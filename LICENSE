@@ -1,4 +1,4 @@
-MIT License
+MIT License + CC
 
 Copyright (c) 2025 Petr Chalupa
 
@@ -11,6 +11,12 @@ furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
+
+Commons Clause Restriction:
+The rights granted under the MIT License above do not include the right to sell,
+provide paid services, or otherwise commercially exploit this software or any
+derivative works thereof. For any commercial use, the user must obtain a separate 
+licensed agreement from the copyright holder.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
