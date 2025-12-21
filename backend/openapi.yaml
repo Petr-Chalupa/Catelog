@@ -6,10 +6,11 @@ servers:
     - url: /api
 security:
     - bearerAuth: []
+
 paths:
-    /auth/login:
+    /user/auth/login:
         post:
-            summary: Authenticate with Social Provider
+            summary: Authenticate with an external provider
             security: []
             requestBody:
                 required: true
@@ -20,57 +21,91 @@ paths:
                             required: [token, provider]
                             properties:
                                 token:
+                                    description: The ID Token from Google or Access Token from Microsoft
                                     type: string
-                                    description: "The ID Token from provider"
                                 provider:
                                     type: string
+                                    enum: [google, microsoft]
             responses:
-                "200":
-                    description: "Login successful"
+                200:
+                    description: Successful authentication
                     content:
                         application/json:
                             schema:
                                 type: object
                                 properties:
-                                    jwt: { type: string }
-                                    user: { $ref: "#/components/schemas/User" }
-    /auth/me:
+                                    jwt:
+                                        type: string
+                                    user:
+                                        $ref: "#/components/schemas/User"
+                400:
+                    description: Unsupported provider or invalid token
+
+    /user/auth/me:
         get:
-            summary: "Get current authenticated user profile"
+            summary: Get current authenticated user profile
             responses:
-                "200":
-                    description: "Successfully retrieved user profile"
+                200:
+                    description: The authenticated user object
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/User"
-                "401":
-                    description: "Unauthorized"
-                "404":
-                    description: "User not found"
+                401:
+                    $ref: "#/components/responses/UnauthorizedError"
+
+    /user/me:
+        patch:
+            summary: Update user profile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/User"
+            responses:
+                200:
+                    description: Profile updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/User"
+                401:
+                    $ref: "#/components/responses/UnauthorizedError"
+                404:
+                    description: User not found
+        delete:
+            summary: Delete user account and all connected data
+            responses:
+                204:
+                    description: Account deleted successfully
+                401:
+                    $ref: "#/components/responses/UnauthorizedError"
+                404:
+                    description: User not found
+
     /titles/search:
         get:
-            summary: "Search for a title in external sources"
+            summary: Search for a title in external sources
             parameters:
                 - name: q
                   in: query
-                  description: "Search query (title name)"
+                  description: Search query (title name)
                   required: true
                   schema:
                       type: string
             responses:
-                "200":
-                    description: "List of matching titles"
+                200:
+                    description: List of matching titles
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
                                     $ref: "#/components/schemas/Title"
-                "401":
-                    description: "Unauthorized"
-                "500":
-                    description: "Search failed"
+                401:
+                    $ref: "#/components/responses/UnauthorizedError"
+                500:
+                    description: Search failed
 
 components:
     securitySchemes:
@@ -78,6 +113,28 @@ components:
             type: http
             scheme: bearer
             bearerFormat: JWT
+
+    responses:
+        UnauthorizedError:
+            description: Access token is missing or invalid
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            message:
+                                type: string
+
+        ForbiddenError:
+            description: The authenticated user does not have permission to access this resource
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            message:
+                                type: string
+
     schemas:
         Title:
             type: object
@@ -148,7 +205,7 @@ components:
                     additionalProperties:
                         type: string
                 public:
-                    boolean: true
+                    type: boolean
                 createdAt:
                     type: string
                     format: date-time
