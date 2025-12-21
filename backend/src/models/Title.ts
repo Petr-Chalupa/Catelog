@@ -64,6 +64,7 @@ export function mergeTitle(existing: Title, incoming: Title): Title {
         ratings: mergeObject(existing.ratings, incoming.ratings),
         avgRating: computeAvgRating(mergeObject(existing.ratings, incoming.ratings)),
         localizedTitles: mergeObject(existing.localizedTitles, incoming.localizedTitles),
+        externalIds: mergeObject(existing.externalIds, incoming.externalIds),
         updatedAt: new Date(),
     };
 

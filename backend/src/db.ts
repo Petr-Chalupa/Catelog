@@ -1,6 +1,6 @@
 import { Db, MongoClient } from "mongodb";
+import { randomUUID } from "node:crypto";
 import { mergeTitle, Title } from "./models/Title";
-import { v4 as uuidv4 } from "uuid";
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
@@ -37,25 +37,23 @@ export async function closeDB() {
 
 // --------------- Title adapter ---------------
 
-function buildTitleSearchQuery(title: Title): Record<string, string>[] {
-    const ors = [];
+function buildTitleSearchQuery(title: Title): any[] {
+    const ors: any[] = [];
 
     if (title.externalIds) {
-        for (const [source, id] of Object.entries(title.externalIds)) {
-            ors.push({ [`externalIds.${source}`]: id });
-        }
+        Object.entries(title.externalIds).forEach(([source, id]) => {
+            if (id) ors.push({ [`externalIds.${source}`]: id });
+        });
     }
 
-    ors.push({ title: title.title });
-
+    const titleVariations = new Set<string>([title.title]);
     if (title.localizedTitles) {
-        for (const [lang, localizedTitle] of Object.entries(title.localizedTitles)) {
-            if (!localizedTitle) continue;
-            ors.push({ title: localizedTitle });
-            ors.push({ [`localizedTitles.${lang}`]: title.title });
-            ors.push({ [`localizedTitles.${lang}`]: localizedTitle });
-        }
+        Object.values(title.localizedTitles).forEach((val) => titleVariations.add(val));
     }
+    titleVariations.forEach((t) => {
+        ors.push({ title: t, ...(title.year && { year: title.year }) });
+        ors.push({ localizedTitles: { $elemMatch: { $eq: t } }, ...(title.year && { year: title.year }) });
+    });
 
     return ors;
 }
@@ -73,7 +71,7 @@ export async function upsertTitle(title: Title): Promise<Title | null> {
     } else {
         const newTitle: Title = {
             ...title,
-            id: title.id || uuidv4(),
+            id: title.id || randomUUID(),
             updatedAt: new Date(),
             createdAt: new Date(),
         };

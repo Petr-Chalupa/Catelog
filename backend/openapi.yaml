@@ -1,0 +1,269 @@
+openapi: 3.1.0
+info:
+    title: Catelog API
+    version: 1.0.0
+servers:
+    - url: /api
+security:
+    - bearerAuth: []
+paths:
+    /auth/login:
+        post:
+            summary: Authenticate with Social Provider
+            security: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [token, provider]
+                            properties:
+                                token:
+                                    type: string
+                                    description: "The ID Token from provider"
+                                provider:
+                                    type: string
+            responses:
+                "200":
+                    description: "Login successful"
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    jwt: { type: string }
+                                    user: { $ref: "#/components/schemas/User" }
+    /auth/me:
+        get:
+            summary: "Get current authenticated user profile"
+            responses:
+                "200":
+                    description: "Successfully retrieved user profile"
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/User"
+                "401":
+                    description: "Unauthorized"
+                "404":
+                    description: "User not found"
+    /titles/search:
+        get:
+            security: []
+            summary: "Search for a title in external sources"
+            parameters:
+                - name: q
+                  in: query
+                  description: "Search query (title name)"
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: "List of matching titles"
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Title"
+                "401":
+                    description: "Unauthorized"
+                "500":
+                    description: "Search failed"
+
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+    schemas:
+        Title:
+            type: object
+            required:
+                - id
+                - type
+                - title
+                - public
+                - externalIds
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                type:
+                    type: string
+                    enum: [movie, series]
+                title:
+                    type: string
+                localizedTitles:
+                    type: object
+                    additionalProperties:
+                        type: string
+                poster:
+                    type: string
+                year:
+                    type: integer
+                genres:
+                    type: array
+                    items:
+                        type: string
+                        enum:
+                            [
+                                action,
+                                adventure,
+                                comedy,
+                                drama,
+                                fantasy,
+                                horror,
+                                history,
+                                sci_fi,
+                                romance,
+                                thriller,
+                                animation,
+                                documentary,
+                                crime,
+                                mystery,
+                                family,
+                                musical,
+                            ]
+                ratings:
+                    type: object
+                    additionalProperties:
+                        type: number
+                avgRating:
+                    type: number
+                directors:
+                    type: array
+                    items:
+                        type: string
+                actors:
+                    type: array
+                    items:
+                        type: string
+                durationMinutes:
+                    type: integer
+                externalIds:
+                    type: object
+                    additionalProperties:
+                        type: string
+                public:
+                    boolean: true
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        Watchlist:
+            type: object
+            required:
+                - id
+                - name
+                - ownerId
+                - sharedWith
+                - createdAt
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                name:
+                    type: string
+                ownerId:
+                    type: string
+                sharedWith:
+                    type: array
+                    items:
+                        type: string
+                order:
+                    type: integer
+                createdAt:
+                    type: string
+                    format: date-time
+
+        WatchListItem:
+            type: object
+            required:
+                - id
+                - listId
+                - titleId
+                - state
+                - addedBy
+                - createdAt
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                listId:
+                    type: string
+                titleId:
+                    type: string
+                state:
+                    type: string
+                    enum: [planned, started, finished]
+                tags:
+                    type: array
+                    items:
+                        type: string
+                personalRating:
+                    type: number
+                order:
+                    type: integer
+                addedBy:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        User:
+            type: object
+            required:
+                - id
+                - email
+                - createdAt
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                email:
+                    type: string
+                    format: email
+                name:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+
+        Invite:
+            type: object
+            required:
+                - id
+                - listId
+                - inviter
+                - invitee
+                - token
+                - expiresAt
+                - createdAt
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                listId:
+                    type: string
+                inviter:
+                    type: string
+                invitee:
+                    type: string
+                token:
+                    type: string
+                expiresAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
