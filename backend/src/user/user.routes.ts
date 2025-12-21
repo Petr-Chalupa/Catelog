@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { handleGoogleAuth, handleMicrosoftAuth } from "./auth.service";
 import { authMiddleware } from "../middleware/auth.middleware";
-import { deleteUser, upsertUser } from "../user/user.adapter";
+import { deleteUser, upsertUser } from "./user.adapter";
+import { handleGoogleAuth, handleMicrosoftAuth } from "./user.service";
 
 const router = Router();
-export const authRouter = router;
+export const userRouter = router;
 
-router.post("/login", async (req, res, next) => {
+router.post("/auth/login", async (req, res, next) => {
     try {
         const { token, provider } = req.body;
 
@@ -26,7 +26,7 @@ router.post("/login", async (req, res, next) => {
     }
 });
 
-router.get("/me", authMiddleware, async (req, res) => {
+router.get("/auth/me", authMiddleware, async (req, res) => {
     return res.json((req as any).user);
 });
 

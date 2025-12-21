@@ -4,21 +4,19 @@ import { searchTMDbById } from "./providers/tmdb";
 import { findTitlesForEnrichment, updateTitlePlaceholders, upsertTitle } from "./title.adapter";
 import { Title, TitleSource } from "./title.model";
 
-export function computeAvgRating(ratings: Partial<Record<TitleSource, number>> = {}): number {
-    const filteredValues: number[] = Object.values(ratings).filter((r) => !isNaN(r));
-    const avg = filteredValues.reduce((a, b) => a + b, 0) / filteredValues.length;
-    return Math.round(avg * 10) / 10; // Round to one decimal place
-}
-
 export function mergeTitle(existing: Title, incoming: Title): Title {
-    // Merge arrays without duplicates
     const mergeArray = (a?: any[], b?: any[]) => Array.from(new Set([...(a || []), ...(b || [])]));
 
-    // Merge objects
     const mergeObject = <T>(a?: Record<string, T>, b?: Record<string, T>) => ({
         ...(b || {}),
         ...(a || {}), // existing overwrites incoming if conflict
     });
+
+    const avgRating = (ratings: Partial<Record<TitleSource, number>> = {}): number => {
+        const filteredValues = Object.values(ratings).filter((r) => !isNaN(r));
+        const avg = filteredValues.reduce((a, b) => a + b, 0) / filteredValues.length;
+        return Math.round(avg * 10) / 10; // Round to one decimal place
+    };
 
     const merged: Title = {
         ...incoming,
@@ -28,7 +26,7 @@ export function mergeTitle(existing: Title, incoming: Title): Title {
         directors: mergeArray(existing.directors, incoming.directors),
         actors: mergeArray(existing.actors, incoming.actors),
         ratings: mergeObject(existing.ratings, incoming.ratings),
-        avgRating: computeAvgRating(mergeObject(existing.ratings, incoming.ratings)),
+        avgRating: avgRating(mergeObject(existing.ratings, incoming.ratings)),
         localizedTitles: mergeObject(existing.localizedTitles, incoming.localizedTitles),
         externalIds: mergeObject(existing.externalIds, incoming.externalIds),
         updatedAt: new Date(),
@@ -37,7 +35,7 @@ export function mergeTitle(existing: Title, incoming: Title): Title {
     return merged;
 }
 
-export async function runEnrichmentWorker() {
+export async function runEnrichment() {
     console.log("Starting enrichment worker");
 
     const titles = await findTitlesForEnrichment();

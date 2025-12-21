@@ -11,7 +11,7 @@ dotenv.config();
 // Imports that might depend on env vars
 import { connectDB, closeDB } from "./db";
 import { errorMiddleware } from "./middleware/error.middleware";
-import { authRouter } from "./auth/auth.routes";
+import { userRouter } from "./user/user.routes";
 import { titlesRouter } from "./title/title.routes";
 
 const apiSpecPath = path.join(__dirname, "../openapi.yaml");
@@ -32,7 +32,7 @@ app.use(
 
 // API routes
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(apiSwaggerDocument));
-app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 app.use("/api/titles", titlesRouter);
 
 // Global error handler
