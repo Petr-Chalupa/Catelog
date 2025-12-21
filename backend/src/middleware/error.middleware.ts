@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-export const errorHandlerMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => {
+export const errorMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error(`[Error] ${req.method} ${req.path}:`, err.message);
 
     if (err.name === "UnauthorizedError" || err.status === 401) {

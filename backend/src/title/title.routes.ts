@@ -1,13 +1,15 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth";
-import { upsertTitle } from "../db";
-import type { Title } from "../models/Title";
-import { mergeSearchResults, searchCSFD, searchOMDb, searchTMDb } from "../services/data";
+import { authMiddleware } from "../middleware/auth.middleware";
+import { searchTMDb } from "./providers/tmdb";
+import { searchOMDb } from "./providers/omdb";
+import { searchCSFD } from "./providers/csfd";
+import { Title } from "./title.model";
+import { mergeSearchResults } from "./title.service";
 
 const router = Router();
 export const titlesRouter = router;
 
-router.get("/search", async (req, res, next) => {
+router.get("/search", authMiddleware, async (req, res, next) => {
     try {
         const { q } = req.query;
         const query = q as string;

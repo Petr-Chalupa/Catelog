@@ -50,7 +50,6 @@ paths:
                     description: "User not found"
     /titles/search:
         get:
-            security: []
             summary: "Search for a title in external sources"
             parameters:
                 - name: q
