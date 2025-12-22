@@ -52,6 +52,7 @@ function mapCSFDLanguage(raw: string): string | undefined {
     const map: Record<string, string> = {
         USA: "en",
         "Velká Británie": "en",
+        angličtina: "en",
         UK: "en",
         Česko: "cs",
         Československo: "cs",
