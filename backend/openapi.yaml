@@ -64,7 +64,7 @@ paths:
             tags: [Auth]
             security: []
             responses:
-                204:
+                200:
                     description: Successfully logged out
 
     /user/me:
@@ -78,19 +78,29 @@ paths:
                         application/json:
                             schema: { $ref: "#/components/schemas/User" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                404:
+                    description: User not found
         patch:
             summary: Update user profile
             tags: [User]
             requestBody:
                 content:
                     application/json:
-                        schema: { $ref: "#/components/schemas/User" }
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                email:
+                                    type: string
             responses:
                 200:
                     description: Profile updated
                     content:
                         application/json:
                             schema: { $ref: "#/components/schemas/User" }
+                400:
+                    description: No data provided for update
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 404:
                     description: User not found
@@ -98,7 +108,7 @@ paths:
             summary: Delete user account and all connected data
             tags: [User]
             responses:
-                204:
+                200:
                     description: Account deleted successfully
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 500:
@@ -114,12 +124,14 @@ paths:
                     application/json:
                         schema: { $ref: "#/components/schemas/Title" }
             responses:
-                201:
+                200:
                     description: Title added
                     content:
                         application/json:
                             schema: { $ref: "#/components/schemas/Title" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                500:
+                    description: Unexpected error while inserting title
 
     /titles/{id}:
         get:
@@ -160,6 +172,8 @@ paths:
                             schema:
                                 type: array
                                 items: { $ref: "#/components/schemas/Title" }
+                400:
+                    description: Empty query
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 500:
                     description: Search failed
@@ -167,20 +181,20 @@ paths:
     /watchlists:
         get:
             summary: Get all user watchlists
-            tags: [Watchlist]
+            tags: [WatchList]
             responses:
                 200:
-                    description: Watchlists
+                    description: WatchLists
                     content:
                         application/json:
                             schema:
                                 type: array
-                                items: { $ref: "#/components/schemas/Watchlist" }
+                                items: { $ref: "#/components/schemas/WatchList" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
         post:
             summary: Create a new watchlist
-            tags: [Watchlist]
+            tags: [WatchList]
             requestBody:
                 required: true
                 content:
@@ -192,18 +206,20 @@ paths:
                                 name:
                                     type: string
             responses:
-                201:
-                    description: Watchlist created
+                200:
+                    description: WatchList created
                     content:
                         application/json:
-                            schema: { $ref: "#/components/schemas/Watchlist" }
+                            schema: { $ref: "#/components/schemas/WatchList" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
+                500:
+                    description: Unexpected error while creating watchlist
 
     /watchlists/{listId}:
         get:
             summary: Get watchlist by ID
-            tags: [Watchlist]
+            tags: [WatchList]
             parameters:
                 - name: listId
                   in: path
@@ -212,15 +228,15 @@ paths:
                       type: string
             responses:
                 200:
-                    description: Watchlist
+                    description: WatchList
                     content:
                         application/json:
-                            schema: { $ref: "#/components/schemas/Watchlist" }
+                            schema: { $ref: "#/components/schemas/WatchList" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
         patch:
             summary: Update watchlist details
-            tags: [Watchlist]
+            tags: [WatchList]
             parameters:
                 - name: listId
                   in: path
@@ -231,20 +247,30 @@ paths:
                 required: true
                 content:
                     application/json:
-                        schema: { $ref: "#/components/schemas/Watchlist" }
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                sharedWith:
+                                    type: array
+                                    items:
+                                        type: string
             responses:
                 200:
-                    description: Watchlist updated
+                    description: WatchList updated
                     content:
                         application/json:
-                            schema: { $ref: "#/components/schemas/Watchlist" }
+                            schema: { $ref: "#/components/schemas/WatchList" }
+                400:
+                    description: No data provided for update
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
                 404:
-                    description: Watchlist not found
+                    description: WatchList not found
         delete:
             summary: Delete a specific watchlist or transfer ownership
-            tags: [Watchlist]
+            tags: [WatchList]
             parameters:
                 - name: listId
                   in: path
@@ -252,41 +278,19 @@ paths:
                   schema:
                       type: string
             responses:
-                204:
-                    description: Watchlist processed successfully
+                200:
+                    description: WatchList processed successfully
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
                 404:
-                    description: Watchlist not found
-
-    /watchlists/{listId}/items:
-        post:
-            summary: Add item to watchlist
-            tags: [Watchlist]
-            parameters:
-                - name: listId
-                  in: path
-                  required: true
-                  schema:
-                      type: string
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema: { $ref: "#/components/schemas/WatchListItem" }
-            responses:
-                201:
-                    description: Item added
-                    content:
-                        application/json:
-                            schema: { $ref: "#/components/schemas/WatchListItem" }
-                401: { $ref: "#/components/responses/UnauthorizedError" }
-                403: { $ref: "#/components/responses/ForbiddenError" }
+                    description: WatchList not found
+                500:
+                    description: Unexpected error while deleting watchlist
 
     /watchlists/{listId}/items:
         get:
             summary: Get items in a watchlist
-            tags: [Watchlist]
+            tags: [WatchList]
             parameters:
                 - name: watchlistId
                   in: path
@@ -295,7 +299,7 @@ paths:
                       type: string
             responses:
                 200:
-                    description: Watchlist items
+                    description: WatchList items
                     content:
                         application/json:
                             schema:
@@ -304,11 +308,45 @@ paths:
                                     items:
                                         type: array
                                         items: { $ref: "#/components/schemas/WatchListItem" }
+                403: { $ref: "#/components/responses/ForbiddenError" }
+                404:
+                    description: WatchList not found
+        post:
+            summary: Add item to watchlist
+            tags: [WatchList]
+            parameters:
+                - name: listId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [titleId]
+                            properties:
+                                titleId:
+                                    type: string
+            responses:
+                200:
+                    description: Item added
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/WatchListItem" }
+                400:
+                    description: No data provided for update
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+                403: { $ref: "#/components/responses/ForbiddenError" }
+                404:
+                    description: WatchList not found
 
     /watchlists/{listId}/items/{itemId}:
         patch:
             summary: Update watchlist item
-            tags: [Watchlist]
+            tags: [WatchList]
             parameters:
                 - name: listId
                   in: path
@@ -324,15 +362,28 @@ paths:
                 required: true
                 content:
                     application/json:
-                        schema: { $ref: "#/components/schemas/WatchListItem" }
+                        schema:
+                            type: object
+                            properties:
+                                state:
+                                    type: string
+                                    enum: [planned, started, finished]
+                                tags:
+                                    type: array
+                                    items:
+                                        type: string
+                                personalRating:
+                                    type: number
             responses:
                 200:
                     description: Item updated
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
+                404:
+                    description: WatchList or watchlist item not found
         delete:
             summary: Remove item from watchlist
-            tags: [Watchlist]
+            tags: [WatchList]
             parameters:
                 - name: listId
                   in: path
@@ -345,10 +396,12 @@ paths:
                   schema:
                       type: string
             responses:
-                204:
+                200:
                     description: Item removed
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
+                404:
+                    description: WatchList or watchlist item not found
 
     /watchlists/{listId}/invites:
         post:
@@ -360,20 +413,32 @@ paths:
                   required: true
                   schema:
                       type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                inviteeId:
+                                    type: string
             responses:
-                201:
+                200:
                     description: Invite created
                     content:
                         application/json:
                             schema: { $ref: "#/components/schemas/Invite" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
+                404:
+                    description: WatchList not found
+                500:
+                    description: Unexpected error while creating invite
 
-    /invites/{token}/accept:
+    /watchlists/invites/{token}/accept:
         post:
             summary: Accept watchlist invite
             tags: [Invite]
-            security: []
             parameters:
                 - name: token
                   in: path
@@ -383,7 +448,12 @@ paths:
             responses:
                 200:
                     description: Invite accepted
+                400:
+                    description: Invite expired
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                403: { $ref: "#/components/responses/ForbiddenError" }
+                404:
+                    description: Invite or related watchList not found
 
 components:
     securitySchemes:
@@ -504,7 +574,7 @@ components:
                     type: string
                     format: date-time
 
-        Watchlist:
+        WatchList:
             type: object
             required: [id, name, ownerId, sharedWith, createdAt]
             properties:
@@ -519,8 +589,6 @@ components:
                     type: array
                     items:
                         type: string
-                order:
-                    type: integer
                 createdAt:
                     type: string
                     format: date-time
@@ -545,8 +613,6 @@ components:
                         type: string
                 personalRating:
                     type: number
-                order:
-                    type: integer
                 addedBy:
                     type: string
                 createdAt:

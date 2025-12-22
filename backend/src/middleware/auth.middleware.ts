@@ -8,9 +8,7 @@ if (!JWT_SECRET) throw new Error("JWT env variable(s) not set");
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader?.startsWith("Bearer ")) {
-        throw new APIError(401, "No token provided");
-    }
+    if (!authHeader?.startsWith("Bearer ")) throw new APIError(401, "No token provided");
 
     try {
         const token = authHeader.split(" ")[1];

@@ -1,8 +1,16 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware";
-import { createRefreshToken, deleteRefreshToken, deleteUser, upsertUser, verifyRefreshToken } from "./user.adapter";
+import {
+    createRefreshToken,
+    deleteRefreshToken,
+    deleteUser,
+    getUserById,
+    upsertUser,
+    verifyRefreshToken,
+} from "./user.adapter";
 import { handleAuth, issueJWT } from "./user.service";
 import { APIError } from "../middleware/error.middleware";
+import { User } from "./user.model";
 
 const router = Router();
 export const userRouter = router;
@@ -48,30 +56,35 @@ router.post("/auth/logout", async (req, res) => {
     }
 
     res.clearCookie("refreshToken");
-    res.sendStatus(204);
+    res.sendStatus(200);
 });
 
 router.get("/me", authMiddleware, async (req, res) => {
-    return res.json((req as any).user);
+    const userId = (req as any).user.id;
+
+    const user = await getUserById(userId);
+    if (!user) throw new APIError(404, "User not found");
+
+    return res.json(user);
 });
 
 router.patch("/me", authMiddleware, async (req, res) => {
-    const updatedUser = await upsertUser((req as any).user);
+    const userId = (req as any).user.id;
+    const updateData = req.body as Partial<User>;
 
-    if (!updatedUser) {
-        throw new APIError(404, "User not found");
-    }
+    if (!updateData || Object.keys(updateData).length === 0) throw new APIError(400, "No data provided for update");
+
+    const updatedUser = await upsertUser({ id: userId, ...updateData });
+    if (!updatedUser) throw new APIError(404, "User not found");
 
     return res.json(updatedUser);
 });
 
 router.delete("/me", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
+
     const success = await deleteUser(userId);
+    if (!success) throw new APIError(500, "Unexpected error");
 
-    if (!success) {
-        throw new APIError(500, "Unexpected error");
-    }
-
-    return res.status(204).send();
+    return res.sendStatus(200);
 });

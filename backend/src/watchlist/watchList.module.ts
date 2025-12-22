@@ -5,7 +5,6 @@ export interface WatchList {
     name: string;
     ownerId: string;
     sharedWith: string[];
-    order?: number;
     createdAt: Date;
 }
 
@@ -16,8 +15,17 @@ export interface WatchListItem {
     state: WatchState;
     tags?: string[];
     personalRating?: number;
-    order?: number;
     addedBy: string;
     createdAt: Date;
     updatedAt: Date;
+}
+
+export interface Invite {
+    id: string;
+    listId: string;
+    inviter: string;
+    invitee: string;
+    token: string;
+    expiresAt: Date;
+    createdAt: Date;
 }

@@ -1,8 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { Title } from "./title.model";
-import { mergeTitle } from "./title.service";
 import { db } from "../db";
 import { WatchListItem } from "../watchlist/watchList.module";
+
+export async function getTitleById(titleId: string): Promise<Title | null> {
+    if (!db) return null;
+
+    const collection = db.collection<Title>("titles");
+    const result = await collection.findOne({ id: titleId });
+
+    return result;
+}
 
 function buildTitleSearchQuery(title: Title): any[] {
     const ors: any[] = [];
@@ -18,6 +26,7 @@ function buildTitleSearchQuery(title: Title): any[] {
         Object.values(title.localizedTitles).forEach((val) => titleVariations.add(val));
     }
     titleVariations.forEach((t) => {
+        if (!t) return;
         ors.push({ title: t, ...(title.year && { year: title.year }) });
         ors.push({ localizedTitles: { $elemMatch: { $eq: t } }, ...(title.year && { year: title.year }) });
     });
@@ -29,22 +38,22 @@ export async function upsertTitle(title: Title): Promise<Title | null> {
     if (!db) return null;
 
     const collection = db.collection<Title>("titles");
-    const existing = await collection.findOne({ public: true, $or: buildTitleSearchQuery(title) });
 
-    if (existing) {
-        const merged = mergeTitle(existing, title);
-        await collection.replaceOne({ id: merged.id }, merged);
-        return merged;
-    } else {
-        const newTitle: Title = {
+    const filter = { public: true, $or: buildTitleSearchQuery(title) };
+    const update = {
+        $set: {
             ...title,
-            id: title.id || randomUUID(),
             updatedAt: new Date(),
+        },
+        $setOnInsert: {
+            id: title.id || randomUUID(),
             createdAt: new Date(),
-        };
-        await collection.insertOne(newTitle);
-        return newTitle;
-    }
+        },
+    };
+    const options = { upsert: true, returnDocument: "after" as const };
+    const result = await collection.findOneAndUpdate(filter, update, options);
+
+    return result;
 }
 
 export async function updateTitlePlaceholders() {
@@ -54,14 +63,13 @@ export async function updateTitlePlaceholders() {
     const placeholders = await collection.find({ public: false }).toArray();
 
     for (const ph of placeholders) {
-        const matches = await collection.find({ public: true, $or: buildTitleSearchQuery(ph) }).toArray();
+        const matches = await collection
+            .find({ public: true, $or: buildTitleSearchQuery(ph) })
+            .project({ id: 1 })
+            .toArray();
+        const mergeCandidates = matches.map((m) => m.id);
 
-        ph.mergeCandidates = [];
-        for (const match of matches) {
-            ph.mergeCandidates.push(match.id);
-        }
-
-        await collection.replaceOne({ id: ph.id }, ph);
+        await collection.updateOne({ id: ph.id }, { $set: { mergeCandidates } });
     }
 }
 

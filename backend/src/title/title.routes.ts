@@ -5,25 +5,43 @@ import { searchOMDb } from "./providers/omdb";
 import { searchCSFD } from "./providers/csfd";
 import { Title } from "./title.model";
 import { mergeSearchResults } from "./title.service";
+import { APIError } from "../middleware/error.middleware";
+import { getTitleById, upsertTitle } from "./title.adapter";
 
 const router = Router();
 export const titlesRouter = router;
 
-router.get("/search", authMiddleware, async (req, res, next) => {
-    try {
-        const { q } = req.query;
-        const query = q as string;
+router.post("/", authMiddleware, async (req, res) => {
+    const titleData = req.body as Title;
 
-        const results = await Promise.allSettled([searchTMDb(query, true), searchOMDb(query), searchCSFD(query, true)]);
+    const title = await upsertTitle(titleData);
+    if (!title) throw new APIError(500, "Failed to add title");
 
-        const flattenedResults = results
-            .filter((r): r is PromiseFulfilledResult<Title[]> => r.status === "fulfilled")
-            .flatMap((r) => r.value);
+    return res.json(title);
+});
 
-        const mergedResults = mergeSearchResults(flattenedResults);
+router.get("/:id", authMiddleware, async (req, res) => {
+    const { id } = req.params;
 
-        res.json(mergedResults);
-    } catch (error) {
-        next(error);
-    }
+    const title = await getTitleById(id);
+    if (!title) throw new APIError(404, "Title not found");
+
+    return res.json(title);
+});
+
+router.get("/search", authMiddleware, async (req, res) => {
+    const { q } = req.query;
+    const query = q as string;
+
+    if (!query?.trim()) throw new APIError(400, "Empty query");
+
+    const results = await Promise.allSettled([searchTMDb(query, true), searchOMDb(query), searchCSFD(query, true)]);
+
+    const flattenedResults = results
+        .filter((r): r is PromiseFulfilledResult<Title[]> => r.status === "fulfilled")
+        .flatMap((r) => r.value);
+
+    const mergedResults = mergeSearchResults(flattenedResults);
+
+    res.json(mergedResults);
 });

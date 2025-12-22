@@ -1,33 +1,45 @@
 import { randomUUID } from "node:crypto";
 import { RefreshToken, User } from "./user.model";
 import { db } from "../db";
-import { cleanupWatchlistsForUser } from "../watchlist/watchlist.adapter";
+import { cleanupWatchListsForUser } from "../watchlist/watchlist.adapter";
+
+export async function getUserById(userId: string): Promise<User | null> {
+    if (!db) return null;
+
+    const collection = db.collection<User>("users");
+    const result = await collection.findOne({ id: userId });
+
+    return result;
+}
 
 export async function upsertUser(user: Partial<User>): Promise<User | null> {
     if (!db) return null;
 
     const collection = db.collection<User>("users");
 
-    const existingUser = await collection.findOne({ email: user.email });
-    if (existingUser) {
-        return existingUser;
-    }
-
-    const newUser: User = {
-        id: randomUUID(),
-        email: user.email!,
-        name: user.name,
-        createdAt: new Date(),
+    const filter = user.id ? { id: user.id } : { email: user.email };
+    const update = {
+        $set: {
+            name: user.name,
+            email: user.email,
+        },
+        $setOnInsert: {
+            id: user.id ?? randomUUID(),
+            email: user.email!,
+            name: user.name,
+            createdAt: new Date(),
+        },
     };
-    await collection.insertOne(newUser);
+    const options = { upsert: true, returnDocument: "after" as const };
+    const result = await collection.findOneAndUpdate(filter, update, options);
 
-    return newUser;
+    return result;
 }
 
 export async function deleteUser(userId: string): Promise<Boolean> {
     if (!db) return false;
 
-    await cleanupWatchlistsForUser(userId);
+    await cleanupWatchListsForUser(userId);
     const result = await db.collection<User>("users").deleteOne({ id: userId });
 
     return result.deletedCount === 1;
