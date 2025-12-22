@@ -1,33 +1,56 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { deleteRefreshToken, deleteUser, getUserById, upsertUser, verifyRefreshToken } from "./user.adapter";
 import {
-    createRefreshToken,
-    deleteRefreshToken,
-    deleteUser,
-    getUserById,
-    upsertUser,
-    verifyRefreshToken,
-} from "./user.adapter";
-import { handleAuth, issueJWT } from "./user.service";
+    finishGoogleOAuth,
+    finishMicrosoftOAuth,
+    issueJWT,
+    startGoogleOAuth,
+    startMicrosoftOAuth,
+} from "./user.service";
 import { APIError } from "../middleware/error.middleware";
 import { User } from "./user.model";
 
 const router = Router();
 export const userRouter = router;
 
-router.post("/auth/login", async (req, res) => {
-    const { token, provider } = req.body;
-    const { jwt, user } = await handleAuth(token, provider);
-    const refreshToken = await createRefreshToken(user.id);
+router.get("/auth", async (req, res) => {
+    const { provider, redirect } = req.query as { provider: string; redirect: string };
 
-    res.cookie("refreshToken", refreshToken, {
+    if (provider === "google") return res.redirect(await startGoogleOAuth(redirect));
+    if (provider === "microsoft") return res.redirect(await startMicrosoftOAuth(redirect));
+
+    throw new APIError(400, "Unsupported provider");
+});
+
+router.get("/auth/google/callback", async (req, res) => {
+    const { code, state } = req.query as { code: string; state: string };
+
+    const result = await finishGoogleOAuth(code, state);
+
+    res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
         secure: true,
         sameSite: "strict",
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    return res.json({ jwt, user });
+    res.redirect(result.redirectUrl);
+});
+
+router.get("/auth/microsoft/callback", async (req, res) => {
+    const { code, state } = req.query as { code: string; state: string };
+
+    const result = await finishMicrosoftOAuth(code, state);
+
+    res.cookie("refreshToken", result.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    res.redirect(result.redirectUrl);
 });
 
 router.post("/auth/refresh", async (req, res) => {

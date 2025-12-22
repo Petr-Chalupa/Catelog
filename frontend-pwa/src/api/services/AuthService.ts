@@ -2,33 +2,72 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { User } from '../models/User';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class AuthService {
     /**
-     * Authenticate with an external provider
-     * @param requestBody
-     * @returns any Successful authentication
+     * Start OAuth flow
+     * @param provider
+     * @param redirect
+     * @returns void
      * @throws ApiError
      */
-    public static postUserAuthLogin(
-        requestBody: {
-            token: string;
-            provider: 'google' | 'microsoft';
-        },
-    ): CancelablePromise<{
-        jwt?: string;
-        user?: User;
-    }> {
+    public static getUserAuth(
+        provider: string,
+        redirect: string,
+    ): CancelablePromise<void> {
         return __request(OpenAPI, {
-            method: 'POST',
-            url: '/user/auth/login',
-            body: requestBody,
-            mediaType: 'application/json',
+            method: 'GET',
+            url: '/user/auth',
+            query: {
+                'provider': provider,
+                'redirect': redirect,
+            },
             errors: {
-                400: `Unsupported provider or invalid token`,
+                302: `Redirect to OAuth`,
+                400: `Invalid provider`,
+            },
+        });
+    }
+    /**
+     * Google OAuth callback
+     * @param code
+     * @param state
+     * @returns void
+     * @throws ApiError
+     */
+    public static getUserAuthGoogleCallback(
+        code: string,
+        state: string,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/user/auth/google/callback',
+            query: {
+                'code': code,
+                'state': state,
+            },
+            errors: {
+                302: `Redirect to frontend with auth result`,
+                400: `Invalid OAuth session`,
+                404: `User not found`,
+            },
+        });
+    }
+    /**
+     * Microsoft OAuth callback
+     * @returns void
+     * @throws ApiError
+     */
+    public static getUserAuthMicrosoftCallback(): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/user/auth/microsoft/callback',
+            errors: {
+                302: `Redirect to frontend with auth result`,
+                400: `Invalid OAuth session`,
+                404: `User not found`,
             },
         });
     }
@@ -38,7 +77,7 @@ export class AuthService {
      * @throws ApiError
      */
     public static postUserAuthRefresh(): CancelablePromise<{
-        jwt?: string;
+        jwt: string;
     }> {
         return __request(OpenAPI, {
             method: 'POST',

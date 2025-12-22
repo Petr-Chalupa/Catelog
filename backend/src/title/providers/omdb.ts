@@ -2,13 +2,9 @@ import axios, { AxiosInstance } from "axios";
 import { Title, TitleGenre } from "../title.model";
 import { randomUUID } from "node:crypto";
 
-const OMDB_BASE_URL = process.env.OMDB_BASE_URL;
-const OMDB_API_KEY = process.env.OMDB_API_KEY;
-if (!OMDB_BASE_URL || !OMDB_API_KEY) throw new Error("OMDB env variable(s) not set");
-
 const omdbClient: AxiosInstance = axios.create({
-    baseURL: OMDB_BASE_URL,
-    params: { apiKey: OMDB_API_KEY },
+    baseURL: process.env.OMDB_BASE_URL,
+    params: { apiKey: process.env.OMDB_API_KEY },
 });
 
 function mapOMDbToTitle(data: any): Title {

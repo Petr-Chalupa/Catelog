@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { RefreshToken, User } from "./user.model";
+import { OAuthSession, RefreshToken, User } from "./user.model";
 import { db } from "../db";
 import { cleanupWatchListsForUser } from "../watchlist/watchlist.adapter";
 
@@ -25,8 +25,6 @@ export async function upsertUser(user: Partial<User>): Promise<User | null> {
         },
         $setOnInsert: {
             id: user.id ?? randomUUID(),
-            email: user.email!,
-            name: user.name,
             createdAt: new Date(),
         },
     };
@@ -43,6 +41,30 @@ export async function deleteUser(userId: string): Promise<Boolean> {
     const result = await db.collection<User>("users").deleteOne({ id: userId });
 
     return result.deletedCount === 1;
+}
+
+export async function createOAuthSession(session: OAuthSession) {
+    if (!db) return;
+
+    const result = await db.collection<OAuthSession>("oauth_sessions").insertOne(session);
+
+    return result;
+}
+
+export async function getOAuthSession(state: string): Promise<OAuthSession | null> {
+    if (!db) return null;
+
+    const result = await db.collection<OAuthSession>("oauth_sessions").findOne({ state });
+
+    return result;
+}
+
+export async function deleteOAuthSession(state: string): Promise<Boolean> {
+    if (!db) return false;
+
+    const result = await db.collection<OAuthSession>("oauth_sessions").deleteOne({ state });
+
+    return result.deletedCount == 1;
 }
 
 export async function createRefreshToken(userId: string): Promise<string> {

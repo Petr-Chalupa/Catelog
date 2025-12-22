@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
+import crypto from "crypto";
 import { db } from "../db";
 import { deleteUnreferencedTitlePlaceholders } from "../title/title.adapter";
 import { Invite, WatchList, WatchListItem } from "./watchList.module";
-import { APIError } from "../middleware/error.middleware";
 
 export async function getWatchListById(listId: string): Promise<WatchList | null> {
     if (!db) return null;
@@ -146,7 +146,7 @@ export async function createWatchListInvite(
         listId,
         inviter: inviterId,
         invitee: inviteeId,
-        token: randomUUID(),
+        token: crypto.randomBytes(32).toString(),
         expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
         createdAt: now,
     };

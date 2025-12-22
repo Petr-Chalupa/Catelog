@@ -15,6 +15,19 @@ export const router = createRouter({
             path: "/login",
             component: LoginPage,
         },
+        {
+            path: "/login/callback",
+            component: { render: () => null },
+            beforeEnter: (to, from, next) => {
+                const authStore = useAuthStore();
+                const token = to.query.token as string;
+                if (token) {
+                    authStore.setToken(token);
+                    return next("/");
+                }
+                next("/login");
+            },
+        },
         // {
         //     path: "/titles",
         //     component: TitlesPage,

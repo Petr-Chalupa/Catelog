@@ -29,7 +29,7 @@ app.use(
         apiSpec: apiSpecPath,
         validateRequests: true,
         validateResponses: false,
-        ignorePaths: /^\/api\/docs/,
+        ignorePaths: /\/api\/(docs|user\/auth\/google\/callback|user\/auth\/microsoft\/callback)/,
     })
 );
 

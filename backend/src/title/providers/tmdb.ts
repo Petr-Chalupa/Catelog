@@ -2,13 +2,9 @@ import axios, { AxiosInstance } from "axios";
 import { Title, TitleGenre, TitleType } from "../title.model";
 import { randomUUID } from "node:crypto";
 
-const TMDB_BASE_URL = process.env.TMDB_BASE_URL;
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
-if (!TMDB_BASE_URL || !TMDB_API_KEY) throw new Error("TMDB env variable(s) not set");
-
 const tmdbClient: AxiosInstance = axios.create({
-    baseURL: TMDB_BASE_URL,
-    params: { api_key: TMDB_API_KEY },
+    baseURL: process.env.TMDB_BASE_URL,
+    params: { api_key: process.env.TMDB_API_KEY },
 });
 
 function mapTMDbToTitle(data: any, translations?: Record<string, string>): Title {

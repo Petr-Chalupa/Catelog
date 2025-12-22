@@ -35,6 +35,12 @@ async function ensureIndexes() {
     await users.createIndex({ id: 1 }, { unique: true });
     await users.createIndex({ email: 1 }, { unique: true });
 
+    const oauthSessions = db.collection("oauth_sessions");
+    await oauthSessions.createIndex({ state: 1 }, { unique: true });
+
+    const refreshTokens = db.collection("refresh_tokens");
+    await refreshTokens.createIndex({ token: 1 }, { unique: true });
+
     const titles = db.collection("titles");
     await titles.createIndex({ id: 1 }, { unique: true });
     await titles.createIndex({ title: 1 });

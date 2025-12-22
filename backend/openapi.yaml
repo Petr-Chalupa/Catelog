@@ -8,38 +8,75 @@ security:
     - bearerAuth: []
 
 paths:
-    /user/auth/login:
-        post:
-            summary: Authenticate with an external provider
+    /user/auth:
+        get:
+            summary: Start OAuth flow
             tags: [Auth]
             security: []
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            required: [token, provider]
-                            properties:
-                                token:
-                                    type: string
-                                provider:
-                                    type: string
-                                    enum: [google, microsoft]
+            parameters:
+                - name: provider
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+                - name: redirect
+                  in: query
+                  required: true
+                  schema:
+                      type: string
             responses:
-                200:
-                    description: Successful authentication
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    jwt:
-                                        type: string
-                                    user:
-                                        $ref: "#/components/schemas/User"
+                302:
+                    description: Redirect to OAuth
                 400:
-                    description: Unsupported provider or invalid token
+                    description: Invalid provider
+
+    /user/auth/google/callback:
+        get:
+            summary: Google OAuth callback
+            tags: [Auth]
+            security: []
+            parameters:
+                - name: code
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+                - name: state
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                302:
+                    description: Redirect to frontend with auth result
+                400:
+                    description: Invalid OAuth session
+                404:
+                    description: User not found
+
+    /user/auth/microsoft/callback:
+        get:
+            summary: Microsoft OAuth callback
+            tags: [Auth]
+            security: []
+            parameters:
+                - name: code
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+                - name: state
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                302:
+                    description: Redirect to frontend with auth result
+                400:
+                    description: Invalid OAuth session
+                404:
+                    description: User not found
 
     /user/auth/refresh:
         post:
@@ -53,6 +90,7 @@ paths:
                         application/json:
                             schema:
                                 type: object
+                                required: [jwt]
                                 properties:
                                     jwt:
                                         type: string

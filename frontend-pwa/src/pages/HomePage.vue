@@ -1,4 +1,6 @@
 <template>
+    <button @click="logout">LOGOUT</button>
+
     <input type="text" v-model="query">
     <button @click="search">Search</button>
 
@@ -8,8 +10,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, type Ref } from "vue";
-import { Title, TitlesService } from "../api";
+import { ref, type Ref } from "vue";
+import { AuthService, Title, TitlesService } from "../api";
+import { useAuthStore } from "../stores/auth";
+import { router } from "../router";
 
 const query = ref("");
 const titles: Ref<Title[]> = ref([]);
@@ -18,4 +22,11 @@ async function search() {
     if (query.value.trim().length == 0) return;
     titles.value = await TitlesService.getTitlesSearch(query.value);
 };
+
+function logout() {
+    const authStore = useAuthStore();
+    authStore.clearToken();
+    AuthService.postUserAuthLogout();
+    router.push("/login");
+}
 </script>
