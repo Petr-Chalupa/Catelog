@@ -117,7 +117,7 @@ paths:
     /titles:
         post:
             summary: Add a title to catalogue
-            tags: [Title]
+            tags: [Titles]
             requestBody:
                 required: true
                 content:
@@ -136,7 +136,7 @@ paths:
     /titles/{id}:
         get:
             summary: Get title by ID
-            tags: [Title]
+            tags: [Titles]
             parameters:
                 - name: id
                   in: path
@@ -156,7 +156,7 @@ paths:
     /titles/search:
         get:
             summary: Search for a title in external sources
-            tags: [Title]
+            tags: [Titles]
             parameters:
                 - name: q
                   in: query
@@ -179,7 +179,7 @@ paths:
     /watchlists:
         get:
             summary: Get all user watchlists
-            tags: [WatchList]
+            tags: [WatchLists]
             responses:
                 200:
                     description: WatchLists
@@ -192,7 +192,7 @@ paths:
                 403: { $ref: "#/components/responses/ForbiddenError" }
         post:
             summary: Create a new watchlist
-            tags: [WatchList]
+            tags: [WatchLists]
             requestBody:
                 required: true
                 content:
@@ -217,7 +217,7 @@ paths:
     /watchlists/{listId}:
         get:
             summary: Get watchlist by ID
-            tags: [WatchList]
+            tags: [WatchLists]
             parameters:
                 - name: listId
                   in: path
@@ -234,7 +234,7 @@ paths:
                 403: { $ref: "#/components/responses/ForbiddenError" }
         patch:
             summary: Update watchlist details
-            tags: [WatchList]
+            tags: [WatchLists]
             parameters:
                 - name: listId
                   in: path
@@ -268,7 +268,7 @@ paths:
                     description: WatchList not found
         delete:
             summary: Delete a specific watchlist or transfer ownership
-            tags: [WatchList]
+            tags: [WatchLists]
             parameters:
                 - name: listId
                   in: path
@@ -288,7 +288,7 @@ paths:
     /watchlists/{listId}/items:
         get:
             summary: Get items in a watchlist
-            tags: [WatchList]
+            tags: [WatchLists]
             parameters:
                 - name: watchlistId
                   in: path
@@ -311,7 +311,7 @@ paths:
                     description: WatchList not found
         post:
             summary: Add item to watchlist
-            tags: [WatchList]
+            tags: [WatchLists]
             parameters:
                 - name: listId
                   in: path
@@ -344,7 +344,7 @@ paths:
     /watchlists/{listId}/items/{itemId}:
         patch:
             summary: Update watchlist item
-            tags: [WatchList]
+            tags: [WatchLists]
             parameters:
                 - name: listId
                   in: path
@@ -381,7 +381,7 @@ paths:
                     description: WatchList or watchlist item not found
         delete:
             summary: Remove item from watchlist
-            tags: [WatchList]
+            tags: [WatchLists]
             parameters:
                 - name: listId
                   in: path
@@ -404,7 +404,7 @@ paths:
     /watchlists/{listId}/invites:
         post:
             summary: Create invite to watchlist
-            tags: [Invite]
+            tags: [Invites]
             parameters:
                 - name: listId
                   in: path
@@ -436,7 +436,7 @@ paths:
     /watchlists/invites/{token}/accept:
         post:
             summary: Accept watchlist invite
-            tags: [Invite]
+            tags: [Invites]
             parameters:
                 - name: token
                   in: path

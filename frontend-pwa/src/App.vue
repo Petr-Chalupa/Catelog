@@ -1,29 +1,23 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
+<style scoped></style>
 
 <template>
+  <input type="text" v-model="query">
+  <button @click="search">Search</button>
+
   <div>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <div v-for="t in titles" :key="t.id">{{ t.title }} --- {{ t.year }}</div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
+<script setup lang="ts">
+import { ref, onMounted, type Ref } from "vue";
+import { Title, TitlesService } from "./api";
 
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
+const query = ref("");
+const titles: Ref<Title[]> = ref([]);
 
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+async function search() {
+  if (query.value.trim().length == 0) return;
+  titles.value = await TitlesService.getTitlesSearch(query.value);
+};
+</script>
