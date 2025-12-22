@@ -57,13 +57,22 @@ export class AuthService {
     }
     /**
      * Microsoft OAuth callback
+     * @param code
+     * @param state
      * @returns void
      * @throws ApiError
      */
-    public static getUserAuthMicrosoftCallback(): CancelablePromise<void> {
+    public static getUserAuthMicrosoftCallback(
+        code: string,
+        state: string,
+    ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/user/auth/microsoft/callback',
+            query: {
+                'code': code,
+                'state': state,
+            },
             errors: {
                 302: `Redirect to frontend with auth result`,
                 400: `Invalid OAuth session`,
@@ -73,11 +82,11 @@ export class AuthService {
     }
     /**
      * Exchange a refresh token for a new access token
-     * @returns any New JWT issued
+     * @returns any New token issued
      * @throws ApiError
      */
     public static postUserAuthRefresh(): CancelablePromise<{
-        jwt: string;
+        accessToken: string;
     }> {
         return __request(OpenAPI, {
             method: 'POST',

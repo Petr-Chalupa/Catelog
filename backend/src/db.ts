@@ -28,7 +28,7 @@ export async function closeDB() {
     console.log("MongoDB connection closed");
 }
 
-async function ensureIndexes() {
+export async function ensureIndexes() {
     if (!db) return;
 
     const users = db.collection("users");
@@ -62,4 +62,12 @@ async function ensureIndexes() {
     await invites.createIndex({ token: 1 }, { unique: true });
 
     console.log("DB indexes ensured");
+}
+
+export async function deleteExpired() {
+    if (!db) return;
+
+    await db.collection("oauth_sessions").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+    await db.collection("invites").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 }

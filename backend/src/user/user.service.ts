@@ -56,6 +56,7 @@ export async function finishGoogleOAuth(
 ): Promise<{ refreshToken: string; redirectUrl: string }> {
     const session = await getOAuthSession(state);
     if (!session || session.provider !== "google") throw new APIError(400, "Invalid OAuth session");
+    if (session.expiresAt < new Date()) throw new APIError(400, "OAuth session expired");
 
     const client = new OAuth2Client(
         process.env.GOOGLE_CLIENT_ID,
@@ -111,6 +112,7 @@ export async function finishMicrosoftOAuth(
 ): Promise<{ refreshToken: string; redirectUrl: string }> {
     const session = await getOAuthSession(state);
     if (!session || session.provider !== "microsoft") throw new APIError(400, "Invalid OAuth session");
+    if (session.expiresAt < new Date()) throw new APIError(400, "OAuth session expired");
 
     const tokens = (
         await axios.post(

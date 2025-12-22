@@ -85,14 +85,14 @@ paths:
             security: []
             responses:
                 200:
-                    description: New JWT issued
+                    description: New token issued
                     content:
                         application/json:
                             schema:
                                 type: object
-                                required: [jwt]
+                                required: [accessToken]
                                 properties:
-                                    jwt:
+                                    accessToken:
                                         type: string
                 401: { $ref: "#/components/responses/UnauthorizedError" }
 

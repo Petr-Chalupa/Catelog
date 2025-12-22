@@ -1,4 +1,5 @@
 import express from "express";
+import cron from "node-cron";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import fs from "fs";
@@ -10,11 +11,13 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 // Imports that might depend on env vars
-import { connectDB, closeDB } from "./db";
+import { connectDB, closeDB, deleteExpired } from "./db";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { userRouter } from "./user/user.routes";
 import { titlesRouter } from "./title/title.routes";
 import { watchlistsRouter } from "./watchlist/watchlist.routes";
+import { deleteUnreferencedTitlePlaceholders } from "./title/title.adapter";
+import { runEnrichment } from "./title/title.service";
 
 const apiSpecPath = path.join(__dirname, "../openapi.yaml");
 const apiSwaggerDocument = YAML.parse(fs.readFileSync(apiSpecPath, "utf8"));
@@ -42,10 +45,26 @@ app.use("/api/watchlists", watchlistsRouter);
 // Global error handler
 app.use(errorMiddleware);
 
+// Periodic runs
+async function schedule() {
+    // Every week
+    cron.schedule("0 0 * * 0", async () => {
+        await runEnrichment();
+    });
+
+    // Every month
+    cron.schedule("0 0 1 * *", async () => {
+        await deleteUnreferencedTitlePlaceholders();
+        await deleteExpired();
+    });
+}
+
 // Lifecycle
 (async () => {
     try {
         await connectDB();
+        schedule();
+
         const port = process.env.PORT || 3000;
         app.listen(port, () => console.log(`Server running on PORT: ${port}`));
     } catch (err) {

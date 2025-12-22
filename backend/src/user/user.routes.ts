@@ -67,8 +67,8 @@ router.post("/auth/refresh", async (req, res) => {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    const newJwt = issueJWT(result.userId);
-    res.json({ jwt: newJwt });
+    const jwt = issueJWT(result.userId);
+    res.json({ accessToken: jwt });
 });
 
 router.post("/auth/logout", async (req, res) => {

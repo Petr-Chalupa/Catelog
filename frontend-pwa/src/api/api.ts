@@ -19,14 +19,13 @@ export function initAPI() {
 
                 try {
                     const response = await AuthService.postUserAuthRefresh();
-                    const newJwt = response.jwt;
-                    authStore.setToken(newJwt);
-                    originalRequest.headers["Authorization"] = `Bearer ${newJwt}`;
+                    const token = response.accessToken;
+                    authStore.setToken(token);
+                    originalRequest.headers["Authorization"] = `Bearer ${token}`;
                     return axios.request(originalRequest);
                 } catch (refreshError) {
                     authStore.clearToken();
                     router.push("/login");
-                    AuthService.postUserAuthLogout();
                     return Promise.reject(refreshError);
                 }
             }
