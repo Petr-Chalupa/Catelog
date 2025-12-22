@@ -172,8 +172,6 @@ paths:
                             schema:
                                 type: array
                                 items: { $ref: "#/components/schemas/Title" }
-                400:
-                    description: Empty query
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 500:
                     description: Search failed

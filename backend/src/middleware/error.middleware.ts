@@ -9,7 +9,7 @@ export class APIError extends Error {
         this.timestamp = new Date().toISOString();
     }
 
-    public log(req?: any): string {
+    public logFormat(req?: any): string {
         const method = req?.method || "N/A";
         const path = req?.path || "N/A";
         return `[${this.timestamp}] ${this.status} - ${method} ${path}: ${this.message}`;
@@ -17,27 +17,22 @@ export class APIError extends Error {
 }
 
 export const errorMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => {
-    if (err instanceof APIError) {
-        console.error(err.log(req));
-    } else {
-        console.error(`[${new Date().toISOString()}] 500 - ${req.method} ${req.path}:`, err.message);
-        if (err.stack) console.error(err.stack);
-    }
-
-    if (err.name === "UnauthorizedError" || err.status === 401) {
-        return res.status(401).json({
-            message: "Invalid or missing authentication token",
-        });
-    }
-
+    // OpenAPI validator errors
     if (err.status && err.errors) {
-        return res.status(err.status).json({
-            message: "Validation Failed",
-            errors: err.errors,
-        });
+        console.error(`[${new Date().toISOString()}] ${err.status} - ${req.method} ${req.path}: Validation Failed`);
+        return res.status(err.status).json({ message: "Validation Failed", errors: err.errors });
     }
 
+    // Custom APIError
+    if (err instanceof APIError) {
+        console.error(err.logFormat(req));
+        return res.status(err.status).json({ message: err.message });
+    }
+
+    // Generic errors
     const statusCode = err.status || 500;
     const message = statusCode === 500 ? "Internal Server Error" : err.message;
+    console.error(`[${new Date().toISOString()}] ${statusCode} - ${req.method} ${req.path}: ${message}`);
+    if (statusCode === 500 && err.stack) console.error(err.stack);
     res.status(statusCode).json({ message });
 };

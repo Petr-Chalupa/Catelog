@@ -43,6 +43,8 @@ export async function upsertTitle(title: Title): Promise<Title | null> {
     const update = {
         $set: {
             ...title,
+            directors: title.directors?.slice(0, 5),
+            actors: title.actors?.slice(0, 10),
             updatedAt: new Date(),
         },
         $setOnInsert: {

@@ -20,20 +20,9 @@ router.post("/", authMiddleware, async (req, res) => {
     return res.json(title);
 });
 
-router.get("/:id", authMiddleware, async (req, res) => {
-    const { id } = req.params;
-
-    const title = await getTitleById(id);
-    if (!title) throw new APIError(404, "Title not found");
-
-    return res.json(title);
-});
-
 router.get("/search", authMiddleware, async (req, res) => {
     const { q } = req.query;
     const query = q as string;
-
-    if (!query?.trim()) throw new APIError(400, "Empty query");
 
     const results = await Promise.allSettled([searchTMDb(query, true), searchOMDb(query), searchCSFD(query, true)]);
 
@@ -44,4 +33,13 @@ router.get("/search", authMiddleware, async (req, res) => {
     const mergedResults = mergeSearchResults(flattenedResults);
 
     res.json(mergedResults);
+});
+
+router.get("/:id", authMiddleware, async (req, res) => {
+    const { id } = req.params;
+
+    const title = await getTitleById(id);
+    if (!title) throw new APIError(404, "Title not found");
+
+    return res.json(title);
 });
