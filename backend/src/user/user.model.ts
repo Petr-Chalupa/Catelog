@@ -4,3 +4,10 @@ export interface User {
     name?: string;
     createdAt: Date;
 }
+
+export interface RefreshToken {
+    token: string;
+    userId: string;
+    expiresAt: Date;
+    createdAt: Date;
+}

@@ -1,60 +1,77 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware";
-import { deleteUser, upsertUser } from "./user.adapter";
-import { handleGoogleAuth, handleMicrosoftAuth } from "./user.service";
+import { createRefreshToken, deleteRefreshToken, deleteUser, upsertUser, verifyRefreshToken } from "./user.adapter";
+import { handleAuth, issueJWT } from "./user.service";
+import { APIError } from "../middleware/error.middleware";
 
 const router = Router();
 export const userRouter = router;
 
-router.post("/auth/login", async (req, res, next) => {
-    try {
-        const { token, provider } = req.body;
+router.post("/auth/login", async (req, res) => {
+    const { token, provider } = req.body;
+    const { jwt, user } = await handleAuth(token, provider);
+    const refreshToken = await createRefreshToken(user.id);
 
-        if (provider === "google") {
-            let { jwt, user } = await handleGoogleAuth(token);
-            return res.json({ jwt, user });
-        }
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
 
-        if (provider === "microsoft") {
-            let { jwt, user } = await handleMicrosoftAuth(token);
-            return res.json({ jwt, user });
-        }
-
-        return res.status(400).json({ message: "Unsupported provider" });
-    } catch (error) {
-        next(error);
-    }
+    return res.json({ jwt, user });
 });
 
-router.get("/auth/me", authMiddleware, async (req, res) => {
+router.post("/auth/refresh", async (req, res) => {
+    const oldRefreshToken = req.cookies.refreshToken;
+    if (!oldRefreshToken) throw new APIError(401, "Invalid session");
+
+    const result = await verifyRefreshToken(oldRefreshToken);
+    if (!result) throw new APIError(401, "Session expired");
+
+    res.cookie("refreshToken", result.token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    const newJwt = issueJWT(result.userId);
+    res.json({ jwt: newJwt });
+});
+
+router.post("/auth/logout", async (req, res) => {
+    const token = req.cookies.refreshToken;
+
+    if (token) {
+        await deleteRefreshToken(token);
+    }
+
+    res.clearCookie("refreshToken");
+    res.sendStatus(204);
+});
+
+router.get("/me", authMiddleware, async (req, res) => {
     return res.json((req as any).user);
 });
 
-router.patch("/me", authMiddleware, async (req, res, next) => {
-    try {
-        const updatedUser = await upsertUser((req as any).user);
+router.patch("/me", authMiddleware, async (req, res) => {
+    const updatedUser = await upsertUser((req as any).user);
 
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        return res.json(updatedUser);
-    } catch (error) {
-        next(error);
+    if (!updatedUser) {
+        throw new APIError(404, "User not found");
     }
+
+    return res.json(updatedUser);
 });
 
-router.delete("/me", authMiddleware, async (req, res, next) => {
-    try {
-        const userId = (req as any).user.id;
-        const success = await deleteUser(userId);
+router.delete("/me", authMiddleware, async (req, res) => {
+    const userId = (req as any).user.id;
+    const success = await deleteUser(userId);
 
-        if (!success) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        res.status(204).send();
-    } catch (error) {
-        next(error);
+    if (!success) {
+        throw new APIError(500, "Unexpected error");
     }
+
+    return res.status(204).send();
 });

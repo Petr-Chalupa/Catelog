@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Title } from "./title.model";
 import { mergeTitle } from "./title.service";
 import { db } from "../db";
+import { WatchListItem } from "../watchlist/watchList.module";
 
 function buildTitleSearchQuery(title: Title): any[] {
     const ors: any[] = [];
@@ -62,6 +63,20 @@ export async function updateTitlePlaceholders() {
 
         await collection.replaceOne({ id: ph.id }, ph);
     }
+}
+
+export async function deleteUnreferencedTitlePlaceholders() {
+    if (!db) return;
+
+    const titleColl = db.collection<Title>("titles");
+    const itemColl = db.collection<WatchListItem>("watchlist_items");
+
+    const referencedTitleIds = await itemColl.distinct("titleId");
+
+    await titleColl.deleteMany({
+        id: { $nin: referencedTitleIds },
+        public: false,
+    });
 }
 
 export async function findTitlesForEnrichment(): Promise<Title[]> {

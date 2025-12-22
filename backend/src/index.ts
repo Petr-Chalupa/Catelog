@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import fs from "fs";
 import path from "path";
 import * as OpenApiValidator from "express-openapi-validator";
@@ -13,6 +14,7 @@ import { connectDB, closeDB } from "./db";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { userRouter } from "./user/user.routes";
 import { titlesRouter } from "./title/title.routes";
+import { watchlistsRouter } from "./watchlist/watchlist.routes";
 
 const apiSpecPath = path.join(__dirname, "../openapi.yaml");
 const apiSwaggerDocument = YAML.parse(fs.readFileSync(apiSpecPath, "utf8"));
@@ -20,20 +22,22 @@ const app = express();
 
 // Common middleware
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(
     OpenApiValidator.middleware({
         apiSpec: apiSpecPath,
         validateRequests: true,
-        validateResponses: true,
+        validateResponses: false,
         ignorePaths: /^\/api\/docs/,
     })
 );
 
 // API routes
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(apiSwaggerDocument));
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(apiSwaggerDocument, { customSiteTitle: "Catelog API" }));
 app.use("/api/user", userRouter);
 app.use("/api/titles", titlesRouter);
+app.use("/api/watchlists", watchlistsRouter);
 
 // Global error handler
 app.use(errorMiddleware);
