@@ -214,6 +214,28 @@ paths:
                 404:
                     description: Title not found
 
+    /titles/{id}/refresh:
+        post:
+            summary: Refresh title metadata or discover candidates
+            tags: [Titles]
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Refresh triggered successfully, returns the updated title state
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Title" }
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+                404:
+                    description: Title not found
+                500:
+                    description: Internal server error during enrichment
+
     /titles/search:
         get:
             summary: Search for a title in external sources
@@ -625,9 +647,8 @@ components:
                     additionalProperties:
                         type: string
                 mergeCandidates:
-                    type: object
-                    additionalProperties:
-                        type: string
+                    type: array
+                    items: { $ref: "#/components/schemas/MergeCandidate" }
                 public:
                     type: boolean
                 createdAt:
@@ -636,6 +657,29 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+
+        MergeCandidate:
+            type: object
+            required: [origin, displayData]
+            properties:
+                origin:
+                    type: string
+                    enum: [internal, tmdb, imdb, csfd]
+                internalId:
+                    type: string
+                    format: uuid
+                externalId:
+                    type: string
+                displayData:
+                    type: object
+                    required: [title]
+                    properties:
+                        title:
+                            type: string
+                        year:
+                            type: integer
+                        poster:
+                            type: string
 
         WatchList:
             type: object

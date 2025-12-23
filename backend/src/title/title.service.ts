@@ -1,8 +1,92 @@
-import { searchCSFDById } from "./providers/csfd";
-import { searchOMDbById } from "./providers/omdb";
-import { searchTMDbById } from "./providers/tmdb";
-import { findTitlesForEnrichment, updateTitlePlaceholders, upsertTitle } from "./title.adapter";
-import { Title, TitleSource } from "./title.model";
+import { searchCSFD, searchCSFDById } from "./providers/csfd";
+import { searchOMDb, searchOMDbById } from "./providers/omdb";
+import { searchTMDb, searchTMDbById } from "./providers/tmdb";
+import {
+    findLocalTitleMatches,
+    findPlaceholders,
+    findTitlesForEnrichment,
+    getTitleById,
+    upsertTitle,
+} from "./title.adapter";
+import { MergeCandidate, Title, TitleSource } from "./title.model";
+
+export async function runEnrichment() {
+    console.log("Starting enrichment worker");
+
+    const publicTitles = await findTitlesForEnrichment();
+    for (const title of publicTitles) {
+        await refreshTitleMetadata(title.id);
+    }
+
+    const placeholders = await findPlaceholders();
+    for (const ph of placeholders) {
+        await updatePlaceholderMergeCandidates(ph.id);
+    }
+
+    console.log(`Enrichment worker finished for: ${publicTitles.length + placeholders.length}`);
+}
+
+export async function refreshTitleMetadata(titleId: string) {
+    const title = await getTitleById(titleId);
+    if (!title || !title.public) return;
+
+    let enriched: Title = { ...title };
+
+    const [tmdbData, omdbData, csfdData] = await Promise.allSettled([
+        title.externalIds?.tmdb ? searchTMDbById(title.externalIds.tmdb, title.type) : Promise.resolve(null),
+        title.externalIds?.imdb ? searchOMDbById(title.externalIds.imdb) : Promise.resolve(null),
+        title.externalIds?.csfd ? searchCSFDById(title.externalIds.csfd) : Promise.resolve(null),
+    ]);
+
+    if (tmdbData.status === "fulfilled" && tmdbData.value) {
+        enriched = mergeTitle(enriched, tmdbData.value);
+    }
+    if (omdbData.status === "fulfilled" && omdbData.value) {
+        enriched = mergeTitle(enriched, omdbData.value);
+    }
+    if (csfdData.status === "fulfilled" && csfdData.value) {
+        enriched = mergeTitle(enriched, csfdData.value);
+    }
+
+    await upsertTitle(enriched);
+}
+
+export async function updatePlaceholderMergeCandidates(titleId: string) {
+    const title = await getTitleById(titleId);
+    if (!title || title.public) return;
+
+    const candidates: MergeCandidate[] = [];
+
+    const localMatches = await findLocalTitleMatches(title);
+    candidates.push(
+        ...localMatches.map((m) => ({
+            origin: "internal" as const,
+            internalId: m.id,
+            displayData: { title: m.title, year: m.year, poster: m.poster },
+        }))
+    );
+
+    const externalResults = await Promise.allSettled([
+        searchTMDb(title.title, true),
+        searchOMDb(title.title),
+        searchCSFD(title.title, true),
+    ]);
+    const externalMatches = externalResults
+        .filter((r): r is PromiseFulfilledResult<Title[]> => r.status === "fulfilled")
+        .flatMap((r) => r.value);
+
+    const mergedExternal = mergeSearchResults(externalMatches);
+    mergedExternal.forEach((r) => {
+        candidates.push({
+            origin: r.externalIds.tmdb ? "tmdb" : r.externalIds.imdb ? "imdb" : "csfd",
+            externalId: r.externalIds.tmdb || r.externalIds.imdb || r.externalIds.csfd,
+            displayData: { title: r.title, year: r.year, poster: r.poster },
+        });
+    });
+
+    title.mergeCandidates = candidates;
+    await upsertTitle(title);
+}
 
 export function mergeTitle(existing: Title, incoming: Title): Title {
     const mergeArray = (a?: any[], b?: any[]) => Array.from(new Set([...(a || []), ...(b || [])]));
@@ -33,39 +117,6 @@ export function mergeTitle(existing: Title, incoming: Title): Title {
     };
 
     return merged;
-}
-
-export async function runEnrichment() {
-    console.log("Starting enrichment worker");
-
-    const titles = await findTitlesForEnrichment();
-
-    for (let title of titles) {
-        try {
-            if (title.externalIds?.tmdb) {
-                const tmdbEnrichment = await searchTMDbById(title.externalIds.tmdb, title.type);
-                if (tmdbEnrichment) mergeTitle(title, tmdbEnrichment);
-            }
-
-            if (title.externalIds?.imdb) {
-                const omdbEnrichment = await searchOMDbById(title.externalIds.imdb);
-                if (omdbEnrichment) mergeTitle(title, omdbEnrichment);
-            }
-
-            if (title.externalIds?.csfd) {
-                const csfdEnrichment = await searchCSFDById(title.externalIds.csfd);
-                if (csfdEnrichment) mergeTitle(title, csfdEnrichment);
-            }
-
-            await upsertTitle(title);
-        } catch (err) {
-            console.error(`Enrichment failed for ${title.id}`, err);
-        }
-    }
-
-    await updateTitlePlaceholders();
-
-    console.log(`Enriched ${titles.length} titles`);
 }
 
 export function mergeSearchResults(results: Title[]): Title[] {

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import crypto from "crypto";
 import { db } from "../db";
 import { deleteUnreferencedTitlePlaceholders } from "../title/title.adapter";
-import { Invite, WatchList, WatchListItem } from "./watchList.module";
+import { Invite, WatchList, WatchListItem } from "./watchList.model";
 
 export async function getWatchListById(listId: string): Promise<WatchList | null> {
     if (!db) return null;

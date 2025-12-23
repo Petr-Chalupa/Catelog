@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Title } from "./title.model";
 import { db } from "../db";
-import { WatchListItem } from "../watchlist/watchList.module";
+import { WatchListItem } from "../watchlist/watchList.model";
 
 export async function getTitleById(titleId: string): Promise<Title | null> {
     if (!db) return null;
@@ -58,21 +58,42 @@ export async function upsertTitle(title: Title): Promise<Title | null> {
     return result;
 }
 
-export async function updateTitlePlaceholders() {
-    if (!db) return;
+export async function findLocalTitleMatches(title: Title): Promise<Title[]> {
+    if (!db) return [];
 
-    const collection = db.collection<Title>("titles");
-    const placeholders = await collection.find({ public: false }).toArray();
+    const result = await db
+        .collection<Title>("titles")
+        .find({ public: true, $or: buildTitleSearchQuery(title) })
+        .toArray();
 
-    for (const ph of placeholders) {
-        const matches = await collection
-            .find({ public: true, $or: buildTitleSearchQuery(ph) })
-            .project({ id: 1 })
-            .toArray();
-        const mergeCandidates = matches.map((m) => m.id);
+    return result;
+}
 
-        await collection.updateOne({ id: ph.id }, { $set: { mergeCandidates } });
-    }
+export async function findTitlesForEnrichment(): Promise<Title[]> {
+    if (!db) return [];
+
+    const result = await db
+        .collection<Title>("titles")
+        .find({
+            public: true,
+            $or: [
+                { avgRating: { $exists: false } },
+                { poster: { $exists: false } },
+                { localizedTitles: { $exists: false } },
+                { updatedAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+            ],
+        })
+        .toArray();
+
+    return result;
+}
+
+export async function findPlaceholders(): Promise<Title[]> {
+    if (!db) return [];
+
+    const result = await db.collection<Title>("titles").find({ public: false }).toArray();
+
+    return result;
 }
 
 export async function deleteUnreferencedTitlePlaceholders() {
@@ -87,21 +108,4 @@ export async function deleteUnreferencedTitlePlaceholders() {
         id: { $nin: referencedTitleIds },
         public: false,
     });
-}
-
-export async function findTitlesForEnrichment(): Promise<Title[]> {
-    if (!db) return [];
-
-    return db
-        .collection<Title>("titles")
-        .find({
-            public: true,
-            $or: [
-                { avgRating: { $exists: false } },
-                { poster: { $exists: false } },
-                { localizedTitles: { $exists: false } },
-                { updatedAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
-            ],
-        })
-        .toArray();
 }

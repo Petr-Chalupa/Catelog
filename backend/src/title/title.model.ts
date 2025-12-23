@@ -32,8 +32,19 @@ export interface Title {
     actors?: string[];
     durationMinutes?: number;
     externalIds: Partial<Record<TitleSource, string>>;
-    mergeCandidates?: string[];
+    mergeCandidates?: MergeCandidate[];
     public: boolean;
     updatedAt?: Date;
     createdAt?: Date;
+}
+
+export interface MergeCandidate {
+    origin: TitleSource | "internal";
+    externalId?: string;
+    internalId?: string;
+    displayData: {
+        title: string;
+        year?: number;
+        poster?: string;
+    };
 }

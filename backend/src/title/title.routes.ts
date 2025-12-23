@@ -4,7 +4,7 @@ import { searchTMDb } from "./providers/tmdb";
 import { searchOMDb } from "./providers/omdb";
 import { searchCSFD } from "./providers/csfd";
 import { Title } from "./title.model";
-import { mergeSearchResults } from "./title.service";
+import { mergeSearchResults, refreshTitleMetadata, updatePlaceholderMergeCandidates } from "./title.service";
 import { APIError } from "../middleware/error.middleware";
 import { getTitleById, upsertTitle } from "./title.adapter";
 
@@ -16,6 +16,13 @@ router.post("/", authMiddleware, async (req, res) => {
 
     const title = await upsertTitle(titleData);
     if (!title) throw new APIError(500, "Failed to add title");
+
+    if (!title.public) {
+        // Run in background
+        updatePlaceholderMergeCandidates(title.id).catch((err) =>
+            console.error(`Background discovery failed for ${title.id}:`, err)
+        );
+    }
 
     return res.json(title);
 });
@@ -42,4 +49,15 @@ router.get("/:id", authMiddleware, async (req, res) => {
     if (!title) throw new APIError(404, "Title not found");
 
     return res.json(title);
+});
+
+router.post("/:id/refresh", authMiddleware, async (req, res) => {
+    const { id } = req.params;
+
+    // Only one will actually run
+    await refreshTitleMetadata(id);
+    await updatePlaceholderMergeCandidates(id);
+
+    const updated = await getTitleById(id);
+    res.json(updated);
 });

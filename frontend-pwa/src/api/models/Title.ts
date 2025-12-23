@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { MergeCandidate } from './MergeCandidate';
 export type Title = {
     id: string;
     type: Title.type;
@@ -16,7 +17,7 @@ export type Title = {
     actors?: Array<string>;
     durationMinutes?: number;
     externalIds: Record<string, string>;
-    mergeCandidates?: Record<string, string>;
+    mergeCandidates?: Array<MergeCandidate>;
     public: boolean;
     createdAt?: string;
     updatedAt?: string;

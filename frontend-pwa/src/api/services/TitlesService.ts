@@ -49,6 +49,28 @@ export class TitlesService {
         });
     }
     /**
+     * Refresh title metadata or discover candidates
+     * @param id
+     * @returns Title Refresh triggered successfully, returns the updated title state
+     * @throws ApiError
+     */
+    public static postTitlesRefresh(
+        id: string,
+    ): CancelablePromise<Title> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/titles/{id}/refresh',
+            path: {
+                'id': id,
+            },
+            errors: {
+                401: `Access token is missing or invalid`,
+                404: `Title not found`,
+                500: `Internal server error during enrichment`,
+            },
+        });
+    }
+    /**
      * Search for a title in external sources
      * @param q Search query (title name)
      * @returns Title List of matching titles

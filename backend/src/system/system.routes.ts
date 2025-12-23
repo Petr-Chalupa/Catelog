@@ -8,7 +8,7 @@ const router = Router();
 export const systemRouter = router;
 
 router.post("/tasks/enrich", systemAuthMiddleware, async (req, res) => {
-    await runEnrichment().catch(console.error);
+    await runEnrichment();
     return res.json({ message: "Enrichment task initiated" });
 });
 

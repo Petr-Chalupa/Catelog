@@ -13,7 +13,7 @@ import {
     upsertWatchListItem,
 } from "./watchlist.adapter";
 import { APIError } from "../middleware/error.middleware";
-import { WatchList, WatchListItem } from "./watchList.module";
+import { WatchList, WatchListItem } from "./watchList.model";
 
 const router = Router();
 export const watchlistsRouter = router;

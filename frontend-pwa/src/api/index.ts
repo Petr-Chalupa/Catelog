@@ -8,6 +8,7 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { Invite } from './models/Invite';
+export { MergeCandidate } from './models/MergeCandidate';
 export { Title } from './models/Title';
 export type { User } from './models/User';
 export type { WatchList } from './models/WatchList';
