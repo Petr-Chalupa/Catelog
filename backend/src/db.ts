@@ -60,8 +60,6 @@ export async function ensureIndexes() {
 
     const invites = db.collection("invites");
     await invites.createIndex({ token: 1 }, { unique: true });
-
-    console.log("DB indexes ensured");
 }
 
 export async function deleteExpired() {

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth.middleware";
+import { ALLOWED_ORIGINS, authMiddleware } from "../middleware/auth.middleware";
 import { deleteRefreshToken, deleteUser, getUserById, upsertUser, verifyRefreshToken } from "./user.adapter";
 import {
     finishGoogleOAuth,
@@ -16,6 +16,9 @@ export const userRouter = router;
 
 router.get("/auth", async (req, res) => {
     const { provider, redirect } = req.query as { provider: string; redirect: string };
+
+    const isSafe = ALLOWED_ORIGINS.some((origin) => redirect.startsWith(origin));
+    if (!isSafe) throw new APIError(403, "Forbidden: Redirect URL not whitelisted");
 
     if (provider === "google") return res.redirect(await startGoogleOAuth(redirect));
     if (provider === "microsoft") return res.redirect(await startMicrosoftOAuth(redirect));

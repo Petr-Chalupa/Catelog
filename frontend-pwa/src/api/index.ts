@@ -15,6 +15,7 @@ export { WatchListItem } from './models/WatchListItem';
 
 export { AuthService } from './services/AuthService';
 export { InvitesService } from './services/InvitesService';
+export { SystemService } from './services/SystemService';
 export { TitlesService } from './services/TitlesService';
 export { UserService } from './services/UserService';
 export { WatchListsService } from './services/WatchListsService';

@@ -27,6 +27,7 @@ export class AuthService {
             errors: {
                 302: `Redirect to OAuth`,
                 400: `Invalid provider`,
+                403: `The authenticated user does not have permission to access this resource`,
             },
         });
     }

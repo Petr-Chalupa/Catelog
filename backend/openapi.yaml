@@ -8,6 +8,28 @@ security:
     - bearerAuth: []
 
 paths:
+    /system/tasks/enrich:
+        post:
+            summary: Trigger title enrichment manually
+            tags: [System]
+            security:
+                - systemKey: []
+            responses:
+                200:
+                    description: Enrichment started
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+
+    /system/tasks/maintenance:
+        post:
+            summary: Trigger database maintenance
+            tags: [System]
+            security:
+                - systemKey: []
+            responses:
+                200:
+                    description: Maintenance complete
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+
     /user/auth:
         get:
             summary: Start OAuth flow
@@ -29,6 +51,7 @@ paths:
                     description: Redirect to OAuth
                 400:
                     description: Invalid provider
+                403: { $ref: "#/components/responses/ForbiddenError" }
 
     /user/auth/google/callback:
         get:
@@ -497,6 +520,10 @@ components:
             type: http
             scheme: bearer
             bearerFormat: JWT
+        systemKey:
+            type: apiKey
+            in: header
+            name: X-System-Key
 
     responses:
         ValidationError: # 400
