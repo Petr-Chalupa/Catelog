@@ -43,10 +43,13 @@ export async function deleteUser(userId: string): Promise<Boolean> {
     return result.deletedCount === 1;
 }
 
-export async function createOAuthSession(session: OAuthSession) {
+export async function createOAuthSession(session: Omit<OAuthSession, "expiresAt">) {
     if (!db) return;
 
-    const result = await db.collection<OAuthSession>("oauth_sessions").insertOne(session);
+    const result = await db.collection<OAuthSession>("oauth_sessions").insertOne({
+        ...session,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 mins
+    });
 
     return result;
 }
@@ -74,7 +77,7 @@ export async function createRefreshToken(userId: string): Promise<string> {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    await db.collection<RefreshToken>("refreshTokens").insertOne({
+    await db.collection<RefreshToken>("refresh_tokens").insertOne({
         token,
         userId,
         expiresAt,
@@ -87,7 +90,7 @@ export async function createRefreshToken(userId: string): Promise<string> {
 export async function verifyRefreshToken(oldToken: string): Promise<{ token: string; userId: string } | null> {
     if (!db) return null;
 
-    const collection = db.collection<RefreshToken>("refreshTokens");
+    const collection = db.collection<RefreshToken>("refresh_tokens");
     const stored = await collection.findOne({ token: oldToken });
 
     if (!stored || stored.expiresAt < new Date()) {
@@ -104,7 +107,7 @@ export async function verifyRefreshToken(oldToken: string): Promise<{ token: str
 export async function deleteRefreshToken(token: string): Promise<Boolean> {
     if (!db) return false;
 
-    const collection = db.collection<RefreshToken>("refreshTokens");
+    const collection = db.collection<RefreshToken>("refresh_tokens");
     const result = await collection.deleteOne({ token });
 
     return result.deletedCount === 1;

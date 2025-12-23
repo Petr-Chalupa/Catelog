@@ -14,6 +14,7 @@ export async function connectDB() {
 
     db = client.db(dbName);
     await ensureIndexes();
+    await deleteExpired();
 
     console.log(`Connected to MongoDB: ${dbName}`);
 }
@@ -65,7 +66,25 @@ export async function ensureIndexes() {
 export async function deleteExpired() {
     if (!db) return;
 
-    await db.collection("oauth_sessions").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+    const indexName = "expiresAt_1";
+    const configs = [
+        { col: "oauth_sessions", ttl: 60 * 60 * 24 }, // 1 Day
+        { col: "refresh_tokens", ttl: 30 * 24 * 60 * 60 }, // 30 Days
+        { col: "invites", ttl: 30 * 24 * 60 * 60 }, // 30 Days
+    ];
 
-    await db.collection("invites").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+    for (const { col, ttl } of configs) {
+        const collection = db.collection(col);
+        const indexes = await collection.listIndexes().toArray();
+        const existingTTLIndex = indexes.find((idx) => idx.name === indexName);
+
+        if (existingTTLIndex && existingTTLIndex.expireAfterSeconds !== ttl) {
+            await collection.dropIndex(indexName);
+            console.log(`Updating TTL index for ${col} to ${ttl}s...`);
+        } else if (!existingTTLIndex) {
+            console.log(`Creating new TTL index for ${col}...`);
+        }
+
+        await collection.createIndex({ expiresAt: 1 }, { name: indexName, expireAfterSeconds: ttl });
+    }
 }

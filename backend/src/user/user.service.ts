@@ -28,13 +28,7 @@ export async function startGoogleOAuth(redirectUrl: string): Promise<string> {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = generateCodeChallenge(codeVerifier);
 
-    await createOAuthSession({
-        state,
-        provider: "google",
-        codeVerifier,
-        redirectUrl,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    });
+    await createOAuthSession({ state, provider: "google", codeVerifier, redirectUrl });
 
     const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     url.searchParams.set("client_id", process.env.GOOGLE_CLIENT_ID!);
@@ -86,13 +80,7 @@ export async function startMicrosoftOAuth(redirectUrl: string): Promise<string> 
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = generateCodeChallenge(codeVerifier);
 
-    await createOAuthSession({
-        state,
-        provider: "microsoft",
-        codeVerifier,
-        redirectUrl,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    });
+    await createOAuthSession({ state, provider: "microsoft", codeVerifier, redirectUrl });
 
     const url = new URL("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
     url.searchParams.set("client_id", process.env.MS_CLIENT_ID!);
