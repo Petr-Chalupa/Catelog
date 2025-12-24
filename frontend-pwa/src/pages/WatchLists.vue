@@ -1,5 +1,6 @@
 <template>
-    {{ user }}
+    Online: {{ isOnline }} <br>
+    User: {{ user }} <br>
 
     <button @click="logout">LOGOUT</button>
 
@@ -15,9 +16,11 @@
 <script setup lang="ts">
 import { onMounted, ref, type Ref } from "vue";
 import { AuthService, Title, TitlesService, UserService, type User } from "../api";
-import { useAuthStore } from "../stores/auth";
+import { useAuthStore } from "../stores/auth.store";
 import { router } from "../router";
+import { useOnline } from "../composables/useOnline";
 
+const isOnline = useOnline();
 const user: Ref<User | null> = ref(null);
 const query = ref("");
 const titles: Ref<Title[]> = ref([]);

@@ -7,6 +7,7 @@
     "main": "src/main.ts",
     "dependencies": {
         "axios": "^1.13.2",
+        "lucide-vue-next": "^0.562.0",
         "pinia": "^3.0.4",
         "vue": "^3.5.24",
         "vue-router": "^4.6.4"
@@ -24,6 +25,7 @@
     "scripts": {
         "gen:api": "npx openapi-typescript-codegen --input ../backend/openapi.yaml --output src/api --client axios",
         "dev": "npm run gen:api && vite",
-        "build": "npm run gen:api && vite build"
+        "build": "npm run gen:api && vite build",
+        "preview": "npm run gen:api && vite preview"
     }
 }

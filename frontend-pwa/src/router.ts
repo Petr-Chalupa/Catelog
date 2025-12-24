@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAuthStore } from "./stores/auth";
+import { useAuthStore } from "./stores/auth.store";
 import Login from "./pages/Login.vue";
 import Watchlists from "./pages/WatchLists.vue";
 
@@ -40,12 +40,6 @@ export const router = createRouter({
         },
         {
             path: "/watchlists/:listId/settings",
-            component: { render: () => null },
-            meta: { requiresAuth: true },
-            props: true,
-        },
-        {
-            path: "/watchlists/:listId/add",
             component: { render: () => null },
             meta: { requiresAuth: true },
             props: true,

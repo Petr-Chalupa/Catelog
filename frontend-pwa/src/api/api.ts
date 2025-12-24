@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAuthStore } from "../stores/auth";
+import { useAuthStore } from "../stores/auth.store";
 import { OpenAPI } from "./core/OpenAPI";
 import { AuthService } from "./services/AuthService";
 import { router } from "../router";
