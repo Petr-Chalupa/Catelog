@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "./stores/auth.store";
+import { useUserStore } from "./stores/user.store";
+import { UserService } from "./api";
 import Login from "./pages/Login.vue";
-import Watchlists from "./pages/WatchLists.vue";
+import Watchlists from "./pages/Watchlists.vue";
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -63,11 +65,17 @@ export const router = createRouter({
     ],
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
+    const userStore = useUserStore();
 
     if (to.meta.requiresAuth && !authStore.token) {
         return next("/login");
+    }
+
+    if (authStore.token && (!userStore.profile || !userStore.profile.id)) {
+        const user = await UserService.getUserMe();
+        userStore.setProfile(user);
     }
 
     next();

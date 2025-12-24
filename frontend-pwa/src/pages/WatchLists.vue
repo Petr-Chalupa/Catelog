@@ -1,7 +1,7 @@
 <template>
     Online: {{ isOnline }} <br>
     Locale: {{ locale }} <br>
-    User: {{ user }} <br>
+    User: {{ userStore.profile }} <br>
 
     <button @click="logout">LOGOUT</button>
 
@@ -15,23 +15,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, type Ref } from "vue";
-import { AuthService, Title, TitlesService, UserService, type User } from "../api";
+import { ref, type Ref } from "vue";
+import { AuthService, Title, TitlesService } from "../api";
 import { useAuthStore } from "../stores/auth.store";
 import { router } from "../router";
 import { useOnline } from "../composables/useOnline";
 import { useI18n } from 'vue-i18n';
-
+import { useUserStore } from "../stores/user.store";
 
 const { locale } = useI18n();
 const isOnline = useOnline();
-const user: Ref<User | null> = ref(null);
+const userStore = useUserStore();
 const query = ref("");
 const titles: Ref<Title[]> = ref([]);
-
-onMounted(async () => {
-    user.value = await UserService.getUserMe();
-});
 
 async function search() {
     if (query.value.trim().length == 0) return;

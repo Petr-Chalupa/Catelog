@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTheme } from './composables/useTheme';
+import { useUserStore } from "./stores/user.store";
 
-useTheme();
+useUserStore();
 </script>

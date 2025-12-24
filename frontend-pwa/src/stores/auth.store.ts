@@ -3,18 +3,20 @@ import { OpenAPI } from "../api";
 
 export const useAuthStore = defineStore("auth", {
     state: () => ({
-        token: localStorage.getItem("token") || "",
+        token: "",
     }),
     actions: {
         setToken(newToken: string) {
             this.token = newToken;
-            localStorage.setItem("token", newToken);
             OpenAPI.TOKEN = newToken;
         },
         clearToken() {
             this.token = "";
-            localStorage.removeItem("token");
             OpenAPI.TOKEN = "";
         },
+    },
+    persist: {
+        key: "catelog-auth",
+        storage: localStorage,
     },
 });
