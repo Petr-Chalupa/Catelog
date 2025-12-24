@@ -1,15 +1,18 @@
 import { defineStore } from "pinia";
 import { ref, watch } from "vue";
 import type { User } from "../api";
-import { i18n } from "../i18n";
+import { getDefaultLocale, i18n, type Language } from "../i18n";
+
+const DEFAULT_PROFILE: User = { id: "", name: "", email: "", createdAt: "" };
+const DEFAULT_THEME = "dark" as const;
 
 export const useUserStore = defineStore(
     "user",
     () => {
         // --- STATE ---
-        const profile = ref<User>({ id: "", name: "", email: "", createdAt: "" });
-        const theme = ref<"light" | "dark">("dark");
-        const locale = ref<string>(navigator.language.split("-")[0] || "en");
+        const profile = ref<User>({ ...DEFAULT_PROFILE });
+        const theme = ref<"light" | "dark">(DEFAULT_THEME);
+        const locale = ref<Language>(getDefaultLocale());
 
         // --- WATCHERS ---
         watch(theme, (newTheme) => (document.documentElement.dataset.theme = newTheme), { immediate: true });
@@ -23,6 +26,12 @@ export const useUserStore = defineStore(
         );
 
         // --- ACTIONS ---
+        function $reset() {
+            profile.value = { ...DEFAULT_PROFILE };
+            theme.value = DEFAULT_THEME;
+            locale.value = getDefaultLocale();
+        }
+
         function setProfile(user: User) {
             profile.value = user;
         }
@@ -31,11 +40,11 @@ export const useUserStore = defineStore(
             theme.value = theme.value === "dark" ? "light" : "dark";
         }
 
-        function setLocale(newLocale: string) {
+        function setLocale(newLocale: Language) {
             locale.value = newLocale;
         }
 
-        return { profile, theme, locale, setProfile, toggleTheme, setLocale };
+        return { profile, theme, locale, $reset, setProfile, toggleTheme, setLocale };
     },
     {
         persist: {

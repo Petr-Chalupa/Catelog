@@ -2,7 +2,6 @@ import axios from "axios";
 import { useAuthStore } from "../stores/auth.store";
 import { OpenAPI } from "./core/OpenAPI";
 import { AuthService } from "./services/AuthService";
-import { router } from "../router";
 
 let isRefreshing = false;
 let failedQueue: any[] = [];
@@ -31,8 +30,7 @@ export function initAPI() {
             }
 
             if (originalRequest.url?.includes("/user/auth/refresh")) {
-                authStore.clearToken();
-                router.push("/login");
+                authStore.logout();
                 return Promise.reject(err);
             }
 
@@ -59,9 +57,8 @@ export function initAPI() {
                             resolve(axios.request(originalRequest));
                         })
                         .catch((refreshError) => {
-                            authStore.clearToken();
+                            authStore.logout();
                             processQueue(refreshError);
-                            router.push("/login");
                             reject(refreshError);
                         })
                         .finally(() => {

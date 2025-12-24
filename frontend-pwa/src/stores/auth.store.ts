@@ -1,5 +1,8 @@
 import { defineStore } from "pinia";
-import { OpenAPI } from "../api";
+import { AuthService, OpenAPI } from "../api";
+import { router } from "../router";
+import { useUserStore } from "./user.store";
+import { useWatchlistsStore } from "./watchlists.store";
 
 export const useAuthStore = defineStore("auth", {
     state: () => ({
@@ -13,6 +16,17 @@ export const useAuthStore = defineStore("auth", {
         clearToken() {
             this.token = "";
             OpenAPI.TOKEN = "";
+        },
+        async logout() {
+            await AuthService.postUserAuthLogout();
+            this.clearToken();
+
+            const userStore = useUserStore();
+            userStore.$reset();
+            const watchlistsStore = useWatchlistsStore();
+            watchlistsStore.$reset();
+
+            router.push("/login");
         },
     },
     persist: {

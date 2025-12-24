@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-export const useAuthStore = defineStore("watchlists", {
+export const useWatchlistsStore = defineStore("watchlists", {
     state: () => ({}),
     actions: {},
     persist: {
