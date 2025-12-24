@@ -12,6 +12,7 @@ function mapOMDbToTitle(data: any): Title {
         id: randomUUID(),
         type: data.Type === "series" ? "series" : "movie",
         title: data.Title,
+        localizedTitles: { en: data.Title },
         year: data.Year ? parseInt(data.Year) : undefined,
         genres: data.Genre ? mapOMDbGenre(data.Genre) : undefined,
         directors: data.Director ? data.Director.split(",").map((s: string) => s.trim()) : undefined,

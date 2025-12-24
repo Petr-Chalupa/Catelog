@@ -8,11 +8,16 @@ const tmdbClient: AxiosInstance = axios.create({
 });
 
 function mapTMDbToTitle(data: any, translations?: Record<string, string>): Title {
+    const allTitles = { ...translations };
+    const originalTitle = data.original_title || data.original_name;
+    const originalLang = data.original_language;
+    if (originalTitle && originalLang) allTitles[originalLang] = originalTitle;
+
     return {
         id: randomUUID(),
         type: data.media_type === "movie" ? "movie" : "series",
         title: data.title || data.name,
-        localizedTitles: translations,
+        localizedTitles: allTitles,
         year:
             data.release_date || data.first_air_date
                 ? new Date(data.release_date || data.first_air_date).getFullYear()

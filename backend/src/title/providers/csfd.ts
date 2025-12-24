@@ -8,6 +8,7 @@ function mapCSFDToTitle(data: any): Title {
         const lang = mapCSFDLanguage(t.country) || t.country;
         localizedTitles[lang] = t.title;
     }
+    if (!localizedTitles["cs"]) localizedTitles["cs"] = data.title;
 
     return {
         id: randomUUID(),
