@@ -10,6 +10,7 @@ export type WatchListItem = {
     tags?: Array<string>;
     personalRating?: number;
     addedBy: string;
+    sortKey?: string;
     createdAt: string;
     updatedAt?: string;
 };

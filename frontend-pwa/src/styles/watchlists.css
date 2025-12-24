@@ -1,12 +1,3 @@
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 3rem;
-    padding: .5rem;
-    border-bottom: 1px solid var(--border);
-}
-
 .logo-wrapper {
     display: flex;
     align-items: center;
@@ -33,8 +24,4 @@
             font-size: x-small;
         }
     }
-}
-
-.offline {
-    color: var(--secondary);
 }

@@ -4,6 +4,7 @@ import { useUserStore } from "./stores/user.store";
 import { UserService } from "./api";
 import Login from "./pages/Login.vue";
 import Watchlists from "./pages/Watchlists.vue";
+import Profile from "./pages/Profile.vue";
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -14,6 +15,7 @@ export const router = createRouter({
         },
         {
             path: "/login",
+            name: "login",
             component: Login,
         },
         {
@@ -31,34 +33,40 @@ export const router = createRouter({
         },
         {
             path: "/watchlists",
+            name: "watchlists",
             component: Watchlists,
             meta: { requiresAuth: true },
         },
         {
             path: "/watchlists/:listId",
+            name: "watchlistDetail",
             component: { render: () => null },
             meta: { requiresAuth: true },
             props: true,
         },
         {
             path: "/watchlists/:listId/settings",
+            name: "watchlistSettings",
             component: { render: () => null },
             meta: { requiresAuth: true },
             props: true,
         },
         {
             path: "/watchlists/:listId/items/:itemId",
+            name: "watchlistItem",
             component: { render: () => null },
             meta: { requiresAuth: true },
             props: true,
         },
         {
             path: "/profile",
-            component: { render: () => null },
+            name: "profile",
+            component: Profile,
             meta: { requiresAuth: true },
         },
         {
             path: "/invites/:token",
+            name: "invite",
             component: { render: () => null },
             meta: { requiresAuth: true },
         },
