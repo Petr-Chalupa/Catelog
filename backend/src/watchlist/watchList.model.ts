@@ -16,6 +16,7 @@ export interface WatchListItem {
     tags?: string[];
     personalRating?: number;
     addedBy: string;
+    sortKey: string;
     createdAt: Date;
     updatedAt: Date;
 }

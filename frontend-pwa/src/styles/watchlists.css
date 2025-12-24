@@ -1,0 +1,40 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3rem;
+    padding: .5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+.profile {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    color: var(--text-primary);
+    text-decoration: none;
+
+    .info {
+        display: grid;
+
+        .email {
+            color: var(--text-secondary);
+            font-size: x-small;
+        }
+    }
+}
+
+.offline {
+    color: var(--secondary);
+}
