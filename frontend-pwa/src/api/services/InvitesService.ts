@@ -36,7 +36,7 @@ export class InvitesService {
     public static postInvites(
         requestBody: {
             listId: string;
-            inviteeId: string;
+            invitee: string;
         },
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
@@ -46,6 +46,26 @@ export class InvitesService {
             mediaType: 'application/json',
             errors: {
                 401: `Access token is missing or invalid`,
+            },
+        });
+    }
+    /**
+     * Get invite details by token
+     * @param token
+     * @returns Invite Invite metadata for display
+     * @throws ApiError
+     */
+    public static getInvites1(
+        token: string,
+    ): CancelablePromise<Invite> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/invites/{token}',
+            path: {
+                'token': token,
+            },
+            errors: {
+                404: `Invite not found`,
             },
         });
     }
@@ -69,6 +89,28 @@ export class InvitesService {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
                 404: `Invite or related watchList not found`,
+            },
+        });
+    }
+    /**
+     * Decline watchlist invite
+     * @param id
+     * @returns any Invite declined
+     * @throws ApiError
+     */
+    public static deleteInvitesDecline(
+        id: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/invites/{id}/decline',
+            path: {
+                'id': id,
+            },
+            errors: {
+                401: `Access token is missing or invalid`,
+                403: `The authenticated user does not have permission to access this resource`,
+                404: `Invite not found`,
             },
         });
     }

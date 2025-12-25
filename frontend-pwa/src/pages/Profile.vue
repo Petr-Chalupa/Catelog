@@ -20,8 +20,8 @@
             <div class="settings-item">
                 <label for="theme">Theme</label>
                 <select id="theme" v-model="userStore.theme">
-                    <option value="dark">Dark Mode</option>
-                    <option value="light">Light Mode</option>
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
                 </select>
             </div>
 
@@ -49,16 +49,7 @@
                 <p>No pending invites at the moment.</p>
             </div>
             <div v-else class="invite-list">
-                <div v-for="invite in invites" :key="invite.id" class="invite-card">
-                    <div class="invite-info">
-                        <p><strong>{{ invite.inviterName }}</strong> invited you to join:</p>
-                        <h4>{{ invite.listName }}</h4>
-                    </div>
-                    <div class="invite-actions">
-                        <button @click="handleInviteAccept(invite.token)" class="btn-accept">Accept</button>
-                        <button @click="handleInviteDecline(invite.id)" class="btn-decline">Decline</button>
-                    </div>
-                </div>
+                <InviteCard v-for="i in invites" :invite="i" size="small" />
             </div>
         </section>
 
@@ -77,6 +68,7 @@ import { InvitesService, UserService, type Invite, type UserDevice } from "../ap
 import { useUserStore } from "../stores/user.store";
 import { useAuthStore } from "../stores/auth.store";
 import Header from "../components/Header.vue";
+import InviteCard from "../components/InviteCard.vue";
 
 const authStore = useAuthStore();
 const userStore = useUserStore();

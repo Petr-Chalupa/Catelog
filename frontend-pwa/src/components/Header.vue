@@ -1,6 +1,6 @@
 <template>
     <header class="header">
-        <ArrowLeft v-if="!isMainRoute" @click="goBack" />
+        <ArrowLeft v-if="!isMainRoute" @click="goBack" class="arrow-back" />
 
         <slot></slot>
 
@@ -21,6 +21,10 @@
     padding: .5rem;
     border-bottom: 1px solid var(--border);
     background-color: var(--bg-primary);
+}
+
+.arrow-back {
+    cursor: pointer;
 }
 
 .offline {

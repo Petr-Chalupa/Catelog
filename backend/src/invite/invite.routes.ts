@@ -1,7 +1,14 @@
 import { Router } from "express";
 import { getWatchListById, isWatchListOwnedBy } from "../watchlist/watchlist.adapter";
 import { APIError } from "../middleware/error.middleware";
-import { acceptInvite, createInvite, getInviteDetails, getUserInvites } from "./invite.adapter";
+import {
+    acceptInvite,
+    createInvite,
+    declineInvite,
+    getInviteByToken,
+    getInviteDetails,
+    getUserInvites,
+} from "./invite.adapter";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { WatchList } from "../watchlist/watchList.model";
 
@@ -26,7 +33,7 @@ router.get("/", authMiddleware, async (req, res) => {
 
 router.post("/", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId, inviteeId } = req.body;
+    const { listId, invitee } = req.body;
 
     const watchlist = await getWatchListById(listId);
     if (!watchlist) throw new APIError(404, "Watchlist not found");
@@ -34,10 +41,21 @@ router.post("/", authMiddleware, async (req, res) => {
     const isOwner = await isWatchListOwnedBy(listId, userId, true);
     if (!isOwner) throw new APIError(403, "Forbidden: You are not the owner");
 
-    const invite = await createInvite(listId, userId, inviteeId);
+    const invite = await createInvite(listId, userId, invitee);
     if (!invite) throw new APIError(500, "Unexpected error while creating invite");
 
     res.json(invite);
+});
+
+router.get("/:token", async (req, res) => {
+    const { token } = req.params;
+
+    const invite = await getInviteByToken(token);
+    if (!invite) throw new APIError(404, "Invite not found");
+
+    const enrichedInvite = await getInviteDetails(invite.id);
+
+    res.json(enrichedInvite);
 });
 
 router.post("/:token/accept", authMiddleware, async (req, res) => {
@@ -50,4 +68,14 @@ router.post("/:token/accept", authMiddleware, async (req, res) => {
     if (result == 403) throw new APIError(403, "This invite is not for you");
 
     res.json(result as WatchList);
+});
+
+router.post("/:id/decline", authMiddleware, async (req, res) => {
+    const userId = (req as any).user?.id;
+    const { id } = req.params;
+
+    const success = await declineInvite(id, userId);
+    if (!success) throw new APIError(500, "Unexpected error while deleting invite");
+
+    res.sendStatus(200);
 });

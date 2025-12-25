@@ -27,8 +27,14 @@
 <script setup lang="ts">
 const login = (provider: "google" | "microsoft") => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    const callback = encodeURIComponent(`${window.location.origin}/login/callback`);
+    const urlParams = new URLSearchParams(window.location.search);
+    const finalTarget = urlParams.get("redirect");
 
-    window.location.href = `${baseUrl}/user/auth?provider=${provider}&redirect=${callback}`;
+    let callbackUrl = `${window.location.origin}/login/callback`;
+    if (finalTarget) callbackUrl += `?redirect=${encodeURIComponent(finalTarget)}`;
+
+    const encodedCallback = encodeURIComponent(callbackUrl);
+
+    window.location.href = `${baseUrl}/user/auth?provider=${provider}&redirect=${encodedCallback}`;
 };
 </script>

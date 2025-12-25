@@ -549,18 +549,38 @@ paths:
                     application/json:
                         schema:
                             type: object
-                            required: [listId, inviteeId]
+                            required: [listId, invitee]
                             properties:
                                 listId:
                                     type: string
                                     format: uuid
-                                inviteeId:
+                                invitee:
                                     type: string
                                     format: uuid
             responses:
                 200:
                     description: Invite created
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+
+    /invites/{token}:
+        get:
+            summary: Get invite details by token
+            tags: [Invites]
+            security: []
+            parameters:
+                - name: token
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Invite metadata for display
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Invite" }
+                404:
+                    description: Invite not found
 
     /invites/{token}/accept:
         post:
@@ -581,6 +601,24 @@ paths:
                 403: { $ref: "#/components/responses/ForbiddenError" }
                 404:
                     description: Invite or related watchList not found
+
+    /invites/{id}/decline:
+        delete:
+            summary: Decline watchlist invite
+            tags: [Invites]
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Invite declined
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+                403: { $ref: "#/components/responses/ForbiddenError" }
+                404:
+                    description: Invite not found
 
 components:
     securitySchemes:

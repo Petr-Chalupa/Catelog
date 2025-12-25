@@ -126,48 +126,6 @@ input[type="checkbox"] {
     gap: 0.5rem;
 }
 
-.invite-card {
-    padding: 15px;
-    border-radius: 8px;
-    background: var(--bg-primary);
-
-    .invite-info {
-        display: grid;
-
-        p {
-            margin: 0;
-        }
-
-        h4 {
-            margin: 0;
-            color: var(--primary);
-        }
-    }
-
-    .invite-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    button {
-        padding: 8px 12px;
-        border-radius: 4px;
-        border: none;
-        cursor: pointer;
-        font-weight: bold;
-
-        &.btn-accept {
-            background-color: var(--ok);
-        }
-
-        &.btn-decline {
-            background-color: var(--danger);
-        }
-    }
-}
-
-
 .btn-logout,
 .btn-delete {
     width: 100%;

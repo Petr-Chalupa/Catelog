@@ -15,6 +15,15 @@ export async function getUserInvites(userId: string, type: string): Promise<Invi
     return result;
 }
 
+export async function getInviteByToken(token: string): Promise<Invite | null> {
+    if (!db) return null;
+
+    const collection = db.collection<Invite>("invites");
+    const result = await collection.findOne({ token });
+
+    return result;
+}
+
 export async function getInviteDetails(inviteId: string): Promise<{ inviterName: string; listName: string } | null> {
     if (!db) return null;
 
@@ -70,4 +79,12 @@ export async function acceptInvite(token: string, userId: string): Promise<Watch
     const result = await upsertWatchList({ id: watchlist.id, sharedWith: updatedSharedWith }, userId);
 
     return result;
+}
+
+export async function declineInvite(inviteId: string, userId: string): Promise<Boolean> {
+    if (!db) return false;
+
+    const result = await db.collection<Invite>("invites").deleteOne({ id: inviteId, invitee: userId });
+
+    return result.deletedCount > 0;
 }

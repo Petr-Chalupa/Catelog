@@ -5,6 +5,7 @@ import { UserService } from "./api";
 import Login from "./pages/Login.vue";
 import Watchlists from "./pages/Watchlists.vue";
 import Profile from "./pages/Profile.vue";
+import Invite from "./pages/Invite.vue";
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -24,9 +25,10 @@ export const router = createRouter({
             beforeEnter: (to, from, next) => {
                 const authStore = useAuthStore();
                 const token = to.query.token as string;
+                const redirectTo = to.query.redirect as string;
                 if (token) {
                     authStore.setToken(token);
-                    return next("/");
+                    return next(redirectTo || "/");
                 }
                 next("/login");
             },
@@ -39,7 +41,7 @@ export const router = createRouter({
         },
         {
             path: "/watchlists/:listId",
-            name: "watchlistDetail",
+            name: "watchlistDetails",
             component: { render: () => null },
             meta: { requiresAuth: true },
             props: true,
@@ -67,8 +69,11 @@ export const router = createRouter({
         {
             path: "/invites/:token",
             name: "invite",
-            component: { render: () => null },
-            meta: { requiresAuth: true },
+            component: Invite,
+        },
+        {
+            path: "/:pathMatch(.*)*",
+            redirect: "/",
         },
     ],
 });
@@ -78,7 +83,7 @@ router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore();
 
     if (to.meta.requiresAuth && !authStore.token) {
-        return next({ name: "login" });
+        return next({ name: "login", query: { redirect: to.fullPath } });
     }
 
     if (authStore.token && !userStore.profile?.id) {
