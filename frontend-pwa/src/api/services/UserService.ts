@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { User } from '../models/User';
+import type { UserDevice } from '../models/UserDevice';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -32,6 +33,7 @@ export class UserService {
         requestBody?: {
             name?: string;
             email?: string;
+            notificationsEnabled?: boolean;
         },
     ): CancelablePromise<User> {
         return __request(OpenAPI, {
@@ -58,6 +60,47 @@ export class UserService {
             errors: {
                 401: `Access token is missing or invalid`,
                 500: `Unexpected error while deleting user data`,
+            },
+        });
+    }
+    /**
+     * Register a device for push notifications
+     * @param requestBody
+     * @returns any Device subscribed successfully
+     * @throws ApiError
+     */
+    public static postUserDevicesSubscribe(
+        requestBody: UserDevice,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/user/devices/subscribe',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Access token is missing or invalid`,
+            },
+        });
+    }
+    /**
+     * Unsubscribe a device from push notifications
+     * @param requestBody
+     * @returns any Device unsubscribed successfully
+     * @throws ApiError
+     */
+    public static postUserDevicesUnsubscribe(
+        requestBody: {
+            endpoint: string;
+        },
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/user/devices/unsubscribe',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Access token is missing or invalid`,
+                500: `Unexpected error while deleting user device`,
             },
         });
     }

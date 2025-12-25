@@ -5,7 +5,9 @@
 export type Invite = {
     id: string;
     listId: string;
+    listName?: string;
     inviter: string;
+    inviterName?: string;
     invitee: string;
     token: string;
     expiresAt: string;

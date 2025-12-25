@@ -1,6 +1,6 @@
 <template>
     <header class="header">
-        <ArrowLeft v-if="!isMainRoute" @click="router.back" />
+        <ArrowLeft v-if="!isMainRoute" @click="goBack" />
 
         <slot></slot>
 
@@ -12,12 +12,15 @@
 
 <style scoped>
 .header {
+    position: sticky;
+    top: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 3rem;
     padding: .5rem;
     border-bottom: 1px solid var(--border);
+    background-color: var(--bg-primary);
 }
 
 .offline {
@@ -38,4 +41,12 @@ const router = useRouter();
 const route = useRoute();
 const isMainRoute = computed(() => route.name === "watchlists");
 const isOnline = useOnline();
+
+function goBack() {
+    if (window.history.state && window.history.state.back) {
+        router.back();
+    } else {
+        router.push({ name: "watchlists" });
+    }
+};
 </script>

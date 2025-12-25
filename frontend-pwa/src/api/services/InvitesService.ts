@@ -8,31 +8,44 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class InvitesService {
     /**
-     * Create invite to watchlist
-     * @param listId
-     * @param requestBody
-     * @returns Invite Invite created
+     * Get all invites related to the current user
+     * @param t
+     * @returns Invite List of invites
      * @throws ApiError
      */
-    public static postWatchlistsInvites(
-        listId: string,
+    public static getInvites(
+        t?: 'incoming' | 'outgoing',
+    ): CancelablePromise<Array<Invite>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/invites',
+            query: {
+                't': t,
+            },
+            errors: {
+                401: `Access token is missing or invalid`,
+            },
+        });
+    }
+    /**
+     * Create a new invite
+     * @param requestBody
+     * @returns any Invite created
+     * @throws ApiError
+     */
+    public static postInvites(
         requestBody: {
-            inviteeId?: string;
+            listId: string;
+            inviteeId: string;
         },
-    ): CancelablePromise<Invite> {
+    ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/watchlists/{listId}/invites',
-            path: {
-                'listId': listId,
-            },
+            url: '/invites',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
                 401: `Access token is missing or invalid`,
-                403: `The authenticated user does not have permission to access this resource`,
-                404: `WatchList not found`,
-                500: `Unexpected error while creating invite`,
             },
         });
     }
@@ -42,12 +55,12 @@ export class InvitesService {
      * @returns any Invite accepted
      * @throws ApiError
      */
-    public static postWatchlistsInvitesAccept(
+    public static postInvitesAccept(
         token: string,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/watchlists/invites/{token}/accept',
+            url: '/invites/{token}/accept',
             path: {
                 'token': token,
             },

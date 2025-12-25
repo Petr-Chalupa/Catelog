@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
-import crypto from "crypto";
 import { db } from "../db";
 import { deleteUnreferencedTitlePlaceholders } from "../title/title.adapter";
-import { Invite, WatchList, WatchListItem } from "./watchList.model";
+import { WatchList, WatchListItem } from "./watchList.model";
 
 export async function getWatchListById(listId: string): Promise<WatchList | null> {
     if (!db) return null;
@@ -131,50 +130,4 @@ export async function deleteWatchListItem(listId: string, itemId: string): Promi
     const result = await collection.deleteOne({ id: itemId, listId });
 
     return result.deletedCount === 1;
-}
-
-export async function createWatchListInvite(
-    listId: string,
-    inviterId: string,
-    inviteeId: string
-): Promise<Invite | null> {
-    if (!db) return null;
-
-    const now = new Date();
-    const invite: Invite = {
-        id: randomUUID(),
-        listId,
-        inviter: inviterId,
-        invitee: inviteeId,
-        token: crypto.randomBytes(32).toString(),
-        expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        createdAt: now,
-    };
-
-    const collection = db.collection<Invite>("invites");
-    await collection.insertOne(invite);
-
-    return invite;
-}
-
-export async function acceptWatchListInvite(token: string, userId: string): Promise<WatchList | number | null> {
-    if (!db) return null;
-
-    const inviteColl = db.collection<Invite>("invites");
-    const watchlistColl = db.collection<WatchList>("watchlists");
-
-    const invite = await inviteColl.findOne({ token });
-    if (!invite) return 404;
-    if (invite.expiresAt < new Date()) return 400;
-    if (invite.invitee !== userId) return 403;
-
-    await inviteColl.deleteOne({ token });
-
-    const watchlist = await watchlistColl.findOne({ id: invite.listId });
-    if (!watchlist) return 404;
-
-    const updatedSharedWith = Array.from(new Set([...watchlist.sharedWith, userId]));
-    const result = await upsertWatchList({ id: watchlist.id, sharedWith: updatedSharedWith }, userId);
-
-    return result;
 }

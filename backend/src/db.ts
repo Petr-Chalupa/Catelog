@@ -42,6 +42,10 @@ export async function ensureIndexes() {
     const refreshTokens = db.collection("refresh_tokens");
     await refreshTokens.createIndex({ token: 1 }, { unique: true });
 
+    const userDevices = db.collection("user_devices");
+    await userDevices.createIndex({ id: 1 }, { unique: true });
+    await userDevices.createIndex({ userId: 1 });
+
     const titles = db.collection("titles");
     await titles.createIndex({ id: 1 }, { unique: true });
     await titles.createIndex({ title: 1 });

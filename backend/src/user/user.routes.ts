@@ -1,6 +1,14 @@
 import { Router } from "express";
 import { ALLOWED_ORIGINS, authMiddleware } from "../middleware/auth.middleware";
-import { deleteRefreshToken, deleteUser, getUserById, upsertUser, verifyRefreshToken } from "./user.adapter";
+import {
+    deleteRefreshToken,
+    deleteUser,
+    deleteUserDevice,
+    getUserById,
+    upsertUser,
+    upsertUserDevice,
+    verifyRefreshToken,
+} from "./user.adapter";
 import {
     finishGoogleOAuth,
     finishMicrosoftOAuth,
@@ -9,7 +17,7 @@ import {
     startMicrosoftOAuth,
 } from "./user.service";
 import { APIError } from "../middleware/error.middleware";
-import { User } from "./user.model";
+import { User, UserDevice } from "./user.model";
 
 const router = Router();
 export const userRouter = router;
@@ -110,6 +118,25 @@ router.delete("/me", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
 
     const success = await deleteUser(userId);
+    if (!success) throw new APIError(500, "Unexpected error");
+
+    return res.sendStatus(200);
+});
+
+router.post("/devices/subscribe", authMiddleware, async (req, res) => {
+    const userId = (req as any).user.id;
+    const deviceData = req.body as UserDevice;
+
+    await upsertUserDevice(userId, deviceData);
+
+    return res.sendStatus(200);
+});
+
+router.post("/devices/unsubscribe", authMiddleware, async (req, res) => {
+    const userId = (req as any).user.id;
+    const { endpoint } = req.body as { endpoint: string };
+
+    const success = await deleteUserDevice(userId, endpoint);
     if (!success) throw new APIError(500, "Unexpected error");
 
     return res.sendStatus(200);

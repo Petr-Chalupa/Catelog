@@ -1,11 +1,15 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import webpush from "web-push";
 import { OAuth2Client } from "google-auth-library";
 import {
     createOAuthSession,
     createRefreshToken,
     deleteOAuthSession,
+    deleteUserDevice,
     getOAuthSession,
+    getUserById,
+    getUserDevices,
     upsertUser,
 } from "../user/user.adapter";
 import { APIError } from "../middleware/error.middleware";
@@ -133,4 +137,24 @@ export async function finishMicrosoftOAuth(
     url.searchParams.set("token", accessToken);
 
     return { refreshToken, redirectUrl: url.toString() };
+}
+
+export async function sendPushNotification(userId: string, payload: { title: string; body: string; url: string }) {
+    const user = await getUserById(userId);
+    if (!user || !user.notificationsEnabled) return;
+
+    webpush.setVapidDetails(process.env.VAPID_SUBJECT!, process.env.VAPID_PUBLIC_KEY!, process.env.VAPID_PRIVATE_KEY!);
+
+    const devices = await getUserDevices(userId);
+    const notifications = devices.map((device) => {
+        return webpush
+            .sendNotification({ endpoint: device.endpoint, keys: device.keys }, JSON.stringify(payload))
+            .catch((err) => {
+                if (err.statusCode === 410 || err.statusCode === 404) {
+                    return deleteUserDevice(userId, device.endpoint);
+                }
+            });
+    });
+
+    await Promise.all(notifications);
 }

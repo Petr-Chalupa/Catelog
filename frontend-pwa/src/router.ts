@@ -78,13 +78,16 @@ router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore();
 
     if (to.meta.requiresAuth && !authStore.token) {
-        return next("/login");
+        return next({ name: "login" });
     }
 
-    if (authStore.token && (!userStore.profile || !userStore.profile.id)) {
-        const user = await UserService.getUserMe();
-        userStore.setProfile(user);
+    if (authStore.token && !userStore.profile?.id) {
+        try {
+            const user = await UserService.getUserMe();
+            userStore.setProfile(user);
+        } catch (error) {
+            authStore.logout();
+        }
     }
-
     next();
 });

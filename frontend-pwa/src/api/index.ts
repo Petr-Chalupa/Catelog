@@ -11,6 +11,7 @@ export type { Invite } from './models/Invite';
 export { MergeCandidate } from './models/MergeCandidate';
 export { Title } from './models/Title';
 export type { User } from './models/User';
+export type { UserDevice } from './models/UserDevice';
 export type { WatchList } from './models/WatchList';
 export { WatchListItem } from './models/WatchListItem';
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <main>
         <header class="header">
             <div class="logo-wrapper">
                 <img src="/favicon.svg" alt="Logo" />
@@ -19,7 +19,7 @@
                 <span>Continue with Microsoft</span>
             </button>
         </div>
-    </div>
+    </main>
 </template>
 
 <style scoped src="/src/styles/login.css"></style>

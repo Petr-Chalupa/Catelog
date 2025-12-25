@@ -2,9 +2,15 @@
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
     "types": [
-      "vite/client"
+      "vite/client",
+      "vite-plugin-pwa/client"
     ],
     "module": "ESNext",
+    "lib": [
+      "esnext",
+      "dom",
+      "WebWorker"
+    ],
     "jsx": "preserve",
     "outDir": "dist"
   },

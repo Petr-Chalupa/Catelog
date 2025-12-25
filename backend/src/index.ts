@@ -13,10 +13,11 @@ dotenv.config();
 import { connectDB, closeDB } from "./db";
 import { corsMiddleware } from "./middleware/auth.middleware";
 import { errorMiddleware } from "./middleware/error.middleware";
+import { systemRouter } from "./system/system.routes";
 import { userRouter } from "./user/user.routes";
 import { titlesRouter } from "./title/title.routes";
 import { watchlistsRouter } from "./watchlist/watchlist.routes";
-import { systemRouter } from "./system/system.routes";
+import { invitesRouter } from "./invite/invite.routes";
 
 const apiSpecPath = path.join(__dirname, "../openapi.yaml");
 const apiSwaggerDocument = YAML.parse(fs.readFileSync(apiSpecPath, "utf8"));
@@ -41,6 +42,7 @@ app.use("/api/system", systemRouter);
 app.use("/api/user", userRouter);
 app.use("/api/titles", titlesRouter);
 app.use("/api/watchlists", watchlistsRouter);
+app.use("/api/invites", invitesRouter);
 
 // Global error handler
 app.use(errorMiddleware);

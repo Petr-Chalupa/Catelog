@@ -9,7 +9,7 @@
         </router-link>
     </Header>
 
-    <main class="main-content">
+    <main>
         WATCHLISTS
     </main>
 </template>

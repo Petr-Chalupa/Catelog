@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { OAuthSession, RefreshToken, User } from "./user.model";
+import { OAuthSession, RefreshToken, User, UserDevice } from "./user.model";
 import { db } from "../db";
 import { cleanupWatchListsForUser } from "../watchlist/watchlist.adapter";
 
@@ -22,6 +22,7 @@ export async function upsertUser(user: Partial<User>): Promise<User | null> {
         $set: {
             name: user.name,
             email: user.email,
+            notificationsEnabled: user.notificationsEnabled,
         },
         $setOnInsert: {
             id: user.id ?? randomUUID(),
@@ -38,6 +39,7 @@ export async function deleteUser(userId: string): Promise<Boolean> {
     if (!db) return false;
 
     await cleanupWatchListsForUser(userId);
+    await db.collection<UserDevice>("user_devices").deleteMany({ userId: userId });
     const result = await db.collection<User>("users").deleteOne({ id: userId });
 
     return result.deletedCount === 1;
@@ -111,4 +113,44 @@ export async function deleteRefreshToken(token: string): Promise<Boolean> {
     const result = await collection.deleteOne({ token });
 
     return result.deletedCount === 1;
+}
+
+export async function upsertUserDevice(userId: string, device: UserDevice): Promise<UserDevice | null> {
+    if (!db) return null;
+
+    const collection = db.collection<UserDevice>("user_devices");
+
+    const filter = { endpoint: device.endpoint };
+    const update = {
+        $set: {
+            userId: userId,
+            keys: device.keys,
+            deviceName: device.deviceName,
+        },
+        $setOnInsert: {
+            id: randomUUID(),
+            createdAt: new Date(),
+        },
+    };
+    const options = { upsert: true, returnDocument: "after" as const };
+    const result = await collection.findOneAndUpdate(filter, update, options);
+
+    return result;
+}
+
+export async function getUserDevices(userId: string): Promise<UserDevice[]> {
+    if (!db) return [];
+
+    const result = await db.collection<UserDevice>("userDevices").find({ userId }).toArray();
+
+    return result;
+}
+
+export async function deleteUserDevice(userId: string, endpoint: string): Promise<boolean> {
+    if (!db) return false;
+
+    const collection = db.collection<UserDevice>("user_devices");
+    const result = await collection.deleteOne({ endpoint: endpoint, userId: userId });
+
+    return result.deletedCount > 0;
 }

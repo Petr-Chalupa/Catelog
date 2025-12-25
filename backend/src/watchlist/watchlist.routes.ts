@@ -1,8 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware";
 import {
-    acceptWatchListInvite,
-    createWatchListInvite,
     deleteWatchListById,
     deleteWatchListItem,
     getUserWatchLists,
@@ -143,33 +141,4 @@ router.delete("/:listId/items/:itemId", authMiddleware, async (req, res) => {
     if (!success) throw new APIError(404, "WatchListItem not found");
 
     res.sendStatus(200);
-});
-
-router.post("/:listId/invites", authMiddleware, async (req, res) => {
-    const userId = (req as any).user.id;
-    const { listId } = req.params;
-    const { inviteeId } = req.body;
-
-    const watchlist = await getWatchListById(listId);
-    if (!watchlist) throw new APIError(404, "Watchlist not found");
-
-    const isOwner = await isWatchListOwnedBy(listId, userId, true);
-    if (!isOwner) throw new APIError(403, "Forbidden: You are not the owner");
-
-    const invite = await createWatchListInvite(listId, userId, inviteeId);
-    if (!invite) throw new APIError(500, "Unexpected error while creating invite");
-
-    res.json(invite);
-});
-
-router.post("/invites/:token/accept", authMiddleware, async (req, res) => {
-    const userId = (req as any).user?.id;
-    const { token } = req.params;
-
-    const result = await acceptWatchListInvite(token, userId);
-    if (!result || result == 404) throw new APIError(404, "Invite or related watchlist not found");
-    if (result == 400) throw new APIError(400, "This invite is expired");
-    if (result == 403) throw new APIError(403, "This invite is not for you");
-
-    res.json(result as WatchList);
 });

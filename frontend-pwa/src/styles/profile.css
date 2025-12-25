@@ -1,0 +1,186 @@
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem 0;
+
+    .avatar-circle {
+        width: 60px;
+        height: 60px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .user-info {
+        display: grid;
+
+        >* {
+            margin: 0;
+        }
+    }
+}
+
+.settings-group {
+    margin-bottom: 2rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+
+    .group-title {
+        padding: 0 1rem;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: var(--secondary);
+    }
+
+    .settings-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: var(--card-bg);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+
+    /* Custom Arrow using SVG background */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem;
+
+    &:hover {
+        border-color: var(--secondary);
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 2px var(--secondary);
+    }
+
+    option {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+}
+
+input[type="checkbox"] {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    appearance: none;
+    background: #333;
+    border-radius: 20px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &::before {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        top: 2px;
+        left: 2px;
+        background: #fff;
+        transition: transform 0.3s;
+    }
+
+    &:checked {
+        background: var(--primary);
+    }
+
+    &:checked::before {
+        transform: translateX(20px);
+    }
+}
+
+.no-invites {
+    padding: 0 1rem;
+}
+
+.invite-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.invite-card {
+    padding: 15px;
+    border-radius: 8px;
+    background: var(--bg-primary);
+
+    .invite-info {
+        display: grid;
+
+        p {
+            margin: 0;
+        }
+
+        h4 {
+            margin: 0;
+            color: var(--primary);
+        }
+    }
+
+    .invite-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    button {
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+
+        &.btn-accept {
+            background-color: var(--ok);
+        }
+
+        &.btn-decline {
+            background-color: var(--danger);
+        }
+    }
+}
+
+
+.btn-logout,
+.btn-delete {
+    width: 100%;
+    padding: 1rem;
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.btn-delete {
+    color: var(--danger);
+    border-bottom: none;
+}

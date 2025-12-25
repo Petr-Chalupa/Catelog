@@ -154,6 +154,8 @@ paths:
                                     type: string
                                 email:
                                     type: string
+                                notificationsEnabled:
+                                    type: boolean
             responses:
                 200:
                     description: Profile updated
@@ -174,6 +176,41 @@ paths:
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 500:
                     description: Unexpected error while deleting user data
+
+    /user/devices/subscribe:
+        post:
+            summary: "Register a device for push notifications"
+            tags: [User]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema: { $ref: "#/components/schemas/UserDevice" }
+            responses:
+                200:
+                    description: "Device subscribed successfully"
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+
+    /user/devices/unsubscribe:
+        post:
+            summary: "Unsubscribe a device from push notifications"
+            tags: [User]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [endpoint]
+                            properties:
+                                endpoint:
+                                    type: string
+            responses:
+                200:
+                    description: "Device unsubscribed successfully"
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+                500:
+                    description: Unexpected error while deleting user device
 
     /titles:
         post:
@@ -484,39 +521,48 @@ paths:
                 404:
                     description: WatchList or watchlist item not found
 
-    /watchlists/{listId}/invites:
-        post:
-            summary: Create invite to watchlist
+    /invites:
+        get:
+            summary: Get all invites related to the current user
             tags: [Invites]
             parameters:
-                - name: listId
-                  in: path
-                  required: true
+                - name: t
+                  in: query
                   schema:
                       type: string
+                      enum: [incoming, outgoing]
+            responses:
+                200:
+                    description: List of invites
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items: { $ref: "#/components/schemas/Invite" }
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+        post:
+            summary: Create a new invite
+            tags: [Invites]
             requestBody:
                 required: true
                 content:
                     application/json:
                         schema:
                             type: object
+                            required: [listId, inviteeId]
                             properties:
+                                listId:
+                                    type: string
+                                    format: uuid
                                 inviteeId:
                                     type: string
+                                    format: uuid
             responses:
                 200:
                     description: Invite created
-                    content:
-                        application/json:
-                            schema: { $ref: "#/components/schemas/Invite" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: WatchList not found
-                500:
-                    description: Unexpected error while creating invite
 
-    /watchlists/invites/{token}/accept:
+    /invites/{token}/accept:
         post:
             summary: Accept watchlist invite
             tags: [Invites]
@@ -692,6 +738,7 @@ components:
                     type: string
                 ownerId:
                     type: string
+                    format: uuid
                 sharedWith:
                     type: array
                     items:
@@ -709,8 +756,10 @@ components:
                     format: uuid
                 listId:
                     type: string
+                    format: uuid
                 titleId:
                     type: string
+                    format: uuid
                 state:
                     type: string
                     enum: [planned, started, finished]
@@ -743,6 +792,34 @@ components:
                     format: email
                 name:
                     type: string
+                notificationsEnabled:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
+
+        UserDevice:
+            type: object
+            required: [endpoint, keys]
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                userId:
+                    type: string
+                    format: uuid
+                deviceName:
+                    type: string
+                endpoint:
+                    type: string
+                keys:
+                    type: object
+                    required: [p256dh, auth]
+                    properties:
+                        p256dh:
+                            type: string
+                        auth:
+                            type: string
                 createdAt:
                     type: string
                     format: date-time
@@ -756,10 +833,17 @@ components:
                     format: uuid
                 listId:
                     type: string
+                    format: uuid
+                listName:
+                    type: string
                 inviter:
+                    type: string
+                    format: uuid
+                inviterName:
                     type: string
                 invitee:
                     type: string
+                    format: uuid
                 token:
                     type: string
                 expiresAt:
