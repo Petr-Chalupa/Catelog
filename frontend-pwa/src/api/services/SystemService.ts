@@ -17,6 +17,7 @@ export class SystemService {
             url: '/system/tasks/enrich',
             errors: {
                 401: `Access token is missing or invalid`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -31,6 +32,7 @@ export class SystemService {
             url: '/system/tasks/maintenance',
             errors: {
                 401: `Access token is missing or invalid`,
+                500: `There was an unexpected error`,
             },
         });
     }

@@ -19,6 +19,15 @@ export function issueJWT(userId: string): string {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 }
 
+export function issueRefreshTokenCookie(): Object {
+    return {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    };
+}
+
 export function generateCodeVerifier() {
     return crypto.randomBytes(32).toString("base64url");
 }

@@ -18,6 +18,7 @@ paths:
                 200:
                     description: Enrichment started
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /system/tasks/maintenance:
         post:
@@ -29,6 +30,7 @@ paths:
                 200:
                     description: Maintenance complete
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /user/auth:
         get:
@@ -51,7 +53,11 @@ paths:
                     description: Redirect to OAuth
                 400:
                     description: Invalid provider
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Error" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /user/auth/google/callback:
         get:
@@ -74,8 +80,11 @@ paths:
                     description: Redirect to frontend with auth result
                 400:
                     description: Invalid OAuth session
-                404:
-                    description: User not found
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Error" }
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /user/auth/microsoft/callback:
         get:
@@ -98,8 +107,11 @@ paths:
                     description: Redirect to frontend with auth result
                 400:
                     description: Invalid OAuth session
-                404:
-                    description: User not found
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Error" }
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /user/auth/refresh:
         post:
@@ -118,6 +130,7 @@ paths:
                                     accessToken:
                                         type: string
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /user/auth/logout:
         post:
@@ -127,6 +140,7 @@ paths:
             responses:
                 200:
                     description: Successfully logged out
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /user/me:
         get:
@@ -139,12 +153,13 @@ paths:
                         application/json:
                             schema: { $ref: "#/components/schemas/User" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                404:
-                    description: User not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
         patch:
             summary: Update user profile
             tags: [User]
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -162,11 +177,9 @@ paths:
                     content:
                         application/json:
                             schema: { $ref: "#/components/schemas/User" }
-                400:
-                    description: No data provided for update
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                404:
-                    description: User not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
         delete:
             summary: Delete user account and all connected data
             tags: [User]
@@ -174,8 +187,7 @@ paths:
                 200:
                     description: Account deleted successfully
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                500:
-                    description: Unexpected error while deleting user data
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /user/devices/subscribe:
         post:
@@ -190,6 +202,7 @@ paths:
                 200:
                     description: "Device subscribed successfully"
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /user/devices/unsubscribe:
         post:
@@ -209,8 +222,7 @@ paths:
                 200:
                     description: "Device unsubscribed successfully"
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                500:
-                    description: Unexpected error while deleting user device
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /titles:
         post:
@@ -228,8 +240,7 @@ paths:
                         application/json:
                             schema: { $ref: "#/components/schemas/Title" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                500:
-                    description: Unexpected error while inserting title
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /titles/{id}:
         get:
@@ -241,6 +252,7 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
             responses:
                 200:
                     description: Title details
@@ -248,8 +260,8 @@ paths:
                         application/json:
                             schema: { $ref: "#/components/schemas/Title" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                404:
-                    description: Title not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /titles/{id}/refresh:
         post:
@@ -261,6 +273,7 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
             responses:
                 200:
                     description: Refresh triggered successfully, returns the updated title state
@@ -268,10 +281,8 @@ paths:
                         application/json:
                             schema: { $ref: "#/components/schemas/Title" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                404:
-                    description: Title not found
-                500:
-                    description: Internal server error during enrichment
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /titles/search:
         get:
@@ -293,8 +304,7 @@ paths:
                                 type: array
                                 items: { $ref: "#/components/schemas/Title" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                500:
-                    description: Search failed
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /watchlists:
         get:
@@ -310,6 +320,8 @@ paths:
                                 items: { $ref: "#/components/schemas/WatchList" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
         post:
             summary: Create a new watchlist
             tags: [WatchLists]
@@ -331,8 +343,8 @@ paths:
                             schema: { $ref: "#/components/schemas/WatchList" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                500:
-                    description: Unexpected error while creating watchlist
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /watchlists/{listId}:
         get:
@@ -344,6 +356,7 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
             responses:
                 200:
                     description: WatchList
@@ -352,6 +365,7 @@ paths:
                             schema: { $ref: "#/components/schemas/WatchList" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
         patch:
             summary: Update watchlist details
             tags: [WatchLists]
@@ -361,6 +375,7 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
             requestBody:
                 required: true
                 content:
@@ -380,12 +395,10 @@ paths:
                     content:
                         application/json:
                             schema: { $ref: "#/components/schemas/WatchList" }
-                400:
-                    description: No data provided for update
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: WatchList not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
         delete:
             summary: Delete a specific watchlist or transfer ownership
             tags: [WatchLists]
@@ -395,26 +408,26 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
             responses:
                 200:
                     description: WatchList processed successfully
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: WatchList not found
-                500:
-                    description: Unexpected error while deleting watchlist
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /watchlists/{listId}/items:
         get:
             summary: Get items in a watchlist
             tags: [WatchLists]
             parameters:
-                - name: watchlistId
+                - name: listId
                   in: path
                   required: true
                   schema:
                       type: string
+                      format: uuid
             responses:
                 200:
                     description: WatchList items
@@ -427,8 +440,8 @@ paths:
                                         type: array
                                         items: { $ref: "#/components/schemas/WatchListItem" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: WatchList not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
         post:
             summary: Add item to watchlist
             tags: [WatchLists]
@@ -438,6 +451,7 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
             requestBody:
                 required: true
                 content:
@@ -448,18 +462,17 @@ paths:
                             properties:
                                 titleId:
                                     type: string
+                                    format: uuid
             responses:
                 200:
                     description: Item added
                     content:
                         application/json:
                             schema: { $ref: "#/components/schemas/WatchListItem" }
-                400:
-                    description: No data provided for update
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: WatchList not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /watchlists/{listId}/items/{itemId}:
         patch:
@@ -471,11 +484,13 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
                 - name: itemId
                   in: path
                   required: true
                   schema:
                       type: string
+                      format: uuid
             requestBody:
                 required: true
                 content:
@@ -497,8 +512,8 @@ paths:
                     description: Item updated
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: WatchList or watchlist item not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
         delete:
             summary: Remove item from watchlist
             tags: [WatchLists]
@@ -508,18 +523,20 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
                 - name: itemId
                   in: path
                   required: true
                   schema:
                       type: string
+                      format: uuid
             responses:
                 200:
                     description: Item removed
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: WatchList or watchlist item not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /invites:
         get:
@@ -540,6 +557,8 @@ paths:
                                 type: array
                                 items: { $ref: "#/components/schemas/Invite" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                403: { $ref: "#/components/responses/ForbiddenError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
         post:
             summary: Create a new invite
             tags: [Invites]
@@ -561,6 +580,8 @@ paths:
                 200:
                     description: Invite created
                 401: { $ref: "#/components/responses/UnauthorizedError" }
+                403: { $ref: "#/components/responses/ForbiddenError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /invites/{token}:
         get:
@@ -579,8 +600,8 @@ paths:
                     content:
                         application/json:
                             schema: { $ref: "#/components/schemas/Invite" }
-                404:
-                    description: Invite not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /invites/{token}/accept:
         post:
@@ -597,10 +618,13 @@ paths:
                     description: Invite accepted
                 400:
                     description: Invite expired
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Error" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: Invite or related watchList not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
     /invites/{id}/decline:
         delete:
@@ -612,13 +636,14 @@ paths:
                   required: true
                   schema:
                       type: string
+                      format: uuid
             responses:
                 200:
                     description: Invite declined
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
-                404:
-                    description: Invite not found
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
 
 components:
     securitySchemes:
@@ -636,40 +661,47 @@ components:
             description: Request body or parameters failed validation
             content:
                 application/json:
-                    schema:
-                        type: object
-                        properties:
-                            message:
-                                type: string
-                            errors:
-                                type: array
-                                items:
-                                    type: object
+                    schema: { $ref: "#/components/schemas/Error" }
 
         UnauthorizedError: # 401
             description: Access token is missing or invalid
             content:
                 application/json:
-                    schema:
-                        type: object
-                        properties:
-                            message:
-                                type: string
+                    schema: { $ref: "#/components/schemas/Error" }
 
         ForbiddenError: # 403
             description: The authenticated user does not have permission to access this resource
             content:
                 application/json:
-                    schema:
-                        type: object
-                        properties:
-                            message:
-                                type: string
+                    schema: { $ref: "#/components/schemas/Error" }
+
+        NotFoundError: # 404
+            description: The requested resource was not found
+            content:
+                application/json:
+                    schema: { $ref: "#/components/schemas/Error" }
+
+        InternalServerError: # 500
+            description: There was an unexpected error
+            content:
+                application/json:
+                    schema: { $ref: "#/components/schemas/Error" }
 
     schemas:
+        Error:
+            type: object
+            properties:
+                message:
+                    type: string
+                errors: # For 400 Validation errors
+                    type: array
+                    items:
+                        type: object
+
         Title:
             type: object
             required: [id, type, title, public, externalIds]
+            readOnly: [id, createdAt, updatedAt]
             properties:
                 id:
                     type: string
@@ -768,6 +800,7 @@ components:
         WatchList:
             type: object
             required: [id, name, ownerId, sharedWith, createdAt]
+            readOnly: [id, createdAt, updatedAt]
             properties:
                 id:
                     type: string
@@ -784,10 +817,14 @@ components:
                 createdAt:
                     type: string
                     format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
 
         WatchListItem:
             type: object
             required: [id, listId, titleId, state, addedBy, createdAt]
+            readOnly: [id, createdAt, updatedAt]
             properties:
                 id:
                     type: string
@@ -821,6 +858,7 @@ components:
         User:
             type: object
             required: [id, email, createdAt]
+            readOnly: [id, createdAt, updatedAt]
             properties:
                 id:
                     type: string
@@ -835,10 +873,14 @@ components:
                 createdAt:
                     type: string
                     format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
 
         UserDevice:
             type: object
             required: [endpoint, keys]
+            readOnly: [id, createdAt]
             properties:
                 id:
                     type: string
@@ -865,6 +907,7 @@ components:
         Invite:
             type: object
             required: [id, listId, inviter, invitee, token, expiresAt, createdAt]
+            readOnly: [id, createdAt]
             properties:
                 id:
                     type: string

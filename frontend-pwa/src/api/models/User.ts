@@ -8,5 +8,6 @@ export type User = {
     name?: string;
     notificationsEnabled?: boolean;
     createdAt: string;
+    updatedAt?: string;
 };
 

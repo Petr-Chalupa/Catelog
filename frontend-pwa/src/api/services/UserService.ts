@@ -19,7 +19,8 @@ export class UserService {
             url: '/user/me',
             errors: {
                 401: `Access token is missing or invalid`,
-                404: `User not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -30,7 +31,7 @@ export class UserService {
      * @throws ApiError
      */
     public static patchUserMe(
-        requestBody?: {
+        requestBody: {
             name?: string;
             email?: string;
             notificationsEnabled?: boolean;
@@ -42,9 +43,9 @@ export class UserService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                400: `No data provided for update`,
                 401: `Access token is missing or invalid`,
-                404: `User not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -59,7 +60,7 @@ export class UserService {
             url: '/user/me',
             errors: {
                 401: `Access token is missing or invalid`,
-                500: `Unexpected error while deleting user data`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -79,6 +80,7 @@ export class UserService {
             mediaType: 'application/json',
             errors: {
                 401: `Access token is missing or invalid`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -100,7 +102,7 @@ export class UserService {
             mediaType: 'application/json',
             errors: {
                 401: `Access token is missing or invalid`,
-                500: `Unexpected error while deleting user device`,
+                500: `There was an unexpected error`,
             },
         });
     }

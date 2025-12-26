@@ -1,83 +1,85 @@
 import { randomUUID } from "node:crypto";
 import { OAuthSession, RefreshToken, User, UserDevice } from "./user.model";
-import { db } from "../db";
+import { getDB } from "../db";
 import { cleanupWatchListsForUser } from "../watchlist/watchlist.adapter";
+import { APIError } from "../middleware/error.middleware";
 
-export async function getUserById(userId: string): Promise<User | null> {
-    if (!db) return null;
+export async function getUserById(userId: string): Promise<User> {
+    const db = getDB();
+    const user = await db.collection<User>("users").findOne({ id: userId });
+    if (!user) throw new APIError(404, "User not found");
 
-    const collection = db.collection<User>("users");
-    const result = await collection.findOne({ id: userId });
-
-    return result;
+    return user;
 }
 
-export async function upsertUser(user: Partial<User>): Promise<User | null> {
-    if (!db) return null;
-
+export async function upsertUser(user: Partial<User>): Promise<User> {
+    const db = getDB();
     const collection = db.collection<User>("users");
 
+    const now = new Date();
     const filter = user.id ? { id: user.id } : { email: user.email };
     const update = {
         $set: {
             name: user.name,
             email: user.email,
             notificationsEnabled: user.notificationsEnabled,
+            updatedAt: now,
         },
         $setOnInsert: {
             id: user.id ?? randomUUID(),
-            createdAt: new Date(),
+            createdAt: now,
         },
     };
     const options = { upsert: true, returnDocument: "after" as const };
+
     const result = await collection.findOneAndUpdate(filter, update, options);
+    if (!result) throw new APIError(500, "Failed to upsert user");
 
     return result;
 }
 
-export async function deleteUser(userId: string): Promise<Boolean> {
-    if (!db) return false;
+export async function deleteUser(userId: string): Promise<void> {
+    const db = getDB();
 
     await cleanupWatchListsForUser(userId);
-    await db.collection<UserDevice>("user_devices").deleteMany({ userId: userId });
-    const result = await db.collection<User>("users").deleteOne({ id: userId });
+    await db.collection<UserDevice>("user_devices").deleteMany({ userId });
 
-    return result.deletedCount === 1;
+    const result = await db.collection<User>("users").deleteOne({ id: userId });
+    if (result.deletedCount !== 1) throw new APIError(404, "User not found");
 }
 
-export async function createOAuthSession(session: Omit<OAuthSession, "expiresAt">) {
-    if (!db) return;
-
-    const result = await db.collection<OAuthSession>("oauth_sessions").insertOne({
+export async function createOAuthSession(session: Omit<OAuthSession, "expiresAt">): Promise<OAuthSession> {
+    const db = getDB();
+    const newSession: OAuthSession = {
         ...session,
         expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 mins
-    });
+    };
 
-    return result;
+    const result = await db.collection<OAuthSession>("oauth_sessions").insertOne(newSession);
+    if (!result.acknowledged) throw new APIError(500, "Failed to create OAuth session");
+
+    return newSession;
 }
 
-export async function getOAuthSession(state: string): Promise<OAuthSession | null> {
-    if (!db) return null;
-
+export async function getOAuthSession(state: string): Promise<OAuthSession> {
+    const db = getDB();
     const result = await db.collection<OAuthSession>("oauth_sessions").findOne({ state });
+    if (!result) throw new APIError(401, "Invalid or expired OAuth state");
 
     return result;
 }
 
-export async function deleteOAuthSession(state: string): Promise<Boolean> {
-    if (!db) return false;
-
+export async function deleteOAuthSession(state: string): Promise<void> {
+    const db = getDB();
     const result = await db.collection<OAuthSession>("oauth_sessions").deleteOne({ state });
-
-    return result.deletedCount == 1;
+    if (result.deletedCount === 0) throw new APIError(404, "User not found");
 }
 
 export async function createRefreshToken(userId: string): Promise<string> {
-    if (!db) return "";
-
+    const db = getDB();
     const token = randomUUID();
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30);
+    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
 
     await db.collection<RefreshToken>("refresh_tokens").insertOne({
         token,
@@ -89,15 +91,14 @@ export async function createRefreshToken(userId: string): Promise<string> {
     return token;
 }
 
-export async function verifyRefreshToken(oldToken: string): Promise<{ token: string; userId: string } | null> {
-    if (!db) return null;
-
+export async function verifyRefreshToken(oldToken: string): Promise<{ token: string; userId: string }> {
+    const db = getDB();
     const collection = db.collection<RefreshToken>("refresh_tokens");
     const stored = await collection.findOne({ token: oldToken });
 
     if (!stored || stored.expiresAt < new Date()) {
         if (stored) await collection.deleteOne({ token: oldToken });
-        return null;
+        throw new APIError(401, "Session expired");
     }
 
     await collection.deleteOne({ token: oldToken });
@@ -106,18 +107,14 @@ export async function verifyRefreshToken(oldToken: string): Promise<{ token: str
     return { token: newToken, userId: stored.userId };
 }
 
-export async function deleteRefreshToken(token: string): Promise<Boolean> {
-    if (!db) return false;
-
-    const collection = db.collection<RefreshToken>("refresh_tokens");
-    const result = await collection.deleteOne({ token });
-
-    return result.deletedCount === 1;
+export async function deleteRefreshToken(token: string): Promise<void> {
+    const db = getDB();
+    const result = await db.collection<RefreshToken>("refresh_tokens").deleteOne({ token });
+    if (result.deletedCount !== 1) throw new APIError(404, "Refresh token not found");
 }
 
-export async function upsertUserDevice(userId: string, device: UserDevice): Promise<UserDevice | null> {
-    if (!db) return null;
-
+export async function upsertUserDevice(userId: string, device: UserDevice): Promise<UserDevice> {
+    const db = getDB();
     const collection = db.collection<UserDevice>("user_devices");
 
     const filter = { endpoint: device.endpoint };
@@ -133,24 +130,22 @@ export async function upsertUserDevice(userId: string, device: UserDevice): Prom
         },
     };
     const options = { upsert: true, returnDocument: "after" as const };
+
     const result = await collection.findOneAndUpdate(filter, update, options);
+    if (!result) throw new APIError(500, "Failed to update device subscription");
 
     return result;
 }
 
 export async function getUserDevices(userId: string): Promise<UserDevice[]> {
-    if (!db) return [];
-
+    const db = getDB();
     const result = await db.collection<UserDevice>("userDevices").find({ userId }).toArray();
 
     return result;
 }
 
-export async function deleteUserDevice(userId: string, endpoint: string): Promise<boolean> {
-    if (!db) return false;
-
-    const collection = db.collection<UserDevice>("user_devices");
-    const result = await collection.deleteOne({ endpoint: endpoint, userId: userId });
-
-    return result.deletedCount > 0;
+export async function deleteUserDevice(userId: string, endpoint: string): Promise<void> {
+    const db = getDB();
+    const result = await db.collection<UserDevice>("user_devices").deleteOne({ endpoint, userId });
+    if (result.deletedCount === 0) throw new APIError(404, "Device not found");
 }

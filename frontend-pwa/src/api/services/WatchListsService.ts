@@ -20,6 +20,8 @@ export class WatchListsService {
             errors: {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -42,7 +44,8 @@ export class WatchListsService {
             errors: {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
-                500: `Unexpected error while creating watchlist`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -64,6 +67,7 @@ export class WatchListsService {
             errors: {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -90,10 +94,10 @@ export class WatchListsService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                400: `No data provided for update`,
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
-                404: `WatchList not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -115,19 +119,19 @@ export class WatchListsService {
             errors: {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
-                404: `WatchList not found`,
-                500: `Unexpected error while deleting watchlist`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
     /**
      * Get items in a watchlist
-     * @param watchlistId
+     * @param listId
      * @returns any WatchList items
      * @throws ApiError
      */
     public static getWatchlistsItems(
-        watchlistId: string,
+        listId: string,
     ): CancelablePromise<{
         items?: Array<WatchListItem>;
     }> {
@@ -135,11 +139,12 @@ export class WatchListsService {
             method: 'GET',
             url: '/watchlists/{listId}/items',
             path: {
-                'watchlistId': watchlistId,
+                'listId': listId,
             },
             errors: {
                 403: `The authenticated user does not have permission to access this resource`,
-                404: `WatchList not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -165,10 +170,10 @@ export class WatchListsService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                400: `No data provided for update`,
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
-                404: `WatchList not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -201,7 +206,8 @@ export class WatchListsService {
             errors: {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
-                404: `WatchList or watchlist item not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -226,7 +232,8 @@ export class WatchListsService {
             errors: {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
-                404: `WatchList or watchlist item not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }

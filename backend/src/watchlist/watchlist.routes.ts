@@ -4,13 +4,11 @@ import {
     deleteWatchListById,
     deleteWatchListItem,
     getUserWatchLists,
-    getWatchListById,
+    getValidatedWatchList,
     getWatchListItems,
-    isWatchListOwnedBy,
     upsertWatchList,
     upsertWatchListItem,
 } from "./watchlist.adapter";
-import { APIError } from "../middleware/error.middleware";
 import { WatchList, WatchListItem } from "./watchList.model";
 
 const router = Router();
@@ -28,7 +26,6 @@ router.post("/", authMiddleware, async (req, res) => {
     const { name } = req.body;
 
     const watchlist = await upsertWatchList({ name }, userId);
-    if (!watchlist) throw new APIError(500, "Unexpected error while creating watchlist");
 
     res.json(watchlist);
 });
@@ -37,11 +34,7 @@ router.get("/:listId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const { listId } = req.params;
 
-    const watchlist = await getWatchListById(listId);
-    if (!watchlist) throw new APIError(404, "WatchList not found");
-
-    const canView = await isWatchListOwnedBy(listId, userId, false);
-    if (!canView) throw new APIError(403, "Forbidden: You do not have access to this watchlist");
+    const watchlist = await getValidatedWatchList(listId, userId);
 
     res.json(watchlist);
 });
@@ -51,15 +44,8 @@ router.patch("/:listId", authMiddleware, async (req, res) => {
     const { listId } = req.params;
     const updateData = req.body as Partial<WatchList>;
 
-    if (!updateData || Object.keys(updateData).length === 0) throw new APIError(400, "No data provided for update");
-
-    const watchlist = await getWatchListById(listId);
-    if (!watchlist) throw new APIError(404, "Watchlist not found");
-
-    const isOwner = await isWatchListOwnedBy(listId, userId, true);
-    if (!isOwner) throw new APIError(403, "Forbidden: You do not own this watchlist");
-
-    const updatedWatchlist = await upsertWatchList({ id: watchlist.id, ...updateData }, userId);
+    await getValidatedWatchList(listId, userId, true); // Member check
+    const updatedWatchlist = await upsertWatchList({ id: listId, ...updateData }, userId);
 
     res.json(updatedWatchlist);
 });
@@ -68,11 +54,8 @@ router.delete("/:listId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const { listId } = req.params;
 
-    const isOwner = await isWatchListOwnedBy(listId, userId, true);
-    if (!isOwner) throw new APIError(403, "Forbidden: You do not own this watchlist");
-
-    const success = await deleteWatchListById(listId);
-    if (!success) throw new APIError(500, "Unexpected error while deleting watchlist");
+    await getValidatedWatchList(req.params.listId, userId, true); // Owner check
+    await deleteWatchListById(listId);
 
     res.sendStatus(200);
 });
@@ -81,12 +64,7 @@ router.get("/:listId/items", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const { listId } = req.params;
 
-    const watchlist = await getWatchListById(listId);
-    if (!watchlist) throw new APIError(404, "Watchlist not found");
-
-    const canView = await isWatchListOwnedBy(listId, userId, false);
-    if (!canView) throw new APIError(403, "Forbidden: You do not have access to this watchlist");
-
+    await getValidatedWatchList(listId, userId); // Member check
     const items = await getWatchListItems(listId);
 
     res.json({ items });
@@ -97,12 +75,7 @@ router.post("/:listId/items", authMiddleware, async (req, res) => {
     const { listId } = req.params;
     const { titleId } = req.body as Partial<WatchListItem>;
 
-    const watchlist = await getWatchListById(listId);
-    if (!watchlist) throw new APIError(404, "Watchlist not found");
-
-    const canEdit = await isWatchListOwnedBy(listId, userId, false);
-    if (!canEdit) throw new APIError(403, "Forbidden: You do not have access to this watchlist");
-
+    await getValidatedWatchList(req.params.listId, userId, true); // Owner check
     const newItem = await upsertWatchListItem(listId, { titleId }, userId);
 
     res.json(newItem);
@@ -113,16 +86,8 @@ router.patch("/:listId/items/:itemId", authMiddleware, async (req, res) => {
     const { listId, itemId } = req.params;
     const updateData = req.body as Partial<WatchListItem>;
 
-    if (!updateData || Object.keys(updateData).length === 0) throw new APIError(400, "No data provided for update");
-
-    const watchlist = await getWatchListById(listId);
-    if (!watchlist) throw new APIError(404, "Watchlist not found");
-
-    const canEdit = await isWatchListOwnedBy(listId, userId, false);
-    if (!canEdit) throw new APIError(403, "Forbidden: You do not have access to this watchlist");
-
+    await getValidatedWatchList(listId, userId); // Member check
     const updatedItem = await upsertWatchListItem(listId, { id: itemId, ...updateData }, userId);
-    if (!updatedItem) throw new APIError(404, "WatchListItem not found");
 
     res.json(updatedItem);
 });
@@ -131,14 +96,8 @@ router.delete("/:listId/items/:itemId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const { listId, itemId } = req.params;
 
-    const watchlist = await getWatchListById(listId);
-    if (!watchlist) throw new APIError(404, "Watchlist not found");
-
-    const canEdit = await isWatchListOwnedBy(listId, userId, false);
-    if (!canEdit) throw new APIError(403, "Forbidden: You do not have access to this watchlist");
-
-    const success = await deleteWatchListItem(listId, itemId);
-    if (!success) throw new APIError(404, "WatchListItem not found");
+    await getValidatedWatchList(listId, userId); // Member check
+    await deleteWatchListItem(listId, itemId);
 
     res.sendStatus(200);
 });

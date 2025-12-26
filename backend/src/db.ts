@@ -1,36 +1,39 @@
 import { Db, MongoClient } from "mongodb";
+import { APIError } from "./middleware/error.middleware";
 
-export let client: MongoClient | null = null;
-export let db: Db | null = null;
+let clientInstance: MongoClient | null = null;
+let dbInstance: Db | null = null;
+
+export function getDB(): Db {
+    if (!dbInstance) throw new APIError(500, "Database connection is not established");
+    return dbInstance;
+}
 
 export async function connectDB() {
-    if (db) return;
-
+    if (dbInstance) return;
     const uri = process.env.MONGO_URI || "";
     const dbName = process.env.MONGO_DB || "";
 
-    client = new MongoClient(uri);
-    await client.connect();
+    clientInstance = new MongoClient(uri);
+    await clientInstance.connect();
+    dbInstance = clientInstance.db(dbName);
 
-    db = client.db(dbName);
     await ensureIndexes();
     await deleteExpired();
-
-    console.log(`Connected to MongoDB: ${dbName}`);
 }
 
 export async function closeDB() {
-    if (!client) return;
+    if (!clientInstance) return;
 
-    await client.close();
-    client = null;
-    db = null;
+    await clientInstance.close();
+    clientInstance = null;
+    dbInstance = null;
 
     console.log("MongoDB connection closed");
 }
 
 export async function ensureIndexes() {
-    if (!db) return;
+    const db = getDB();
 
     const users = db.collection("users");
     await users.createIndex({ id: 1 }, { unique: true });
@@ -68,7 +71,7 @@ export async function ensureIndexes() {
 }
 
 export async function deleteExpired() {
-    if (!db) return;
+    const db = getDB();
 
     const indexName = "expiresAt_1";
     const configs = [

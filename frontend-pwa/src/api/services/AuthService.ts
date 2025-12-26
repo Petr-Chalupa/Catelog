@@ -28,6 +28,7 @@ export class AuthService {
                 302: `Redirect to OAuth`,
                 400: `Invalid provider`,
                 403: `The authenticated user does not have permission to access this resource`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -52,7 +53,8 @@ export class AuthService {
             errors: {
                 302: `Redirect to frontend with auth result`,
                 400: `Invalid OAuth session`,
-                404: `User not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -77,7 +79,8 @@ export class AuthService {
             errors: {
                 302: `Redirect to frontend with auth result`,
                 400: `Invalid OAuth session`,
-                404: `User not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -94,6 +97,7 @@ export class AuthService {
             url: '/user/auth/refresh',
             errors: {
                 401: `Access token is missing or invalid`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -106,6 +110,9 @@ export class AuthService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/user/auth/logout',
+            errors: {
+                500: `There was an unexpected error`,
+            },
         });
     }
 }

@@ -23,7 +23,7 @@ export class TitlesService {
             mediaType: 'application/json',
             errors: {
                 401: `Access token is missing or invalid`,
-                500: `Unexpected error while inserting title`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -44,7 +44,8 @@ export class TitlesService {
             },
             errors: {
                 401: `Access token is missing or invalid`,
-                404: `Title not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -65,8 +66,8 @@ export class TitlesService {
             },
             errors: {
                 401: `Access token is missing or invalid`,
-                404: `Title not found`,
-                500: `Internal server error during enrichment`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -87,7 +88,7 @@ export class TitlesService {
             },
             errors: {
                 401: `Access token is missing or invalid`,
-                500: `Search failed`,
+                500: `There was an unexpected error`,
             },
         });
     }

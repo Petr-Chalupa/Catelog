@@ -1,29 +1,40 @@
 import { randomUUID } from "node:crypto";
-import { db } from "../db";
+import { getDB } from "../db";
 import { deleteUnreferencedTitlePlaceholders } from "../title/title.adapter";
 import { WatchList, WatchListItem } from "./watchList.model";
+import { APIError } from "../middleware/error.middleware";
 
-export async function getWatchListById(listId: string): Promise<WatchList | null> {
-    if (!db) return null;
-
-    const collection = db.collection<WatchList>("watchlists");
-    const result = await collection.findOne({ id: listId });
+export async function getWatchListById(listId: string): Promise<WatchList> {
+    const db = getDB();
+    const result = await db.collection<WatchList>("watchlists").findOne({ id: listId });
+    if (!result) throw new APIError(404, "Watchlist not found");
 
     return result;
 }
 
 export async function getUserWatchLists(userId: string): Promise<WatchList[]> {
-    if (!db) return [];
+    const db = getDB();
+    const result = await db
+        .collection<WatchList>("watchlists")
+        .find({ $or: [{ ownerId: userId }, { sharedWith: userId }] })
+        .toArray();
 
-    const collection = db.collection<WatchList>("watchlists");
-    const lists = await collection.find({ $or: [{ ownerId: userId }, { sharedWith: userId }] }).toArray();
-
-    return lists;
+    return result;
 }
 
-export async function upsertWatchList(watchlist: Partial<WatchList>, ownerId: string): Promise<WatchList | null> {
-    if (!db) return null;
+export async function getValidatedWatchList(listId: string, userId: string, requireOwner = false): Promise<WatchList> {
+    const list = await getWatchListById(listId);
 
+    const isOwner = list.ownerId === userId;
+    const isShared = list.sharedWith.includes(userId);
+    if (requireOwner && !isOwner) throw new APIError(403, "Only the owner can perform this action");
+    if (!isOwner && !isShared) throw new APIError(403, "You do not have access to this watchlist");
+
+    return list;
+}
+
+export async function upsertWatchList(watchlist: Partial<WatchList>, ownerId: string): Promise<WatchList> {
+    const db = getDB();
     const collection = db.collection<WatchList>("watchlists");
 
     const filter = watchlist.id ? { id: watchlist.id } : { name: watchlist.name, ownerId };
@@ -36,71 +47,52 @@ export async function upsertWatchList(watchlist: Partial<WatchList>, ownerId: st
             id: watchlist.id || randomUUID(),
             ownerId,
             createdAt: new Date(),
+            sharedWith: watchlist.sharedWith || [],
         },
     };
     const options = { upsert: true, returnDocument: "after" as const };
+
     const result = await collection.findOneAndUpdate(filter, update, options);
+    if (!result) throw new APIError(500, "Failed to upsert watchlist");
 
     return result;
 }
 
-export async function cleanupWatchListsForUser(userId: string) {
-    if (!db) return;
+export async function cleanupWatchListsForUser(userId: string): Promise<void> {
+    const db = getDB();
 
-    const collection = db.collection<WatchList>("watchlists");
-    const ownedLists = await collection.find({ ownerId: userId }).toArray();
-
+    await db.collection<WatchList>("watchlists").updateMany({ sharedWith: userId }, { $pull: { sharedWith: userId } });
+    const ownedLists = await db.collection<WatchList>("watchlists").find({ ownerId: userId }).toArray();
     for (const list of ownedLists) {
-        if (list.sharedWith && list.sharedWith.length > 0) {
-            const [newOwner, ...remaining] = list.sharedWith;
-            await collection.updateOne({ id: list.id }, { $set: { ownerId: newOwner, sharedWith: remaining } });
-        } else {
-            await deleteWatchListById(list.id);
-        }
+        await deleteWatchListById(list.id);
     }
 }
 
-export async function isWatchListOwnedBy(listId: string, userId: string, ownerOnly: boolean): Promise<boolean> {
-    if (!db) return false;
+export async function deleteWatchListById(listId: string): Promise<void> {
+    const db = getDB();
 
-    const collection = db.collection<WatchList>("watchlists");
-    const list = await collection.findOne({ id: listId }, { projection: { ownerId: 1, sharedWith: 1 } });
+    const resultItems = await db.collection<WatchListItem>("watchlist_items").deleteMany({ listId });
+    if (resultItems.deletedCount === 0) throw new APIError(404, "Watchlist items not found");
 
-    const isOwner = list?.ownerId === userId;
-    const isCollaborator = list?.sharedWith?.includes(userId) ?? false;
+    const resultList = await db.collection<WatchList>("watchlists").deleteOne({ id: listId });
+    if (resultList.deletedCount === 0) throw new APIError(404, "Watchlist not found");
 
-    return ownerOnly ? isOwner : isOwner || isCollaborator;
-}
-
-export async function deleteWatchListById(listId: string): Promise<boolean> {
-    if (!db) return false;
-
-    const watchlistColl = db.collection<WatchList>("watchlists");
-    const itemColl = db.collection<WatchListItem>("watchlist_items");
-
-    await watchlistColl.deleteOne({ id: listId });
-    await itemColl.deleteMany({ listId: listId });
     await deleteUnreferencedTitlePlaceholders();
-
-    return true;
 }
 
 export async function getWatchListItems(listId: string): Promise<WatchListItem[]> {
-    if (!db) return [];
+    const db = getDB();
+    const result = await db.collection<WatchListItem>("watchlist_items").find({ listId }).toArray();
 
-    const collection = db.collection<WatchListItem>("watchlist_items");
-    const items = await collection.find({ listId }).toArray();
-
-    return items;
+    return result;
 }
 
 export async function upsertWatchListItem(
     listId: string,
     item: Partial<WatchListItem>,
     addedBy: string
-): Promise<WatchListItem | null> {
-    if (!db) return null;
-
+): Promise<WatchListItem> {
+    const db = getDB();
     const collection = db.collection<WatchListItem>("watchlist_items");
 
     const filter = item.id ? { id: item.id } : { listId, titleId: item.titleId };
@@ -118,16 +110,15 @@ export async function upsertWatchListItem(
         },
     };
     const options = { upsert: true, returnDocument: "after" as const };
+
     const result = await collection.findOneAndUpdate(filter, update, options);
+    if (!result) throw new APIError(500, "Failed to upsert watchlist item");
 
     return result;
 }
 
-export async function deleteWatchListItem(listId: string, itemId: string): Promise<boolean> {
-    if (!db) return false;
-
-    const collection = db.collection<WatchListItem>("watchlist_items");
-    const result = await collection.deleteOne({ id: itemId, listId });
-
-    return result.deletedCount === 1;
+export async function deleteWatchListItem(listId: string, itemId: string): Promise<void> {
+    const db = getDB();
+    const result = await db.collection<WatchListItem>("watchlist_items").deleteOne({ id: itemId, listId });
+    if (result.deletedCount === 0) throw new APIError(404, "Item not found in this watchlist");
 }

@@ -8,5 +8,6 @@ export type WatchList = {
     ownerId: string;
     sharedWith: Array<string>;
     createdAt: string;
+    updatedAt?: string;
 };
 

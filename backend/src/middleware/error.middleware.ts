@@ -17,9 +17,11 @@ export class APIError extends Error {
 }
 
 export const errorMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => {
+    const timestamp = new Date().toISOString();
+
     // OpenAPI validator errors
     if (err.status && err.errors) {
-        console.error(`[${new Date().toISOString()}] ${err.status} - ${req.method} ${req.path}: Validation Failed`);
+        console.error(`[${timestamp}] ${err.status} ${req.method} ${req.path}: Validation Failed`);
         return res.status(err.status).json({ message: "Validation Failed", errors: err.errors });
     }
 
@@ -30,9 +32,11 @@ export const errorMiddleware = (err: any, req: Request, res: Response, next: Nex
     }
 
     // Generic errors
-    const statusCode = err.status || 500;
-    const message = statusCode === 500 ? "Internal Server Error" : err.message;
-    console.error(`[${new Date().toISOString()}] ${statusCode} - ${req.method} ${req.path}: ${message}`);
-    if (statusCode === 500 && err.stack) console.error(err.stack);
-    res.status(statusCode).json({ message });
+    console.error(`[${timestamp}] ${err.status || 500} ${req.method} ${req.path}: UNEXPECTED SYSTEM ERROR:`, err);
+    return res.status(500).json({
+        message: "Internal Server Error",
+        internalCode: err.status
+            ? `HTTP_${err.status}_${err.code || err.name || "ERR"}`
+            : err.code || err.name || "UNKNOWN_ERROR",
+    });
 };

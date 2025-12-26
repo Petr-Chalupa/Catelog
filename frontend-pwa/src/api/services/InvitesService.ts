@@ -24,6 +24,8 @@ export class InvitesService {
             },
             errors: {
                 401: `Access token is missing or invalid`,
+                403: `The authenticated user does not have permission to access this resource`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -46,6 +48,8 @@ export class InvitesService {
             mediaType: 'application/json',
             errors: {
                 401: `Access token is missing or invalid`,
+                403: `The authenticated user does not have permission to access this resource`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -65,7 +69,8 @@ export class InvitesService {
                 'token': token,
             },
             errors: {
-                404: `Invite not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -88,7 +93,8 @@ export class InvitesService {
                 400: `Invite expired`,
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
-                404: `Invite or related watchList not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }
@@ -110,7 +116,8 @@ export class InvitesService {
             errors: {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,
-                404: `Invite not found`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
             },
         });
     }

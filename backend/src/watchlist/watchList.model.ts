@@ -6,6 +6,7 @@ export interface WatchList {
     ownerId: string;
     sharedWith: string[];
     createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface WatchListItem {

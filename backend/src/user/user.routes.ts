@@ -13,6 +13,7 @@ import {
     finishGoogleOAuth,
     finishMicrosoftOAuth,
     issueJWT,
+    issueRefreshTokenCookie,
     startGoogleOAuth,
     startMicrosoftOAuth,
 } from "./user.service";
@@ -39,12 +40,7 @@ router.get("/auth/google/callback", async (req, res) => {
 
     const result = await finishGoogleOAuth(code, state);
 
-    res.cookie("refreshToken", result.refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+    res.cookie("refreshToken", result.refreshToken, issueRefreshTokenCookie());
 
     res.redirect(result.redirectUrl);
 });
@@ -54,12 +50,7 @@ router.get("/auth/microsoft/callback", async (req, res) => {
 
     const result = await finishMicrosoftOAuth(code, state);
 
-    res.cookie("refreshToken", result.refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+    res.cookie("refreshToken", result.refreshToken, issueRefreshTokenCookie());
 
     res.redirect(result.redirectUrl);
 });
@@ -69,14 +60,8 @@ router.post("/auth/refresh", async (req, res) => {
     if (!oldRefreshToken) throw new APIError(401, "Invalid session");
 
     const result = await verifyRefreshToken(oldRefreshToken);
-    if (!result) throw new APIError(401, "Session expired");
 
-    res.cookie("refreshToken", result.token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+    res.cookie("refreshToken", result.token, issueRefreshTokenCookie());
 
     const jwt = issueJWT(result.userId);
     res.json({ accessToken: jwt });
@@ -95,9 +80,7 @@ router.post("/auth/logout", async (req, res) => {
 
 router.get("/me", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-
     const user = await getUserById(userId);
-    if (!user) throw new APIError(404, "User not found");
 
     return res.json(user);
 });
@@ -105,11 +88,7 @@ router.get("/me", authMiddleware, async (req, res) => {
 router.patch("/me", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const updateData = req.body as Partial<User>;
-
-    if (!updateData || Object.keys(updateData).length === 0) throw new APIError(400, "No data provided for update");
-
     const updatedUser = await upsertUser({ id: userId, ...updateData });
-    if (!updatedUser) throw new APIError(404, "User not found");
 
     return res.json(updatedUser);
 });
@@ -117,8 +96,7 @@ router.patch("/me", authMiddleware, async (req, res) => {
 router.delete("/me", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
 
-    const success = await deleteUser(userId);
-    if (!success) throw new APIError(500, "Unexpected error");
+    await deleteUser(userId);
 
     return res.sendStatus(200);
 });
@@ -136,8 +114,7 @@ router.post("/devices/unsubscribe", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const { endpoint } = req.body as { endpoint: string };
 
-    const success = await deleteUserDevice(userId, endpoint);
-    if (!success) throw new APIError(500, "Unexpected error");
+    await deleteUserDevice(userId, endpoint);
 
     return res.sendStatus(200);
 });

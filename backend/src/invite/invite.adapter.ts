@@ -2,34 +2,30 @@ import crypto, { randomUUID } from "crypto";
 import { Invite } from "./invite.model";
 import { WatchList } from "../watchlist/watchList.model";
 import { upsertWatchList } from "../watchlist/watchlist.adapter";
-import { db } from "../db";
+import { getDB } from "../db";
 import { User } from "../user/user.model";
+import { APIError } from "../middleware/error.middleware";
 
 export async function getUserInvites(userId: string, type: string): Promise<Invite[]> {
-    if (!db) return [];
-
+    const db = getDB();
     const filter = type === "outgoing" ? { inviter: userId } : { invitee: userId };
-    const collection = db.collection<Invite>("invites");
-    const result = await collection.find(filter).toArray();
+    const result = await db.collection<Invite>("invites").find(filter).toArray();
 
     return result;
 }
 
-export async function getInviteByToken(token: string): Promise<Invite | null> {
-    if (!db) return null;
+export async function getInviteByToken(token: string): Promise<Invite> {
+    const db = getDB();
+    const invite = await db.collection<Invite>("invites").findOne({ token });
+    if (!invite) throw new APIError(404, "Invite not found");
 
-    const collection = db.collection<Invite>("invites");
-    const result = await collection.findOne({ token });
-
-    return result;
+    return invite;
 }
 
-export async function getInviteDetails(inviteId: string): Promise<{ inviterName: string; listName: string } | null> {
-    if (!db) return null;
-
-    const collection = db.collection<Invite>("invites");
-    const invite = await collection.findOne({ id: inviteId });
-    if (!invite) return null;
+export async function getInviteDetails(inviteId: string): Promise<{ inviterName: string; listName: string }> {
+    const db = getDB();
+    const invite = await db.collection<Invite>("invites").findOne({ id: inviteId });
+    if (!invite) throw new APIError(404, "Invite details not found");
 
     const [inviter, watchlist] = await Promise.all([
         db.collection<User>("users").findOne({ id: invite.inviter }),
@@ -39,52 +35,48 @@ export async function getInviteDetails(inviteId: string): Promise<{ inviterName:
     return { inviterName: inviter?.name || "Someone", listName: watchlist?.name || "a watchlist" };
 }
 
-export async function createInvite(listId: string, inviterId: string, inviteeId: string): Promise<Invite | null> {
-    if (!db) return null;
-
+export async function createInvite(listId: string, inviterId: string, inviteeId: string): Promise<Invite> {
+    const db = getDB();
     const now = new Date();
     const invite: Invite = {
         id: randomUUID(),
         listId,
         inviter: inviterId,
         invitee: inviteeId,
-        token: crypto.randomBytes(32).toString(),
+        token: crypto.randomBytes(32).toString("hex"),
         expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
         createdAt: now,
     };
 
-    const collection = db.collection<Invite>("invites");
-    await collection.insertOne(invite);
+    await db.collection<Invite>("invites").insertOne(invite);
 
     return invite;
 }
 
-export async function acceptInvite(token: string, userId: string): Promise<WatchList | number | null> {
-    if (!db) return null;
-
+export async function acceptInvite(token: string, userId: string): Promise<WatchList> {
+    const db = getDB();
     const inviteColl = db.collection<Invite>("invites");
     const watchlistColl = db.collection<WatchList>("watchlists");
 
     const invite = await inviteColl.findOne({ token });
-    if (!invite) return 404;
-    if (invite.expiresAt < new Date()) return 400;
-    if (invite.invitee !== userId) return 403;
-
-    await inviteColl.deleteOne({ token });
+    if (!invite) throw new APIError(404, "Invite not found");
+    if (invite.expiresAt < new Date()) throw new APIError(400, "This invite is expired");
+    if (invite.invitee !== userId) throw new APIError(403, "This invite is not for you");
 
     const watchlist = await watchlistColl.findOne({ id: invite.listId });
-    if (!watchlist) return 404;
+    if (!watchlist) throw new APIError(404, "Related watchlist not found");
 
+    await inviteColl.deleteOne({ token });
     const updatedSharedWith = Array.from(new Set([...watchlist.sharedWith, userId]));
+
     const result = await upsertWatchList({ id: watchlist.id, sharedWith: updatedSharedWith }, userId);
+    if (!result) throw new APIError(500, "Failed to update watchlist members");
 
     return result;
 }
 
-export async function declineInvite(inviteId: string, userId: string): Promise<Boolean> {
-    if (!db) return false;
-
+export async function declineInvite(inviteId: string, userId: string): Promise<void> {
+    const db = getDB();
     const result = await db.collection<Invite>("invites").deleteOne({ id: inviteId, invitee: userId });
-
-    return result.deletedCount > 0;
+    if (result.deletedCount === 0) throw new APIError(404, "Invite not found or already processed");
 }
