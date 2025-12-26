@@ -49,7 +49,7 @@
                 <p>No pending invites at the moment.</p>
             </div>
             <div v-else class="invite-list">
-                <InviteCard v-for="i in invites" :invite="i" size="small" />
+                <InviteCard v-for="i in invites" :invite="i" size="small" @accept="removeInvite(i)" @decline="removeInvite(i)" />
             </div>
         </section>
 
@@ -153,6 +153,9 @@ async function togglePush(event: Event) {
     }
 };
 
+function removeInvite(invite: Invite) {
+    invites.value = invites.value.filter((i) => i.id != invite.id);
+}
 
 function handleLogout() {
     if (confirm("Are you sure you want to sign out?")) {

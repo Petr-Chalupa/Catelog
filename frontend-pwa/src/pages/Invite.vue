@@ -9,7 +9,7 @@
         <div v-else-if="invite" class="invite-container">
             <h1>You're Invited!</h1>
 
-            <InviteCard :invite="invite" size="large" />
+            <InviteCard :invite="invite" size="large" @accept="handleAccept" @decline="handleDecline" />
         </div>
     </main>
 </template>
@@ -49,13 +49,17 @@ onMounted(async () => {
     try {
         invite.value = await InvitesService.getInvites1(token);
     } catch (err: any) {
-        if (err.status === 410) {
-            error.value = "This invite has expired.";
-        } else {
-            error.value = "Invitation not found or invalid.";
-        }
+        error.value = "Invitation not found or invalid.";
     } finally {
         loading.value = false;
     }
-}); 
+});
+
+function handleAccept() {
+    router.push({ name: "watchlists", params: { listId: invite.value?.listId } });
+}
+
+function handleDecline() {
+    router.push("/");
+}
 </script>

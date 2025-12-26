@@ -9,7 +9,12 @@
             <span class="invite-date">{{ formatDate(invite.createdAt) }}</span>
         </div>
 
-        <div class="invite-actions">
+        <div v-if="isExpired" class="invite-actions">
+            <button @click="handleAction('decline')" class="btn-decline">
+                Dismiss Expired Invite
+            </button>
+        </div>
+        <div v-else class="invite-actions">
             <button @click="handleAction('accept')" class="btn-accept">
                 {{ isLoggedIn ? "Accept" : "Login to Accept" }}
             </button>
@@ -83,19 +88,19 @@
 </style>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { InvitesService, type Invite } from "../api";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth.store";
 
+const emits = defineEmits(["accept", "decline"]);
 const props = defineProps<{ invite: Invite; size: "small" | "large"; }>();
 
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const isLoggedIn = computed(() => !!authStore.token);
-const isVisible = ref(true);
-const isProcessing = ref(false);
+const isExpired = computed(() => new Date(props.invite.expiresAt) < new Date());
 
 function formatDate(d: string) {
     return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
@@ -111,17 +116,12 @@ function handleAction(type: "accept" | "decline") {
 };
 
 async function processInvite(action: "accept" | "decline") {
-    isProcessing.value = true;
-
-    try {
-        if (action === "accept") {
-            await InvitesService.postInvitesAccept(props.invite.token);
-        } else {
-            await InvitesService.deleteInvitesDecline(props.invite.id);
-            isVisible.value = false;
-        }
-    } finally {
-        isProcessing.value = false;
+    if (action === "accept") {
+        await InvitesService.postInvitesAccept(props.invite.token);
+        emits("accept");
+    } else {
+        await InvitesService.deleteInvitesDecline(props.invite.id);
+        emits("decline");
     }
 };
 </script>

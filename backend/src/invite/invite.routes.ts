@@ -55,7 +55,7 @@ router.post("/:token/accept", authMiddleware, async (req, res) => {
     res.json(result);
 });
 
-router.post("/:id/decline", authMiddleware, async (req, res) => {
+router.delete("/:id/decline", authMiddleware, async (req, res) => {
     const userId = (req as any).user?.id;
     const { id } = req.params;
 
