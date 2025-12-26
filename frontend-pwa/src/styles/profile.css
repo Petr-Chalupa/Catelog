@@ -1,8 +1,14 @@
+main {
+    display: grid;
+    justify-content: center;
+    padding-top: 2rem;
+}
+
 .profile-card {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 2rem 0;
+    padding-bottom: 2rem;
 
     .avatar-circle {
         width: 60px;

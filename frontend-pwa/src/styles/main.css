@@ -63,12 +63,6 @@ body {
   padding-right: env(safe-area-inset-right);
 }
 
-main {
-  display: grid;
-  justify-content: center;
-  padding: 0 2rem;
-}
-
 button {
   cursor: pointer;
 }

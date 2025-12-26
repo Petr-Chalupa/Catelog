@@ -389,6 +389,8 @@ paths:
                                     type: array
                                     items:
                                         type: string
+                                sortKey:
+                                    type: string
             responses:
                 200:
                     description: WatchList updated
@@ -507,6 +509,8 @@ paths:
                                         type: string
                                 personalRating:
                                     type: number
+                                sortKey:
+                                    type: string
             responses:
                 200:
                     description: Item updated
@@ -814,6 +818,8 @@ components:
                     type: array
                     items:
                         type: string
+                sortKey:
+                    type: string
                 createdAt:
                     type: string
                     format: date-time

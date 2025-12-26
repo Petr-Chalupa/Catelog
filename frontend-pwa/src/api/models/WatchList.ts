@@ -7,6 +7,7 @@ export type WatchList = {
     name: string;
     ownerId: string;
     sharedWith: Array<string>;
+    sortKey?: string;
     createdAt: string;
     updatedAt?: string;
 };

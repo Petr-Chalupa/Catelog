@@ -1,7 +1,3 @@
-main {
-    padding-top: 1rem;
-}
-
 .logo-wrapper {
     display: flex;
     align-items: center;
@@ -30,58 +26,17 @@ main {
     }
 }
 
-.list-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-}
-
-.list-card {
-    background: var(--bg-secondary, #ffffff);
-    border: 1px solid var(--border-color, #e2e8f0);
-    border-radius: 12px;
-    padding: 0.5rem 1rem;
+.meta .shared,
+.meta .items {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    position: relative;
-    overflow: hidden;
-
-    &:hover {
-        transform: translateY(-2px);
-        border-color: var(--primary);
-    }
-
-    .shared-icon {
-        color: var(--text-tertiary, #94a3b8);
-    }
-}
-
-.card-content {
-    display: grid;
+    align-items: center;
     gap: 0.5rem;
-
-    h3 {
-        margin: 0;
-        font-size: 1.1rem;
-        color: var(--text-primary);
-    }
-
-    .shared {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-    }
+    font-size: 0.85rem;
 }
 
-.card-actions button {
+.actions button {
     background: transparent;
     border: none;
-    color: var(--text-tertiary);
     margin: 0.25rem 0 0 0.5rem;
     border-radius: 6px;
     cursor: pointer;

@@ -10,24 +10,21 @@
     </Header>
 
     <main>
-        <section v-if="watchlistsStore.lists.length">
-            <div class="list-grid">
-                <div v-for="list in watchlistsStore.lists" :key="list.id" class="list-card" @click="goToList(list.id)">
-                    <div class="card-content">
-                        <h3>{{ list.name }}</h3>
-                        <span class="shared">
-                            <Users :size="16" class="shared-icon" /> {{ list.sharedWith.length + 1 }}
-                        </span>
-                    </div>
-                    <div class="card-actions">
-                        <button @click.stop="openSettings(list.id)" title="Settings">
-                            <Settings :size="20" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
+        <DraggableList v-if="watchlistsStore.lists.length" :items="watchlistsStore.sortedLists" title-key="name" @row-click="goToList($event.id)" @item-moved="({ element, newArray }) => watchlistsStore.updateListOrder(newArray, element)">
+            <template #meta="{ item }">
+                <span class="shared">
+                    <Users :size="14" /> {{ item.sharedWith.length + 1 }}
+                </span>
+                <span class="items">
+                    <Library :size="16" />{{ watchlistsStore.listItems[item.id]?.length || 0 }}
+                </span>
+            </template>
+            <template #actions="{ item }">
+                <button @click.stop="openSettings(item.id)">
+                    <Settings :size="18" @click.stop="openSettings(item.id)" />
+                </button>
+            </template>
+        </DraggableList>
         <div v-else class="empty-state">
             <Library :size="48" />
             <p>No watchlists found. Create one to get started!</p>
@@ -52,6 +49,7 @@ import { WatchListsService } from "../api";
 import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
 import { useWatchlistsStore } from "../stores/watchlists.store";
+import DraggableList from "../components/DraggableList.vue";
 
 const userStore = useUserStore();
 const watchlistsStore = useWatchlistsStore();

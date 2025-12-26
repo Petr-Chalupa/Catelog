@@ -21,6 +21,7 @@
     padding: .5rem;
     border-bottom: 1px solid var(--border);
     background-color: var(--bg-primary);
+    z-index: 999;
 }
 
 .arrow-back {

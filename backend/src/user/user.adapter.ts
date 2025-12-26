@@ -16,18 +16,17 @@ export async function upsertUser(user: Partial<User>): Promise<User> {
     const db = getDB();
     const collection = db.collection<User>("users");
 
-    const now = new Date();
     const filter = user.id ? { id: user.id } : { email: user.email };
     const update = {
         $set: {
             name: user.name,
             email: user.email,
             notificationsEnabled: user.notificationsEnabled,
-            updatedAt: now,
+            updatedAt: new Date(),
         },
         $setOnInsert: {
             id: user.id ?? randomUUID(),
-            createdAt: now,
+            createdAt: new Date(),
         },
     };
     const options = { upsert: true, returnDocument: "after" as const };

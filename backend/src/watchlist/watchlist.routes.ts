@@ -5,6 +5,7 @@ import {
     deleteWatchListItem,
     getUserWatchLists,
     getValidatedWatchList,
+    getWatchListItemById,
     getWatchListItems,
     upsertWatchList,
     upsertWatchListItem,
@@ -44,8 +45,8 @@ router.patch("/:listId", authMiddleware, async (req, res) => {
     const { listId } = req.params;
     const updateData = req.body as Partial<WatchList>;
 
-    await getValidatedWatchList(listId, userId, true); // Member check
-    const updatedWatchlist = await upsertWatchList({ id: listId, ...updateData }, userId);
+    const list = await getValidatedWatchList(listId, userId, true); // Member check
+    const updatedWatchlist = await upsertWatchList({ ...list, ...updateData }, userId);
 
     res.json(updatedWatchlist);
 });
@@ -76,7 +77,7 @@ router.post("/:listId/items", authMiddleware, async (req, res) => {
     const { titleId } = req.body as Partial<WatchListItem>;
 
     await getValidatedWatchList(req.params.listId, userId, true); // Owner check
-    const newItem = await upsertWatchListItem(listId, { titleId }, userId);
+    const newItem = await upsertWatchListItem(listId, { titleId, addedBy: userId });
 
     res.json(newItem);
 });
@@ -87,7 +88,8 @@ router.patch("/:listId/items/:itemId", authMiddleware, async (req, res) => {
     const updateData = req.body as Partial<WatchListItem>;
 
     await getValidatedWatchList(listId, userId); // Member check
-    const updatedItem = await upsertWatchListItem(listId, { id: itemId, ...updateData }, userId);
+    const item = await getWatchListItemById(itemId);
+    const updatedItem = await upsertWatchListItem(listId, { ...item, ...updateData });
 
     res.json(updatedItem);
 });

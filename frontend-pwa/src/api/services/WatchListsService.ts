@@ -83,6 +83,7 @@ export class WatchListsService {
         requestBody: {
             name?: string;
             sharedWith?: Array<string>;
+            sortKey?: string;
         },
     ): CancelablePromise<WatchList> {
         return __request(OpenAPI, {
@@ -192,6 +193,7 @@ export class WatchListsService {
             state?: 'planned' | 'started' | 'finished';
             tags?: Array<string>;
             personalRating?: number;
+            sortKey?: string;
         },
     ): CancelablePromise<any> {
         return __request(OpenAPI, {

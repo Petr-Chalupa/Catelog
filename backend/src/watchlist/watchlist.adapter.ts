@@ -40,14 +40,15 @@ export async function upsertWatchList(watchlist: Partial<WatchList>, ownerId: st
     const filter = watchlist.id ? { id: watchlist.id } : { name: watchlist.name, ownerId };
     const update = {
         $set: {
-            ...watchlist,
+            name: watchlist.name,
+            sharedWith: watchlist.sharedWith || [],
+            sortKey: watchlist.sortKey,
             updatedAt: new Date(),
         },
         $setOnInsert: {
-            id: watchlist.id || randomUUID(),
+            id: watchlist.id ?? randomUUID(),
             ownerId,
             createdAt: new Date(),
-            sharedWith: watchlist.sharedWith || [],
         },
     };
     const options = { upsert: true, returnDocument: "after" as const };
@@ -87,26 +88,32 @@ export async function getWatchListItems(listId: string): Promise<WatchListItem[]
     return result;
 }
 
-export async function upsertWatchListItem(
-    listId: string,
-    item: Partial<WatchListItem>,
-    addedBy: string
-): Promise<WatchListItem> {
+export async function getWatchListItemById(itemId: string): Promise<WatchListItem> {
+    const db = getDB();
+    const item = await db.collection<WatchListItem>("watchlist_items").findOne({ id: itemId });
+    if (!item) throw new APIError(404, "Watchlist item not found");
+
+    return item;
+}
+
+export async function upsertWatchListItem(listId: string, item: Partial<WatchListItem>): Promise<WatchListItem> {
     const db = getDB();
     const collection = db.collection<WatchListItem>("watchlist_items");
 
     const filter = item.id ? { id: item.id } : { listId, titleId: item.titleId };
     const update = {
         $set: {
-            ...item,
+            state: item.state || "planned",
+            tags: item.tags,
+            personalRating: item.personalRating,
+            sortKey: item.sortKey,
             updatedAt: new Date(),
-            addedBy,
         },
         $setOnInsert: {
             id: item.id || randomUUID(),
             listId,
+            addedBy: item.addedBy,
             createdAt: new Date(),
-            state: item.state || "planned",
         },
     };
     const options = { upsert: true, returnDocument: "after" as const };

@@ -88,7 +88,9 @@ router.get("/me", authMiddleware, async (req, res) => {
 router.patch("/me", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const updateData = req.body as Partial<User>;
-    const updatedUser = await upsertUser({ id: userId, ...updateData });
+
+    const user = await getUserById(userId);
+    const updatedUser = await upsertUser({ ...user, ...updateData });
 
     return res.json(updatedUser);
 });
