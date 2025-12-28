@@ -7,6 +7,7 @@ import { useWatchlistsStore } from "./watchlists.store";
 export const useAuthStore = defineStore("auth", {
     state: () => ({
         token: "",
+        isProcessing: false,
     }),
     actions: {
         setToken(newToken: string) {
@@ -18,15 +19,20 @@ export const useAuthStore = defineStore("auth", {
             OpenAPI.TOKEN = "";
         },
         async logout() {
-            await AuthService.postUserAuthLogout();
-            this.clearToken();
+            this.isProcessing = true;
+            try {
+                await AuthService.postUserAuthLogout();
+                this.clearToken();
 
-            const userStore = useUserStore();
-            userStore.$reset();
-            const watchlistsStore = useWatchlistsStore();
-            watchlistsStore.$reset();
+                const userStore = useUserStore();
+                userStore.$reset();
+                const watchlistsStore = useWatchlistsStore();
+                watchlistsStore.$reset();
 
-            router.push("/login");
+                router.push("/login");
+            } finally {
+                this.isProcessing = false;
+            }
         },
     },
     persist: {

@@ -73,12 +73,31 @@ export async function deleteWatchListById(listId: string): Promise<void> {
     const db = getDB();
 
     const resultItems = await db.collection<WatchListItem>("watchlist_items").deleteMany({ listId });
-    if (resultItems.deletedCount === 0) throw new APIError(404, "Watchlist items not found");
-
     const resultList = await db.collection<WatchList>("watchlists").deleteOne({ id: listId });
     if (resultList.deletedCount === 0) throw new APIError(404, "Watchlist not found");
 
     await deleteUnreferencedTitlePlaceholders();
+}
+
+export async function transferWatchlist(listId: string, ownerId: string, newOwnerId: string): Promise<void> {
+    const db = getDB();
+
+    if (ownerId === newOwnerId) throw new APIError(400, "New owner must be different from current owner");
+
+    const watchlist = await db.collection<WatchList>("watchlists").findOne({ id: listId });
+    if (!watchlist) throw new APIError(404, "Watchlist not found");
+    if (watchlist.ownerId !== ownerId) throw new APIError(403, "Only the owner can transfer this watchlist");
+
+    const isMember = watchlist.sharedWith?.some((member) => member === newOwnerId);
+    if (!isMember) throw new APIError(400, "New owner must be a member of the watchlist");
+
+    await db.collection<WatchList>("watchlists").updateOne(
+        { id: listId },
+        {
+            $set: { ownerId: newOwnerId },
+            $pull: { sharedWith: newOwnerId },
+        }
+    );
 }
 
 export async function getWatchListItems(listId: string): Promise<WatchListItem[]> {

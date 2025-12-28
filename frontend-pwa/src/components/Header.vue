@@ -1,12 +1,18 @@
 <template>
     <header class="header">
-        <ArrowLeft v-if="!isMainRoute" @click="goBack" class="arrow-back" />
+        <div class="header-left">
+            <ArrowLeft v-if="!isMainRoute" @click="goBack" class="arrow-back" />
+            <slot name="left"></slot>
+        </div>
 
-        <slot></slot>
+        <div class="header-center">
+            <slot name="center"></slot>
+        </div>
 
-        <span class="offline">
-            <WifiOff v-if="!isOnline" />
-        </span>
+        <div class="header-right">
+            <WifiOff v-if="!isOnline" class="offline" />
+            <slot name="actions"></slot>
+        </div>
     </header>
 </template>
 
@@ -14,14 +20,34 @@
 .header {
     position: sticky;
     top: 0;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    height: 3rem;
-    padding: .5rem;
+    height: 3.5rem;
+    padding: 0 1rem;
     border-bottom: 1px solid var(--border);
     background-color: var(--bg-primary);
     z-index: 999;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-self: start;
+}
+
+.header-center {
+    justify-self: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-self: end;
 }
 
 .arrow-back {
@@ -29,9 +55,6 @@
 }
 
 .offline {
-    display: flex;
-    align-items: center;
-    width: 1.5rem;
     color: var(--secondary);
 }
 </style>

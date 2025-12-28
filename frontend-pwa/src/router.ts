@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "./stores/auth.store";
 import { useUserStore } from "./stores/user.store";
-import { UserService } from "./api";
 import Login from "./pages/Login.vue";
 import Watchlists from "./pages/Watchlists.vue";
 import Profile from "./pages/Profile.vue";
 import Invite from "./pages/Invite.vue";
+import WatchlistDetail from "./pages/WatchlistDetail.vue";
+import WatchlistSettings from "./pages/WatchlistSettings.vue";
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -42,14 +43,14 @@ export const router = createRouter({
         {
             path: "/watchlists/:listId",
             name: "watchlistDetails",
-            component: { render: () => null },
+            component: WatchlistDetail,
             meta: { requiresAuth: true },
             props: true,
         },
         {
             path: "/watchlists/:listId/settings",
             name: "watchlistSettings",
-            component: { render: () => null },
+            component: WatchlistSettings,
             meta: { requiresAuth: true },
             props: true,
         },
@@ -88,8 +89,7 @@ router.beforeEach(async (to, from, next) => {
 
     if (authStore.token && !userStore.profile?.id) {
         try {
-            const user = await UserService.getUserMe();
-            userStore.setProfile(user);
+            userStore.fetchProfile();
         } catch (error) {
             authStore.logout();
         }

@@ -54,6 +54,28 @@ export class InvitesService {
         });
     }
     /**
+     * Get all invites realted to this watchlist
+     * @param id
+     * @returns Invite List of invites
+     * @throws ApiError
+     */
+    public static getInvitesWatchlists(
+        id: string,
+    ): CancelablePromise<Array<Invite>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/invites/watchlists/{id}',
+            path: {
+                'id': id,
+            },
+            errors: {
+                401: `Access token is missing or invalid`,
+                403: `The authenticated user does not have permission to access this resource`,
+                500: `There was an unexpected error`,
+            },
+        });
+    }
+    /**
      * Get invite details by token
      * @param token
      * @returns Invite Invite metadata for display

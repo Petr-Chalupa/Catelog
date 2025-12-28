@@ -5,7 +5,6 @@ import { searchOMDb } from "./providers/omdb";
 import { searchCSFD } from "./providers/csfd";
 import { Title } from "./title.model";
 import { mergeSearchResults, refreshTitleMetadata, updatePlaceholderMergeCandidates } from "./title.service";
-import { APIError } from "../middleware/error.middleware";
 import { getTitleById, upsertTitle } from "./title.adapter";
 
 const router = Router();

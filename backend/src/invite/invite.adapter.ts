@@ -1,7 +1,7 @@
 import crypto, { randomUUID } from "crypto";
 import { Invite } from "./invite.model";
 import { WatchList } from "../watchlist/watchList.model";
-import { upsertWatchList } from "../watchlist/watchlist.adapter";
+import { getValidatedWatchList, upsertWatchList } from "../watchlist/watchlist.adapter";
 import { getDB } from "../db";
 import { User } from "../user/user.model";
 import { APIError } from "../middleware/error.middleware";
@@ -14,6 +14,15 @@ export async function getUserInvites(userId: string, type: string): Promise<Invi
     return result;
 }
 
+export async function getWatchlistInvites(userId: string, listId: string): Promise<Invite[]> {
+    const db = getDB();
+
+    await getValidatedWatchList(listId, userId); // Check member
+    const result = await db.collection<Invite>("invites").find({ listId }).toArray();
+
+    return result;
+}
+
 export async function getInviteByToken(token: string): Promise<Invite> {
     const db = getDB();
     const invite = await db.collection<Invite>("invites").findOne({ token });
@@ -22,17 +31,26 @@ export async function getInviteByToken(token: string): Promise<Invite> {
     return invite;
 }
 
-export async function getInviteDetails(inviteId: string): Promise<{ inviterName: string; listName: string }> {
+export async function getInviteDetails(
+    inviteId: string
+): Promise<{ inviterName: string; inviterEmail: string; inviteeName: string; inviteeEmail: string; listName: string }> {
     const db = getDB();
     const invite = await db.collection<Invite>("invites").findOne({ id: inviteId });
     if (!invite) throw new APIError(404, "Invite details not found");
 
-    const [inviter, watchlist] = await Promise.all([
+    const [inviter, invitee, watchlist] = await Promise.all([
         db.collection<User>("users").findOne({ id: invite.inviter }),
+        db.collection<User>("users").findOne({ id: invite.invitee }),
         db.collection<WatchList>("watchlists").findOne({ id: invite.listId }),
     ]);
 
-    return { inviterName: inviter?.name || "Someone", listName: watchlist?.name || "a watchlist" };
+    return {
+        inviterName: inviter?.name || "Someone",
+        inviterEmail: inviter?.email || "unknown",
+        inviteeName: invitee?.name || "Someone",
+        inviteeEmail: invitee?.email || "unknown",
+        listName: watchlist?.name || "a watchlist",
+    };
 }
 
 export async function createInvite(listId: string, inviterId: string, inviteeId: string): Promise<Invite> {

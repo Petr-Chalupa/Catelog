@@ -6,6 +6,7 @@ import {
     getInviteByToken,
     getInviteDetails,
     getUserInvites,
+    getWatchlistInvites,
 } from "./invite.adapter";
 import { authMiddleware } from "../middleware/auth.middleware";
 
@@ -35,6 +36,21 @@ router.post("/", authMiddleware, async (req, res) => {
     const invite = await createInvite(listId, userId, invitee);
 
     res.json(invite);
+});
+
+router.get("/watchlists/:id", authMiddleware, async (req, res) => {
+    const userId = (req as any).user.id;
+    const { id } = req.params;
+
+    const invites = await getWatchlistInvites(userId, id);
+    const enrichedInvites = await Promise.all(
+        invites.map(async (invite) => {
+            const details = await getInviteDetails(invite.id);
+            return { ...invite, ...details };
+        })
+    );
+
+    res.json(enrichedInvites);
 });
 
 router.get("/:token", async (req, res) => {

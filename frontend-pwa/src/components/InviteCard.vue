@@ -10,16 +10,16 @@
         </div>
 
         <div v-if="isExpired" class="invite-actions">
-            <button @click="handleAction('decline')" class="btn-decline">
+            <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline">
                 Dismiss Expired Invite
             </button>
         </div>
         <div v-else class="invite-actions">
-            <button @click="handleAction('accept')" class="btn-accept">
+            <button @click="handleAction('accept')" :disabled="disabled" class="btn-accept">
                 {{ isLoggedIn ? "Accept" : "Login to Accept" }}
             </button>
 
-            <button @click="handleAction('decline')" class="btn-decline">
+            <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline">
                 {{ isLoggedIn ? "Decline" : "Login to Decline" }}
             </button>
         </div>
@@ -89,12 +89,12 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { InvitesService, type Invite } from "../api";
+import { type Invite } from "../api";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth.store";
 
 const emits = defineEmits(["accept", "decline"]);
-const props = defineProps<{ invite: Invite; size: "small" | "large"; }>();
+const props = defineProps<{ invite: Invite; size: "small" | "large"; disabled?: boolean; }>();
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -112,16 +112,6 @@ function handleAction(type: "accept" | "decline") {
         return;
     }
 
-    processInvite(type);
-};
-
-async function processInvite(action: "accept" | "decline") {
-    if (action === "accept") {
-        await InvitesService.postInvitesAccept(props.invite.token);
-        emits("accept");
-    } else {
-        await InvitesService.deleteInvitesDecline(props.invite.id);
-        emits("decline");
-    }
-};
+    emits(type);
+}
 </script>

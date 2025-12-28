@@ -142,6 +142,29 @@ paths:
                     description: Successfully logged out
                 500: { $ref: "#/components/responses/InternalServerError" }
 
+    /user:
+        get:
+            summary: Get user by id or email if id is not present
+            tags: [User]
+            parameters:
+                - name: id
+                  in: query
+                  schema:
+                      type: string
+                      format: uuid
+                - name: email
+                  in: query
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: User details
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/User" }
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
+
     /user/me:
         get:
             summary: Get current authenticated user profile
@@ -402,7 +425,7 @@ paths:
                 404: { $ref: "#/components/responses/NotFoundError" }
                 500: { $ref: "#/components/responses/InternalServerError" }
         delete:
-            summary: Delete a specific watchlist or transfer ownership
+            summary: Delete a specific watchlist
             tags: [WatchLists]
             parameters:
                 - name: listId
@@ -414,6 +437,36 @@ paths:
             responses:
                 200:
                     description: WatchList processed successfully
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+                403: { $ref: "#/components/responses/ForbiddenError" }
+                404: { $ref: "#/components/responses/NotFoundError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
+
+    /watchlists/{listId}/transfer:
+        post:
+            summary: Transfer ownership of a watchlist
+            tags: [WatchLists]
+            parameters:
+                - name: listId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [newOwnerId]
+                            properties:
+                                newOwnerId:
+                                    type: string
+                                    format: uuid
+            responses:
+                200:
+                    description: Ownership transferred successfully
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
                 404: { $ref: "#/components/responses/NotFoundError" }
@@ -583,6 +636,29 @@ paths:
             responses:
                 200:
                     description: Invite created
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+                403: { $ref: "#/components/responses/ForbiddenError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
+
+    /invites/watchlists/{id}:
+        get:
+            summary: Get all invites realted to this watchlist
+            tags: [Invites]
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            responses:
+                200:
+                    description: List of invites
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items: { $ref: "#/components/schemas/Invite" }
                 401: { $ref: "#/components/responses/UnauthorizedError" }
                 403: { $ref: "#/components/responses/ForbiddenError" }
                 500: { $ref: "#/components/responses/InternalServerError" }
@@ -928,9 +1004,15 @@ components:
                     format: uuid
                 inviterName:
                     type: string
+                inviterEmail:
+                    type: string
                 invitee:
                     type: string
                     format: uuid
+                inviteeName:
+                    type: string
+                inviteeEmail:
+                    type: string
                 token:
                     type: string
                 expiresAt:

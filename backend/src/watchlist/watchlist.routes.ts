@@ -7,6 +7,7 @@ import {
     getValidatedWatchList,
     getWatchListItemById,
     getWatchListItems,
+    transferWatchlist,
     upsertWatchList,
     upsertWatchListItem,
 } from "./watchlist.adapter";
@@ -57,6 +58,16 @@ router.delete("/:listId", authMiddleware, async (req, res) => {
 
     await getValidatedWatchList(req.params.listId, userId, true); // Owner check
     await deleteWatchListById(listId);
+
+    res.sendStatus(200);
+});
+
+router.post("/:listId/transfer", authMiddleware, async (req, res) => {
+    const userId = (req as any).user.id;
+    const { listId } = req.params;
+    const { newOwnerId } = req.body as { newOwnerId: string };
+
+    await transferWatchlist(listId, userId, newOwnerId);
 
     res.sendStatus(200);
 });

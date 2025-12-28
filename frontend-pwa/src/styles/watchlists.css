@@ -42,21 +42,6 @@
     cursor: pointer;
 }
 
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5rem 2rem;
-    text-align: center;
-    color: var(--text-tertiary);
-
-    p {
-        margin-top: 1rem;
-        font-size: 1.1rem;
-    }
-}
-
 .create-section {
     position: fixed;
     bottom: 0;

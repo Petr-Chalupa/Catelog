@@ -103,7 +103,7 @@ export class WatchListsService {
         });
     }
     /**
-     * Delete a specific watchlist or transfer ownership
+     * Delete a specific watchlist
      * @param listId
      * @returns any WatchList processed successfully
      * @throws ApiError
@@ -117,6 +117,35 @@ export class WatchListsService {
             path: {
                 'listId': listId,
             },
+            errors: {
+                401: `Access token is missing or invalid`,
+                403: `The authenticated user does not have permission to access this resource`,
+                404: `The requested resource was not found`,
+                500: `There was an unexpected error`,
+            },
+        });
+    }
+    /**
+     * Transfer ownership of a watchlist
+     * @param listId
+     * @param requestBody
+     * @returns any Ownership transferred successfully
+     * @throws ApiError
+     */
+    public static postWatchlistsTransfer(
+        listId: string,
+        requestBody: {
+            newOwnerId: string;
+        },
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/watchlists/{listId}/transfer',
+            path: {
+                'listId': listId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 401: `Access token is missing or invalid`,
                 403: `The authenticated user does not have permission to access this resource`,

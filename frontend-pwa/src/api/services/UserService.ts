@@ -9,6 +9,30 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class UserService {
     /**
+     * Get user by id or email if id is not present
+     * @param id
+     * @param email
+     * @returns User User details
+     * @throws ApiError
+     */
+    public static getUser(
+        id?: string,
+        email?: string,
+    ): CancelablePromise<User> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/user',
+            query: {
+                'id': id,
+                'email': email,
+            },
+            errors: {
+                401: `Access token is missing or invalid`,
+                500: `There was an unexpected error`,
+            },
+        });
+    }
+    /**
      * Get current authenticated user profile
      * @returns User The authenticated user object
      * @throws ApiError

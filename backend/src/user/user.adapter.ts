@@ -12,6 +12,14 @@ export async function getUserById(userId: string): Promise<User> {
     return user;
 }
 
+export async function getUserByEmail(userEmail: string): Promise<User> {
+    const db = getDB();
+    const user = await db.collection<User>("users").findOne({ email: userEmail });
+    if (!user) throw new APIError(404, "User not found");
+
+    return user;
+}
+
 export async function upsertUser(user: Partial<User>): Promise<User> {
     const db = getDB();
     const collection = db.collection<User>("users");

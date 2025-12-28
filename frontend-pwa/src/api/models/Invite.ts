@@ -8,7 +8,10 @@ export type Invite = {
     listName?: string;
     inviter: string;
     inviterName?: string;
+    inviterEmail?: string;
     invitee: string;
+    inviteeName?: string;
+    inviteeEmail?: string;
     token: string;
     expiresAt: string;
     createdAt: string;

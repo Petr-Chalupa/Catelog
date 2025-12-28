@@ -4,6 +4,7 @@ import {
     deleteRefreshToken,
     deleteUser,
     deleteUserDevice,
+    getUserByEmail,
     getUserById,
     upsertUser,
     upsertUserDevice,
@@ -76,6 +77,15 @@ router.post("/auth/logout", async (req, res) => {
 
     res.clearCookie("refreshToken");
     res.sendStatus(200);
+});
+
+router.get("/", authMiddleware, async (req, res) => {
+    const { id, email } = req.query as { id?: string; email?: string };
+
+    if (!id && !email) throw new APIError(400, "At least one of the parameters is required");
+    const user = id ? await getUserById(id) : await getUserByEmail(email!);
+
+    return res.json(user);
 });
 
 router.get("/me", authMiddleware, async (req, res) => {
