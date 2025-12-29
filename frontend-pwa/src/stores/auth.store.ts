@@ -1,42 +1,67 @@
 import { defineStore } from "pinia";
-import { AuthService, OpenAPI } from "../api";
+import { ref } from "vue";
 import { router } from "../router";
+import { AuthService, OpenAPI } from "../api";
 import { useUserStore } from "./user.store";
 import { useWatchlistsStore } from "./watchlists.store";
+import { useNotificationStore } from "./notification.store";
+import { useTitlesStore } from "./titles.store";
 
-export const useAuthStore = defineStore("auth", {
-    state: () => ({
-        token: "",
-        isProcessing: false,
-    }),
-    actions: {
-        setToken(newToken: string) {
-            this.token = newToken;
+export const useAuthStore = defineStore(
+    "auth",
+    () => {
+        // --- STATE ---
+        const token = ref("");
+        const isProcessing = ref(false);
+
+        // --- RESET ---
+        function $reset() {
+            token.value = "";
+            isProcessing.value = false;
+        }
+
+        // --- ACTIONS ---
+        function setToken(newToken: string) {
+            token.value = newToken;
             OpenAPI.TOKEN = newToken;
-        },
-        clearToken() {
-            this.token = "";
+        }
+
+        function clearToken() {
+            token.value = "";
             OpenAPI.TOKEN = "";
-        },
-        async logout() {
-            this.isProcessing = true;
+        }
+
+        async function logout() {
+            isProcessing.value = true;
             try {
                 await AuthService.postUserAuthLogout();
-                this.clearToken();
 
-                const userStore = useUserStore();
-                userStore.$reset();
-                const watchlistsStore = useWatchlistsStore();
-                watchlistsStore.$reset();
+                clearToken();
+
+                useNotificationStore().$reset();
+                useTitlesStore().$reset();
+                useUserStore().$reset();
+                useWatchlistsStore().$reset();
 
                 router.push("/login");
             } finally {
-                this.isProcessing = false;
+                isProcessing.value = false;
             }
+        }
+
+        return {
+            token,
+            isProcessing,
+            $reset,
+            setToken,
+            clearToken,
+            logout,
+        };
+    },
+    {
+        persist: {
+            key: "catelog-auth",
+            storage: localStorage,
         },
-    },
-    persist: {
-        key: "catelog-auth",
-        storage: localStorage,
-    },
-});
+    }
+);

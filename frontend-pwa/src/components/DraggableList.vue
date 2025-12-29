@@ -1,17 +1,9 @@
 <template>
-    <draggable :model-value="items" @change="onDragChange" item-key="id" tag="div" handle=".drag-handle" ghost-class="sortable-ghost" drag-class="sortable-drag" :animation="200" class="list-grid">
+    <draggable :model-value="items" @change="onDragChange" item-key="id" tag="div" :delay="300" :delay-on-touch-only="false" :touch-start-threshold="5" ghost-class="sortable-ghost" drag-class="sortable-drag" :animation="200" class="list-grid">
         <template #item="{ element, index }">
             <div class="list-row" @click="$emit('row-click', element)">
-                <div class="left">
-                    <div class="drag-handle">
-                        <GripVertical :size="18" />
-                    </div>
-                    <div class="body">
-                        <h3>{{ element[titleKey] }}</h3>
-                        <div class="meta">
-                            <slot name="meta" :item="element" :index="index"></slot>
-                        </div>
-                    </div>
+                <div class="body">
+                    <slot name="body" :item="element" :index="index"></slot>
                 </div>
                 <div class="actions">
                     <slot name="actions" :item="element" :index="index"></slot>
@@ -30,7 +22,7 @@
 .list-row {
     position: relative;
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1rem 0.75rem 0.75rem;
@@ -78,16 +70,20 @@
     }
 }
 
-.left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex: 1;
+.ghost-item {
+    opacity: 0.5;
+    background: var(--bg-secondary);
+    border: 1px dashed var(--primary);
+    transform: scale(1.02);
+}
 
-    .drag-handle {
-        display: flex;
-        align-items: center;
-        min-height: 2rem;
+.list-item {
+    transition: transform 0.2s ease;
+    user-select: none;
+    -webkit-touch-callout: none;
+
+    & :active {
+        cursor: grabbing;
     }
 }
 
@@ -96,28 +92,14 @@
     display: flex;
     align-items: center;
     gap: 2rem;
-
-    h3 {
-        flex: 1;
-        font-size: 1rem;
-        font-weight: 400;
-        color: var(--text-primary);
-    }
-
-    .meta {
-        display: flex;
-        gap: 1rem;
-        color: var(--text-secondary);
-    }
 }
 </style>
 
 <script setup lang="ts">
 import draggable from "vuedraggable";
-import { GripVertical } from "lucide-vue-next";
 
 const emits = defineEmits(["row-click", "item-moved"]);
-const props = defineProps<{ items: any[]; titleKey: string; }>();
+const props = defineProps<{ items: any[]; }>();
 
 const onDragChange = (evt: any) => {
     if (evt.moved) {

@@ -12,7 +12,7 @@ export async function getTitleById(titleId: string): Promise<Title> {
     return result;
 }
 
-function buildTitleSearchQuery(title: Title): any[] {
+function buildTitleSearchQuery(title: Partial<Title>): any[] {
     const ors: any[] = [];
 
     if (title.externalIds) {
@@ -21,7 +21,8 @@ function buildTitleSearchQuery(title: Title): any[] {
         });
     }
 
-    const titleVariations = new Set<string>([title.title]);
+    const titleVariations = new Set<string>();
+    if (title.title) titleVariations.add(title.title);
     if (title.localizedTitles) {
         Object.values(title.localizedTitles).forEach((val) => titleVariations.add(val));
     }
@@ -34,18 +35,30 @@ function buildTitleSearchQuery(title: Title): any[] {
     return ors;
 }
 
-export async function upsertTitle(title: Title): Promise<Title> {
+export async function upsertTitle(title: Partial<Title>): Promise<Title> {
     const db = getDB();
     const collection = db.collection<Title>("titles");
 
-    const filter = buildTitleSearchQuery(title).length > 0 ? { $or: buildTitleSearchQuery(title) } : { id: title.id };
+    const searchQueries = buildTitleSearchQuery(title);
+    const filter = title.id
+        ? { id: title.id }
+        : searchQueries.length > 0
+        ? { $or: searchQueries }
+        : { title: title.title };
     const update = {
         $set: {
-            ...title,
-            id: title.id || randomUUID(),
+            title: title.title,
+            type: title.type || "movie",
+            posterImage: title.poster,
+            year: title.year,
+            externalIds: title.externalIds || {},
+            public: title.public ?? false,
             updatedAt: new Date(),
         },
-        $setOnInsert: { createdAt: new Date() },
+        $setOnInsert: {
+            id: title.id || randomUUID(),
+            createdAt: new Date(),
+        },
     };
     const options = { upsert: true, returnDocument: "after" as const };
 

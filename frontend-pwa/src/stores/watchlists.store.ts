@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import {
     InvitesService,
+    Title,
+    TitlesService,
     UserService,
     WatchListItem,
     WatchListsService,
@@ -10,107 +12,120 @@ import {
 } from "../api";
 import { useUserStore } from "./user.store";
 import { useNotificationStore } from "./notification.store";
+import { computed, ref } from "vue";
+import { useTitlesStore } from "./titles.store";
 
-export const useWatchlistsStore = defineStore("watchlists", {
-    state: () => ({
-        lists: [] as WatchList[],
-        listItems: {} as Record<string, WatchListItem[]>,
-        listMembers: {} as Record<string, User[]>,
-        listInvites: {} as Record<string, Invite[]>,
-        isProcessing: false,
-        isInitialLoading: true,
-    }),
-    getters: {
-        sortedLists: (state) => {
-            return [...state.lists].sort((a, b) => {
+export const useWatchlistsStore = defineStore(
+    "watchlists",
+    () => {
+        const notify = useNotificationStore();
+
+        // --- STATE ---
+        const lists = ref<WatchList[]>([]);
+        const listItems = ref<Record<string, WatchListItem[]>>({});
+        const listMembers = ref<Record<string, User[]>>({});
+        const listInvites = ref<Record<string, Invite[]>>({});
+        const isProcessing = ref(false);
+        const isInitialLoading = ref(true);
+
+        // --- GETTERS ---
+        const sortedLists = computed(() => {
+            return [...lists.value].sort((a, b) => {
                 const keyA = a.sortKey || "";
                 const keyB = b.sortKey || "";
                 return keyA.localeCompare(keyB);
             });
-        },
-    },
-    actions: {
-        // --- FETCHING ---
-        async fetchLists() {
+        });
+
+        // --- RESET ---
+        function $reset() {
+            lists.value = [];
+            listItems.value = {};
+            listMembers.value = {};
+            listInvites.value = {};
+            isProcessing.value = false;
+            isInitialLoading.value = true;
+        }
+
+        // --- ACTIONS ---
+        async function fetchLists() {
             try {
-                this.lists = await WatchListsService.getWatchlists();
+                lists.value = await WatchListsService.getWatchlists();
                 // Background fetching of list extra data
-                for (const { id } of this.lists) {
-                    this.fetchSingleList(id);
+                for (const { id } of lists.value) {
+                    fetchSingleList(id);
                 }
             } finally {
-                this.isInitialLoading = false;
+                isInitialLoading.value = false;
             }
-        },
+        }
 
-        async fetchSingleList(id: string) {
+        async function fetchSingleList(id: string) {
             const list = await WatchListsService.getWatchlists1(id);
-            const idx = this.lists.findIndex((l) => l.id === id);
+            const idx = lists.value.findIndex((l) => l.id === id);
 
-            if (idx !== -1) this.lists[idx] = list;
-            else this.lists.push(list);
+            if (idx !== -1) lists.value[idx] = list;
+            else lists.value.push(list);
 
-            this.listMembers[id] = await Promise.all(list.sharedWith.map(async (m) => await UserService.getUser(m)));
-            this.listItems[id] = (await WatchListsService.getWatchlistsItems(id)).items ?? [];
-            this.listInvites[id] = await InvitesService.getInvitesWatchlists(id);
-        },
+            listMembers.value[id] = await Promise.all(list.sharedWith.map(async (m) => await UserService.getUser(m)));
+            listItems.value[id] = (await WatchListsService.getWatchlistsItems(id)).items ?? [];
+            listInvites.value[id] = await InvitesService.getInvitesWatchlists(id);
 
-        // --- CORE ACTIONS ---
-        async patchWatchlist(id: string, data: Partial<WatchList>) {
-            this.isProcessing = true;
-            try {
-                await WatchListsService.patchWatchlists(id, data);
-                await this.fetchSingleList(id);
-            } finally {
-                this.isProcessing = false;
-            }
-        },
+            listItems.value[id].forEach((i) => useTitlesStore().getTitleById(i.titleId));
+        }
 
-        async transferOwnership(listId: string, newOwnerId: string) {
-            const notifications = useNotificationStore();
-            this.isProcessing = true;
-            try {
-                await WatchListsService.postWatchlistsTransfer(listId, { newOwnerId });
-                notifications.addNotification("Ownership transferred successfully", "success");
-                await this.fetchSingleList(listId);
-            } finally {
-                this.isProcessing = false;
-            }
-        },
-
-        async createWatchlist(name: string) {
-            this.isProcessing = true;
+        async function createList(name: string) {
+            isProcessing.value = true;
             try {
                 const newList = await WatchListsService.postWatchlists({ name });
-                this.lists.push(newList);
-                this.fetchSingleList(newList.id);
+                lists.value.push(newList);
+                await fetchSingleList(newList.id);
                 return newList;
             } finally {
-                this.isProcessing = false;
+                isProcessing.value = false;
             }
-        },
+        }
 
-        async deleteWatchlist(id: string) {
-            const notifications = useNotificationStore();
-            this.isProcessing = true;
+        async function deleteList(id: string) {
+            isProcessing.value = true;
             try {
                 await WatchListsService.deleteWatchlists(id);
+                lists.value = lists.value.filter((l) => l.id !== id);
 
-                this.lists = this.lists.filter((l) => l.id !== id);
-                delete this.listItems[id];
-                delete this.listMembers[id];
-                delete this.listInvites[id];
+                delete listItems.value[id];
+                delete listInvites.value[id];
+                delete listMembers.value[id];
 
-                notifications.addNotification("Watchlist deleted successfully", "success");
                 return true;
             } catch (error) {
                 return false;
             } finally {
-                this.isProcessing = false;
+                isProcessing.value = false;
             }
-        },
+        }
 
-        async updateListOrder(newOrderedLists: WatchList[], movedItem: WatchList) {
+        async function patchWatchlist(id: string, data: Partial<WatchList>) {
+            isProcessing.value = true;
+            try {
+                await WatchListsService.patchWatchlists(id, data);
+                await fetchSingleList(id);
+            } finally {
+                isProcessing.value = false;
+            }
+        }
+
+        async function transferOwnership(listId: string, newOwnerId: string) {
+            isProcessing.value = true;
+            try {
+                await WatchListsService.postWatchlistsTransfer(listId, { newOwnerId });
+                notify.addNotification("Ownership transferred successfully", "success");
+                await fetchSingleList(listId);
+            } finally {
+                isProcessing.value = false;
+            }
+        }
+
+        async function updateListOrder(newOrderedLists: WatchList[], movedItem: WatchList) {
             const index = newOrderedLists.findIndex((l) => l.id === movedItem.id);
             const prevKey = newOrderedLists[index - 1]?.sortKey || "";
             const nextKey = newOrderedLists[index + 1]?.sortKey || "";
@@ -119,74 +134,124 @@ export const useWatchlistsStore = defineStore("watchlists", {
             if (newKey.length > 20) {
                 return await rebalanceAllSortKeys(newOrderedLists);
             } else {
-                const itemInStore = this.lists.find((l) => l.id === movedItem.id);
+                const itemInStore = lists.value.find((l) => l.id === movedItem.id);
                 if (itemInStore) itemInStore.sortKey = newKey;
                 await WatchListsService.patchWatchlists(movedItem.id, { sortKey: newKey });
             }
-        },
+        }
 
         // --- MEMBER & INVITE MANAGEMENT ---
-        async sendInvite(listId: string, email: string) {
+        async function sendInvite(listId: string, email: string) {
             const userStore = useUserStore();
-            const notifications = useNotificationStore();
 
             if (email.toLowerCase() === userStore.profile.email.toLowerCase()) {
-                notifications.addNotification("You cannot invite yourself", "error");
+                notify.addNotification("You cannot invite yourself", "error");
                 return;
             }
-            const existingMembers = this.listMembers[listId] || [];
+            const existingMembers = listMembers.value[listId] || [];
             if (existingMembers.some((m) => m.email.toLowerCase() === email.toLowerCase())) {
-                notifications.addNotification("User is already a member", "error");
+                notify.addNotification("User is already a member", "error");
                 return;
             }
-            const invitedMembers = this.listInvites[listId] || [];
+            const invitedMembers = listInvites.value[listId] || [];
             if (invitedMembers.some((i) => i.inviteeEmail?.toLowerCase() === email.toLowerCase())) {
-                notifications.addNotification("User is already invited", "error");
+                notify.addNotification("User is already invited", "error");
                 return;
             }
 
-            this.isProcessing = true;
+            isProcessing.value = true;
             try {
                 const invitee = await UserService.getUser(undefined, email);
 
                 await InvitesService.postInvites({ listId, invitee: invitee.id });
-                notifications.addNotification(`Invite sent to ${email}`, "success");
+                notify.addNotification(`Invite sent to ${email}`, "success");
 
-                await this.fetchSingleList(listId);
+                await fetchSingleList(listId);
             } finally {
-                this.isProcessing = false;
+                isProcessing.value = false;
             }
-        },
+        }
 
-        async revokeInvite(inviteId: string, listId: string) {
-            this.isProcessing = true;
+        async function revokeInvite(inviteId: string, listId: string) {
+            isProcessing.value = true;
             try {
                 await InvitesService.deleteInvitesDecline(inviteId);
-                await this.fetchSingleList(listId);
+                await fetchSingleList(listId);
             } finally {
-                this.isProcessing = false;
+                isProcessing.value = false;
             }
-        },
+        }
 
-        async removeMember(listId: string, userId: string) {
-            const list = this.lists.find((l) => l.id === listId);
+        async function removeMember(listId: string, userId: string) {
+            const list = lists.value.find((l) => l.id === listId);
             if (!list) return;
 
-            this.isProcessing = true;
+            isProcessing.value = true;
             try {
                 const newMembers = list.sharedWith.filter((id) => id !== userId);
                 await WatchListsService.patchWatchlists(listId, { sharedWith: newMembers });
-                await this.fetchSingleList(listId);
+                await fetchSingleList(listId);
             } finally {
-                this.isProcessing = false;
+                isProcessing.value = false;
             }
+        }
+
+        // --- ITEMS ---
+        async function addItemToList(listId: string, payload: { title?: Title; name?: string }) {
+            isProcessing.value = true;
+            try {
+                let titleId: string;
+
+                if (payload.title?.id) {
+                    titleId = payload.title.id;
+                } else {
+                    const titleRequest = payload.title || { title: payload.name };
+                    const savedTitle = await TitlesService.postTitles(titleRequest as Title);
+                    titleId = savedTitle.id;
+
+                    const titlesStore = useTitlesStore();
+                    titlesStore.titles[titleId] = savedTitle;
+                }
+
+                const newItem = await WatchListsService.postWatchlistsItems(listId, { titleId });
+                if (!listItems.value[listId]) listItems.value[listId] = [];
+                listItems.value[listId].push(newItem);
+            } catch (error) {
+                throw error;
+            } finally {
+                isProcessing.value = false;
+            }
+        }
+
+        return {
+            lists,
+            listItems,
+            listMembers,
+            listInvites,
+            isProcessing,
+            isInitialLoading,
+            sortedLists,
+            $reset,
+            fetchLists,
+            fetchSingleList,
+            createList,
+            deleteList,
+            patchWatchlist,
+            transferOwnership,
+            updateListOrder,
+            sendInvite,
+            revokeInvite,
+            removeMember,
+            addItemToList,
+        };
+    },
+    {
+        persist: {
+            key: "catelog-watchlists",
+            storage: localStorage,
         },
-    },
-    persist: {
-        key: "catelog-watchlists",
-        storage: localStorage,
-    },
-});
+    }
+);
 
 function calculateMidpoint(prev: string, next: string): string {
     if (!prev) return next ? String.fromCharCode(next.charCodeAt(0) - 1) : "m";

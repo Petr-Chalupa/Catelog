@@ -11,7 +11,7 @@ const router = Router();
 export const titlesRouter = router;
 
 router.post("/", authMiddleware, async (req, res) => {
-    const titleData = req.body as Title;
+    const titleData = req.body as Partial<Title>;
 
     const title = await upsertTitle(titleData);
     if (!title.public) {

@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { ref } from "vue";
 
 export interface Notification {
     id: number;
@@ -6,22 +7,33 @@ export interface Notification {
     type: "error" | "success" | "info";
 }
 
-export const useNotificationStore = defineStore("notification", {
-    state: () => ({
-        notifications: [] as Notification[],
-    }),
-    actions: {
-        addNotification(message: string, type: Notification["type"] = "error") {
-            const id = Date.now();
-            this.notifications.push({ id, message, type });
+export const useNotificationStore = defineStore("notification", () => {
+    // --- STATE ---
+    const notifications = ref<Notification[]>([]);
 
-            setTimeout(() => {
-                this.removeNotification(id);
-            }, 5000);
-        },
+    // --- RESET ---
+    function $reset() {
+        notifications.value = [];
+    }
 
-        removeNotification(id: number) {
-            this.notifications = this.notifications.filter((n) => n.id !== id);
-        },
-    },
+    // --- ACTIONS ---
+    function addNotification(message: string, type: Notification["type"] = "error") {
+        const id = Date.now();
+        notifications.value.push({ id, message, type });
+
+        setTimeout(() => {
+            removeNotification(id);
+        }, 5000);
+    }
+
+    function removeNotification(id: number) {
+        notifications.value = notifications.value.filter((n) => n.id !== id);
+    }
+
+    return {
+        notifications,
+        $reset,
+        addNotification,
+        removeNotification,
+    };
 });

@@ -2,7 +2,7 @@
     <Header>
         <template #left>
             <router-link to="/profile" class="profile">
-                <CircleUserRound />
+                <CircleUserRound :size="30" />
                 <div class="info">
                     <span class="name">{{ userStore.profile.name }}</span>
                     <span class="email">{{ userStore.profile.email }}</span>
@@ -11,22 +11,27 @@
         </template>
     </Header>
 
-    <main v-if="watchlistsStore.isInitialLoading" class="loading-state">
-        <LoaderIcon :size="48" class="animate-spin" />
-        <p>Loading watchlists...</p>
-    </main>
-    <main v-else-if="watchlistsStore.lists.length == 0" class="empty-state">
-        <Library :size="48" />
-        <p>No watchlists found. Create one to get started!</p>
-    </main>
-    <main v-else>
-        <DraggableList :items="watchlistsStore.sortedLists" title-key="name" @row-click="goToList($event.id)" @item-moved="({ element, newArray }) => watchlistsStore.updateListOrder(newArray, element)">
-            <template #meta="{ item }">
-                <span class="shared">
-                    <Users :size="14" /> {{ item.sharedWith.length + 1 }}
-                </span>
-                <span class="items">
-                    <Library :size="16" />{{ watchlistsStore.listItems[item.id]?.length || 0 }}
+    <main>
+        <section v-if="watchlistsStore.isInitialLoading" class="loading-state">
+            <LoaderIcon :size="48" class="animate-spin" />
+            <p>Loading watchlists...</p>
+        </section>
+
+        <section v-else-if="watchlistsStore.lists.length == 0" class="empty-state">
+            <Library :size="48" />
+            <p>No watchlists found. Create one to get started!</p>
+        </section>
+
+        <DraggableList v-else :items="watchlistsStore.sortedLists" @row-click="goToList($event.id)" @item-moved="({ element, newArray }) => watchlistsStore.updateListOrder(newArray, element)">
+            <template #body="{ item }">
+                <h3>{{ item.name }}</h3>
+                <span class="meta">
+                    <span v-if="item.sharedWith.length > 0" class="shared">
+                        <Users :size="16" /> {{ item.sharedWith.length }}
+                    </span>
+                    <span class="items">
+                        <Library :size="16" />{{ watchlistsStore.listItems[item.id]?.length || 0 }}
+                    </span>
                 </span>
             </template>
             <template #actions="{ item }">
@@ -74,6 +79,6 @@ function openSettings(id: string) {
 
 async function createNewList() {
     const name = newListName.value.trim()
-    await watchlistsStore.createWatchlist(name);
+    await watchlistsStore.createList(name);
 };
 </script>

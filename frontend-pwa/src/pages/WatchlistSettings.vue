@@ -118,7 +118,7 @@ async function handleTransfer(userId: string) {
 
 async function handleDelete() {
     if (confirm("PERMANENTLY delete list? This cannot be undone.")) {
-        const success = await watchlistsStore.deleteWatchlist(props.listId);
+        const success = await watchlistsStore.deleteList(props.listId);
         if (success) router.push({ name: "watchlists" });
     }
 }

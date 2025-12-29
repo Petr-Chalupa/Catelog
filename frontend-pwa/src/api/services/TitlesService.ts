@@ -8,13 +8,15 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class TitlesService {
     /**
-     * Add a title to catalogue
+     * Add a title/placeholder to catalogue
      * @param requestBody
      * @returns Title Title added
      * @throws ApiError
      */
     public static postTitles(
-        requestBody: Title,
+        requestBody: (Title | {
+            title: string;
+        }),
     ): CancelablePromise<Title> {
         return __request(OpenAPI, {
             method: 'POST',

@@ -16,6 +16,10 @@
     color: var(--text-primary);
     text-decoration: none;
 
+    svg {
+        color: var(--text-secondary);
+    }
+
     .info {
         display: grid;
 
@@ -26,12 +30,32 @@
     }
 }
 
-.meta .shared,
-.meta .items {
+.body {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
+    gap: 2rem;
+
+    h3 {
+        flex: 1;
+        font-size: 1rem;
+        font-weight: 400;
+        color: var(--text-primary);
+    }
+
+    .meta {
+        display: flex;
+        gap: 1rem;
+        color: var(--text-secondary);
+
+        .shared,
+        .items {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+    }
 }
 
 .actions button {
@@ -52,13 +76,14 @@
     background: var(--bg-secondary);
     z-index: 100;
     border-radius: 14px 14px 0 0;
-    border: 1px solid var(--border-color);
+    border-top: 1px solid var(--border);
 }
 
 .create-section input {
     flex: 1;
     background: transparent;
     border: none;
+    border-radius: 14px 0 0 0;
     padding: 1rem 1rem;
     color: var(--text-primary);
     font-size: 1rem;
@@ -69,20 +94,12 @@
 }
 
 .create-section button {
-    display: flex;
-    align-items: center;
     background: var(--primary);
     border: none;
-    padding: 1rem;
     border-radius: 0 14px 0 0;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-
-    &:hover:not(:disabled) {
-        background: var(--primary-dark);
-        transform: translateY(-1px);
-    }
+    padding: 1rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
 
     &:disabled {
         opacity: 0.5;

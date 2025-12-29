@@ -54,7 +54,7 @@ export class InvitesService {
         });
     }
     /**
-     * Get all invites realted to this watchlist
+     * Get all invites related to this watchlist
      * @param id
      * @returns Invite List of invites
      * @throws ApiError

@@ -97,7 +97,7 @@ function handleLogout() {
 }
 
 async function handleDelete() {
-    if (confirm("PERMANENTLY delete account?")) {
+    if (confirm("PERMANENTLY delete account? This cannot be undone.")) {
         const success = await userStore.deleteAccount();
         if (success) authStore.logout();
     }

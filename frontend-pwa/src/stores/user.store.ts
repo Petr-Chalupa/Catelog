@@ -35,6 +35,8 @@ export const useUserStore = defineStore(
             profile.value = { ...DEFAULT_PROFILE };
             theme.value = DEFAULT_THEME;
             locale.value = getDefaultLocale();
+            isProcessing.value = false;
+            isInitialLoading.value = true;
         }
 
         // --- FETCHING ---

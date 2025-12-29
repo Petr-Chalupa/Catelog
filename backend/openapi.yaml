@@ -249,13 +249,20 @@ paths:
 
     /titles:
         post:
-            summary: Add a title to catalogue
+            summary: Add a title/placeholder to catalogue
             tags: [Titles]
             requestBody:
                 required: true
                 content:
                     application/json:
-                        schema: { $ref: "#/components/schemas/Title" }
+                        schema:
+                            oneOf:
+                                - $ref: "#/components/schemas/Title"
+                                - type: object
+                                  required: [title]
+                                  properties:
+                                      title:
+                                          type: string
             responses:
                 200:
                     description: Title added
@@ -642,7 +649,7 @@ paths:
 
     /invites/watchlists/{id}:
         get:
-            summary: Get all invites realted to this watchlist
+            summary: Get all invites related to this watchlist
             tags: [Invites]
             parameters:
                 - name: id
