@@ -1,6 +1,6 @@
 import { searchCSFD, searchCSFDById } from "./providers/csfd";
 import { searchOMDb, searchOMDbById } from "./providers/omdb";
-import { searchTMDb, searchTMDbById } from "./providers/tmdb";
+import { mapTitleTypeToTMDB, searchTMDb, searchTMDbById } from "./providers/tmdb";
 import {
     findLocalTitleMatches,
     findPlaceholders,
@@ -33,7 +33,9 @@ export async function refreshTitleMetadata(titleId: string) {
     let enriched: Title = { ...title };
 
     const [tmdbData, omdbData, csfdData] = await Promise.allSettled([
-        title.externalIds?.tmdb ? searchTMDbById(title.externalIds.tmdb, title.type) : Promise.resolve(null),
+        title.externalIds?.tmdb
+            ? searchTMDbById(title.externalIds.tmdb, mapTitleTypeToTMDB(title.type))
+            : Promise.resolve(null),
         title.externalIds?.imdb ? searchOMDbById(title.externalIds.imdb) : Promise.resolve(null),
         title.externalIds?.csfd ? searchCSFDById(title.externalIds.csfd) : Promise.resolve(null),
     ]);
@@ -98,7 +100,7 @@ export function mergeTitle(existing: Title, incoming: Title): Title {
 
     const avgRating = (ratings: Partial<Record<TitleSource, number>> = {}): number => {
         const filteredValues = Object.values(ratings).filter((r) => !isNaN(r));
-        const avg = filteredValues.reduce((a, b) => a + b, 0) / filteredValues.length;
+        const avg = filteredValues.length > 0 ? filteredValues.reduce((a, b) => a + b, 0) / filteredValues.length : 0;
         return Math.round(avg * 10) / 10; // Round to one decimal place
     };
 

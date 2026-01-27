@@ -200,17 +200,17 @@ export const useWatchlistsStore = defineStore(
         async function addItemToList(listId: string, payload: { title?: Title; name?: string }) {
             isProcessing.value = true;
             try {
-                let titleId: string;
+                const titleRequest = payload.title || { title: payload.name };
+                const savedTitle = await TitlesService.postTitles(titleRequest as Title);
+                const titleId = savedTitle.id;
 
-                if (payload.title?.id) {
-                    titleId = payload.title.id;
-                } else {
-                    const titleRequest = payload.title || { title: payload.name };
-                    const savedTitle = await TitlesService.postTitles(titleRequest as Title);
-                    titleId = savedTitle.id;
+                const titlesStore = useTitlesStore();
+                titlesStore.titles[titleId] = savedTitle;
 
-                    const titlesStore = useTitlesStore();
-                    titlesStore.titles[titleId] = savedTitle;
+                const existingItems = listItems.value[listId] ?? [];
+                if (existingItems.some((item) => item.titleId === titleId)) {
+                    notify.addNotification("This title is already in the list", "error");
+                    return;
                 }
 
                 const newItem = await WatchListsService.postWatchlistsItems(listId, { titleId });
@@ -220,6 +220,21 @@ export const useWatchlistsStore = defineStore(
                 throw error;
             } finally {
                 isProcessing.value = false;
+            }
+        }
+
+        async function updateListItemOrder(listId: string, newOrderedItems: WatchListItem[], movedItem: WatchListItem) {
+            const index = newOrderedItems.findIndex((i) => i.id === movedItem.id);
+            const prevKey = newOrderedItems[index - 1]?.sortKey || "";
+            const nextKey = newOrderedItems[index + 1]?.sortKey || "";
+            const newKey = calculateMidpoint(prevKey, nextKey);
+
+            if (newKey.length > 20) {
+                await rebalanceAllSortKeys(newOrderedItems, listId);
+            } else {
+                const itemInStore = listItems.value[listId]?.find((i) => i.id === movedItem.id);
+                if (itemInStore) itemInStore.sortKey = newKey;
+                await WatchListsService.patchWatchlistsItems(listId, movedItem.id, { sortKey: newKey });
             }
         }
 
@@ -243,6 +258,7 @@ export const useWatchlistsStore = defineStore(
             revokeInvite,
             removeMember,
             addItemToList,
+            updateListItemOrder,
         };
     },
     {
@@ -255,7 +271,17 @@ export const useWatchlistsStore = defineStore(
 
 function calculateMidpoint(prev: string, next: string): string {
     if (!prev) return next ? String.fromCharCode(next.charCodeAt(0) - 1) : "m";
-    if (!next) return String.fromCharCode(prev.charCodeAt(prev.length - 1) + 1);
+    if (!next) return prev + "m";
+
+    let i = 0;
+    while (prev[i] === next[i] && i < prev.length) i++;
+
+    const charP = prev.charCodeAt(i) || 96; // 96 is before 'a'
+    const charN = next.charCodeAt(i) || 123; // 123 is after 'z'
+    if (charN - charP > 1) {
+        return prev.slice(0, i) + String.fromCharCode(Math.floor((charP + charN) / 2));
+    }
+
     return prev + "m";
 }
 

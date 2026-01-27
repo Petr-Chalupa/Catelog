@@ -2,6 +2,32 @@ import axios, { AxiosInstance } from "axios";
 import { Title, TitleGenre, TitleType } from "../title.model";
 import { randomUUID } from "node:crypto";
 
+const TMDB_TYPE_MAP: Record<string, TitleType> = {
+    movie: "movie",
+    tv: "series",
+    person: "other",
+    collection: "other",
+};
+
+const TMDB_GENRE_MAP: Record<number, TitleGenre> = {
+    28: "action",
+    12: "adventure",
+    16: "animation",
+    35: "comedy",
+    80: "crime",
+    99: "documentary",
+    18: "drama",
+    10751: "family",
+    14: "fantasy",
+    36: "history",
+    27: "horror",
+    10402: "musical",
+    9648: "mystery",
+    10749: "romance",
+    878: "sci_fi",
+    53: "thriller",
+};
+
 const tmdbClient: AxiosInstance = axios.create({
     baseURL: process.env.TMDB_BASE_URL,
     params: { api_key: process.env.TMDB_API_KEY },
@@ -15,14 +41,14 @@ function mapTMDbToTitle(data: any, translations?: Record<string, string>): Title
 
     return {
         id: randomUUID(),
-        type: data.media_type === "movie" ? "movie" : "series",
+        type: TMDB_TYPE_MAP[data.media_type ?? (data.title ? "movie" : "tv")] ?? "other",
         title: data.title || data.name,
         localizedTitles: allTitles,
         year:
             data.release_date || data.first_air_date
                 ? new Date(data.release_date || data.first_air_date).getFullYear()
                 : undefined,
-        genres: data.genres?.map((g: any) => mapTMDbGenre(g.id)).filter(Boolean),
+        genres: data.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean),
         durationMinutes: data.runtime || data.episode_run_time?.[0],
         ratings: { tmdb: data.vote_average },
         poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : undefined,
@@ -46,29 +72,6 @@ async function fetchTMDbTranslations(id: string, type: "movie" | "tv"): Promise<
     return titles;
 }
 
-function mapTMDbGenre(id: number): TitleGenre | undefined {
-    const map: Record<number, TitleGenre> = {
-        12: "adventure",
-        14: "fantasy",
-        16: "animation",
-        18: "drama",
-        27: "horror",
-        28: "action",
-        35: "comedy",
-        36: "history",
-        53: "thriller",
-        80: "crime",
-        99: "documentary",
-        878: "sci_fi",
-        9648: "mystery",
-        10402: "musical",
-        10749: "romance",
-        10751: "family",
-    };
-
-    return map[id];
-}
-
 export async function searchTMDb(query: string, details: boolean): Promise<Title[]> {
     const res = await tmdbClient.get("/search/multi", { params: { query } });
 
@@ -77,9 +80,7 @@ export async function searchTMDb(query: string, details: boolean): Promise<Title
     let finalData: Title[] = [];
 
     if (details) {
-        const detailedResults = await Promise.all(
-            searchResults.map((r: any) => searchTMDbById(r.id, r.media_type === "movie" ? "movie" : "series"))
-        );
+        const detailedResults = await Promise.all(searchResults.map((r: any) => searchTMDbById(r.id, r.media_type)));
         finalData = detailedResults.filter((r) => r != null);
     } else {
         finalData = searchResults.map(mapTMDbToTitle);
@@ -88,14 +89,17 @@ export async function searchTMDb(query: string, details: boolean): Promise<Title
     return finalData;
 }
 
-export async function searchTMDbById(tmdbId: string, type: TitleType): Promise<Title | null> {
-    const endpoint = type === "movie" ? "movie" : "tv";
-    const res = await tmdbClient.get(`/${endpoint}/${tmdbId}`);
+export async function searchTMDbById(tmdbId: string, type: "movie" | "tv"): Promise<Title | null> {
+    const res = await tmdbClient.get(`/${type}/${tmdbId}`);
     const data = res.data;
 
     if (!data) return null;
 
-    const translations = await fetchTMDbTranslations(tmdbId, endpoint);
+    const translations = await fetchTMDbTranslations(tmdbId, type);
 
     return mapTMDbToTitle(data, translations);
+}
+
+export function mapTitleTypeToTMDB(type: TitleType): "movie" | "tv" {
+    return type === "series" ? "tv" : "movie";
 }

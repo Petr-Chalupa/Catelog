@@ -1,4 +1,4 @@
-export type TitleType = "movie" | "series";
+export type TitleType = "movie" | "series" | "other";
 export type TitleSource = "imdb" | "tmdb" | "csfd";
 export type TitleGenre =
     | "action"

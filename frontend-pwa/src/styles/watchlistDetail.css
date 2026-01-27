@@ -1,3 +1,57 @@
+.item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+
+    .poster {
+        width: 2.75rem;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+}
+
+.item .info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        line-height: 1;
+    }
+
+    .other {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .genres {
+        display: flex;
+        gap: 0.25rem;
+
+        .genre-tag {
+            display: flex;
+            align-items: center;
+            height: 1rem;
+            background: var(--border);
+            padding: 0 5px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+    }
+}
+
+.watched-btn {
+    height: 1.15rem;
+    width: 1.15rem;
+    margin: 0;
+}
+
 .add-item {
     position: fixed;
     bottom: 0;
@@ -13,8 +67,71 @@
 }
 
 .add-item .results {
-    max-height: 50vh;
+    max-height: 45vh;
     overflow-y: auto;
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.add-item .results .result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: inherit;
+    font-size: inherit;
+    font-family: inherit;
+
+    &:hover {
+        background: var(--bg-primary);
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.add-item .results .poster {
+    width: 2.25rem;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.add-item .results .info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .title {
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1;
+    }
+
+    .other {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+}
+
+.add-item .results .no-results {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-secondary);
 }
 
 .add-item .bar {

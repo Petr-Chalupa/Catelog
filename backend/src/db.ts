@@ -51,7 +51,7 @@ export async function ensureIndexes() {
 
     const titles = db.collection("titles");
     await titles.createIndex({ id: 1 }, { unique: true });
-    await titles.createIndex({ title: 1 });
+    await titles.createIndex({ title: "text", localizedTitles: "text" }, { weights: { title: 2, localizedTitles: 1 } });
     await titles.createIndex({ "externalIds.tmdb": 1 });
     await titles.createIndex({ "externalIds.imdb": 1 });
     await titles.createIndex({ "externalIds.csfd": 1 });
