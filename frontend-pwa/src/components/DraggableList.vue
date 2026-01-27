@@ -1,5 +1,5 @@
 <template>
-    <draggable :model-value="items" @change="onDragChange" item-key="id" tag="div" :delay="300" :delay-on-touch-only="false" :touch-start-threshold="5" ghost-class="sortable-ghost" drag-class="sortable-drag" :animation="200" class="list-grid">
+    <draggable :model-value="items" @change="onDragChange" item-key="id" tag="div" :delay="300" :delay-on-touch-only="false" :touch-start-threshold="5" ghost-class="ghost-item" drag-class="drag-item" :animation="200" class="list-grid">
         <template #item="{ element, index }">
             <div class="list-row" @click="$emit('row-click', element)">
                 <div class="body">
@@ -68,13 +68,6 @@
     &:not(:last-child) {
         border-bottom: 1px solid var(--border);
     }
-}
-
-.ghost-item {
-    opacity: 0.5;
-    background: var(--bg-secondary);
-    border: 1px dashed var(--primary);
-    transform: scale(1.02);
 }
 
 .list-item {

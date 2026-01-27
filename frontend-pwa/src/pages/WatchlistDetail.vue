@@ -21,7 +21,7 @@
 
         <DraggableList v-else :items="items" @row-click="goToItem($event.id)" @item-moved="">
             <template #body="{ item }">
-                {{ item.details.title }}
+                {{ item?.details?.title }}
             </template>
             <template #actions="{ item }">
             </template>
