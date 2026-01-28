@@ -10,21 +10,12 @@
     </Header>
 
     <main>
-        <Transition name="slide-down">
-            <section v-if="isFilterActive" class="filter">
-                <div class="filter-bar">
-                    <input v-model="filterQuery" placeholder="Hledat (název, režisér, žánr...)" />
-                    <X class="close-btn" @click="handlePopState" />
-                </div>
-            </section>
-        </Transition>
-
         <section v-if="watchlistsStore.isInitialLoading" class="loading-state">
             <LoaderIcon :size="48" class="animate-spin" />
             <p>Loading items...</p>
         </section>
 
-        <section v-else-if="items.length == 0" class="empty-state">
+        <section v-else-if="activeItems.length == 0" class="empty-state">
             <Library :size="48" />
             <p>No items found. Create one to get started!</p>
         </section>
@@ -79,21 +70,33 @@
             <Plus :size="28" />
         </button>
 
-        <Transition name="fade">
-            <section v-if="isSearchExpanded" class="search-overlay">
-                <div class="search-header">
-                    <div class="search-bar">
-                        <input v-model="searchQuery" type="text" placeholder="Hledat film nebo přidat vlastní..." @keyup.enter="handleSearch" />
+        <Overlay v-model="isFilterExpanded" history-key="filter">
+            <template #header>
+                <Input v-model="filterQuery" placeholder="Filtrovat list..." autoFocus>
+                    <template #actions>
+                        <button class="close-btn" @click="closeFilter">
+                            <X :size="20" />
+                        </button>
+                    </template>
+                </Input>
+            </template>
+        </Overlay>
+
+        <Overlay v-model="isSearchExpanded" history-key="search">
+            <template #header>
+                <Input v-model="searchQuery" placeholder="Hledat film..." @enter="handleSearch" autoFocus>
+                    <template #actions>
                         <button class="search-btn" @click="handleSearch" :disabled="titlesStore.isProcessing">
                             <Search v-if="!titlesStore.isProcessing" :size="20" />
                             <LoaderIcon v-else :size="20" class="animate-spin" />
                         </button>
-                        <button class="close-btn" @click="handlePopState">
+                        <button class="close-btn" @click="closeSearch">
                             <X :size="20" />
                         </button>
-                    </div>
-                </div>
-
+                    </template>
+                </Input>
+            </template>
+            <template #body>
                 <div class="search-content">
                     <div v-if="titlesStore.isProcessing" class="search-loading">
                         <LoaderIcon :size="24" class="animate-spin" />
@@ -119,8 +122,8 @@
                         <span>Přidat jako vlastní: "<strong>{{ searchQuery }}</strong>"</span>
                     </div>
                 </div>
-            </section>
-        </Transition>
+            </template>
+        </Overlay>
     </main>
 </template>
 
@@ -130,11 +133,13 @@
 import { ChevronRight, Image, Library, LoaderIcon, Plus, Search, Settings, X } from "lucide-vue-next";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import Header from "../components/Header.vue";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useTitlesStore } from "../stores/titles.store";
 import type { Title, WatchListItem } from "../api";
 import DraggableList from "../components/DraggableList.vue";
+import Overlay from "../components/Overlay.vue";
+import Input from "../components/Input.vue";
 
 const props = defineProps<{ listId: string }>();
 
@@ -142,19 +147,6 @@ const router = useRouter();
 const watchlistsStore = useWatchlistsStore();
 const titlesStore = useTitlesStore();
 const list = computed(() => watchlistsStore.lists.find((l) => l.id === props.listId));
-const items = computed({
-    get() {
-        let listItems = watchlistsStore.listItems[props.listId] ?? [];
-
-        return [...listItems]
-            .sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || ""))
-            .map((item) => ({ ...item, details: titlesStore.titles[item.titleId] }))
-            .filter((i) => i.details?.title.toLowerCase().includes(filterQuery.value.toLowerCase()));
-    },
-    set(newArray) {
-        watchlistsStore.listItems[props.listId] = newArray;
-    }
-});
 const activeItems = computed({
     get() {
         return processItems()
@@ -171,19 +163,12 @@ const finishedItems = computed(() => {
         .filter(i => i.state === "finished" && i.details?.title.toLowerCase().includes(filterQuery.value.toLowerCase()))
         .sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
 });
-const isFilterActive = ref(false);
+const isFilterExpanded = ref(false);
 const filterQuery = ref("");
 const isSearchExpanded = ref(false);
 const searchQuery = ref("");
 
-onMounted(() => {
-    watchlistsStore.fetchSingleList(props.listId)
-    window.addEventListener("popstate", handlePopState);
-});
-
-onUnmounted(() => {
-    window.removeEventListener("popstate", handlePopState);
-});
+onMounted(() => watchlistsStore.fetchSingleList(props.listId));
 
 function processItems() {
     const listItems = watchlistsStore.listItems[props.listId] ?? [];
@@ -199,18 +184,19 @@ function goToItem(id: string) {
 }
 
 function openFilter() {
-    isFilterActive.value = true;
-    window.history.pushState({ mode: "filter" }, "");
+    isFilterExpanded.value = true;
 }
 
 function openSearch() {
     isSearchExpanded.value = true;
-    window.history.pushState({ mode: "add" }, "");
 }
 
-function handlePopState() {
-    isFilterActive.value = false;
+function closeFilter() {
+    isFilterExpanded.value = false;
     filterQuery.value = "";
+}
+
+function closeSearch() {
     isSearchExpanded.value = false;
     searchQuery.value = "";
     titlesStore.clearSearchResults();

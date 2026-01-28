@@ -42,11 +42,14 @@
         </DraggableList>
 
         <section class="create-section">
-            <input v-model="newListName" type="text" placeholder="Name..." @keyup.enter="createNewList" />
-            <button @click="createNewList" :disabled="watchlistsStore.isProcessing || !newListName.trim()">
-                <Plus v-if="!watchlistsStore.isProcessing" :size="20" />
-                <LoaderIcon v-else :size="20" class="animate-spin" />
-            </button>
+            <Input v-model="newListName" placeholder="Name..." @enter="createNewList">
+                <template #actions>
+                    <button @click="createNewList" :disabled="watchlistsStore.isProcessing || !newListName.trim()">
+                        <Plus v-if="!watchlistsStore.isProcessing" :size="20" />
+                        <LoaderIcon v-else :size="20" class="animate-spin" />
+                    </button>
+                </template>
+            </Input>
         </section>
     </main>
 </template>
@@ -61,6 +64,7 @@ import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import DraggableList from "../components/DraggableList.vue";
+import Input from "../components/Input.vue";
 
 const userStore = useUserStore();
 const watchlistsStore = useWatchlistsStore();

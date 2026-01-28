@@ -14,11 +14,14 @@
             <h3 class="group-title">Name</h3>
 
             <div class="settings-item change-name">
-                <input type="text" v-model="editName" :disabled="watchlistsStore.isProcessing" @keyup.enter="handleSaveName">
-                <button :disabled="!editName.trim().length" @click="handleSaveName">
-                    <Save v-if="!watchlistsStore.isProcessing" :size="18" />
-                    <LoaderIcon v-else :size="18" class="animate-spin" />
-                </button>
+                <Input v-model="editName" :disabled="watchlistsStore.isProcessing" @enter="handleSaveName">
+                    <template #actions>
+                        <button :disabled="!editName.trim().length" @click="handleSaveName">
+                            <Save v-if="!watchlistsStore.isProcessing" :size="18" />
+                            <LoaderIcon v-else :size="18" class="animate-spin" />
+                        </button>
+                    </template>
+                </Input>
             </div>
         </section>
 
@@ -26,11 +29,14 @@
             <h3 class="group-title">Sharing</h3>
 
             <div class="settings-item add-member">
-                <input type="text" placeholder="E-mail" v-model="addMemberEmail" :disabled="watchlistsStore.isProcessing" @keyup.enter="addMember">
-                <button :disabled="!isOwner || !addMemberEmail.trim().length" @click="addMember">
-                    <Plus v-if="!watchlistsStore.isProcessing" :size="18" />
-                    <LoaderIcon v-else :size="18" class="animate-spin" />
-                </button>
+                <Input v-model="addMemberEmail" placeholder="E-mail" :disabled="watchlistsStore.isProcessing" @enter="addMember">
+                    <template #actions>
+                        <button :disabled="!isOwner || !addMemberEmail.trim().length" @click="addMember">
+                            <Plus v-if="!watchlistsStore.isProcessing" :size="18" />
+                            <LoaderIcon v-else :size="18" class="animate-spin" />
+                        </button>
+                    </template>
+                </Input>
             </div>
             <div class="settings-item members">
                 <span v-if="members.length == 0">No other members.</span>
@@ -70,6 +76,7 @@ import { useWatchlistsStore } from "../stores/watchlists.store";
 import { LoaderIcon, Plus, Save, ShieldUser, Trash } from "lucide-vue-next";
 import { useUserStore } from "../stores/user.store";
 import { useRouter } from "vue-router";
+import Input from "../components/Input.vue";
 
 const props = defineProps<{ listId: string }>();
 

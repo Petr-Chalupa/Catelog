@@ -110,41 +110,6 @@ main {
     }
 }
 
-.filter {
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-
-    .filter-bar {
-        display: flex;
-        align-items: center;
-        background: var(--bg-primary);
-        border-radius: 10px;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid var(--border);
-
-        input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-        }
-
-        .close-btn {
-            display: flex;
-            align-items: center;
-            background: transparent;
-            border: none;
-            color: var(--primary);
-            cursor: pointer;
-        }
-    }
-}
-
 .add-item-btn {
     position: fixed;
     bottom: 1.5rem;
@@ -160,59 +125,6 @@ main {
     border: none;
     z-index: 90;
     cursor: pointer;
-}
-
-.search-overlay {
-    position: fixed;
-    top: 3.5rem;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--bg-primary);
-    z-index: 200;
-    display: flex;
-    flex-direction: column;
-}
-
-.search-header {
-    padding: 1rem;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
-}
-
-.search-bar {
-    display: flex;
-    align-items: center;
-    background: var(--bg-primary);
-    border-radius: 10px;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    gap: 0.5rem;
-
-    input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        outline: none;
-        color: var(--text-primary);
-        font-size: 0.9rem;
-    }
-
-    .search-btn,
-    .close-btn {
-        display: flex;
-        align-items: center;
-        background: transparent;
-        border: none;
-        color: var(--primary);
-        cursor: pointer;
-    }
-}
-
-.search-content {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 2rem;
 }
 
 .search-loading {
@@ -285,23 +197,4 @@ main {
         border-radius: 10px;
         display: flex;
     }
-}
-
-.slide-down-enter-active,
-.slide-down-leave-active {
-    transition: all 0.2s;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-    transform: translateY(-20px);
-    opacity: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.2s;
-}
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
 }
