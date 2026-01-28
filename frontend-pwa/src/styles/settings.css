@@ -27,7 +27,7 @@ main {
     .user-info {
         display: grid;
 
-        >* {
+        > * {
             margin: 0;
         }
     }
@@ -118,7 +118,7 @@ input[type="checkbox"] {
     transition: background 0.3s;
 
     &::before {
-        content: '';
+        content: "";
         position: absolute;
         width: 16px;
         height: 16px;
@@ -155,20 +155,22 @@ input[type="checkbox"] {
     border: 1px solid var(--border-color);
     padding: 0 !important;
 
-    >input {
+    > input {
         border-radius: 14px 0 0 0;
     }
 
-    >button {
+    > button {
         display: flex;
         align-items: center;
         background: var(--primary);
         border: none;
-        padding: 1.09rem;
+        padding: 1.07rem;
         border-radius: 0 14px 0 0;
         font-weight: 600;
         cursor: pointer;
-        transition: transform 0.2s, background 0.2s;
+        transition:
+            transform 0.2s,
+            background 0.2s;
 
         &:hover:not(:disabled) {
             background: var(--primary-dark);

@@ -36,7 +36,7 @@
             </template>
             <template #actions="{ item }">
                 <button @click.stop="openSettings(item.id)">
-                    <Settings :size="18" />
+                    <Settings :size="20" />
                 </button>
             </template>
         </DraggableList>
