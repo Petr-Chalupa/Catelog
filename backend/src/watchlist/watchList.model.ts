@@ -1,3 +1,5 @@
+import { TitleGenre } from "../title/title.model";
+
 export type WatchState = "planned" | "started" | "finished";
 
 export interface WatchList {
@@ -15,7 +17,8 @@ export interface WatchListItem {
     listId: string;
     titleId: string;
     state: WatchState;
-    tags?: string[];
+    addedGenres?: TitleGenre[];
+    excludedGenres?: TitleGenre[];
     personalRating?: number;
     addedBy: string;
     sortKey: string;

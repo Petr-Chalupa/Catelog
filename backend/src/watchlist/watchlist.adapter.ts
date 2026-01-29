@@ -96,7 +96,7 @@ export async function transferWatchlist(listId: string, ownerId: string, newOwne
         {
             $set: { ownerId: newOwnerId },
             $pull: { sharedWith: newOwnerId },
-        }
+        },
     );
 }
 
@@ -123,7 +123,8 @@ export async function upsertWatchListItem(listId: string, item: Partial<WatchLis
     const update = {
         $set: {
             state: item.state || "planned",
-            tags: item.tags,
+            addedGenres: item.addedGenres,
+            excludedGenres: item.excludedGenres,
             personalRating: item.personalRating,
             sortKey: item.sortKey,
             updatedAt: new Date(),

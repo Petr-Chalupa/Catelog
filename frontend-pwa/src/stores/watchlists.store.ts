@@ -14,11 +14,19 @@ import { useUserStore } from "./user.store";
 import { useNotificationStore } from "./notification.store";
 import { computed, ref } from "vue";
 import { useTitlesStore } from "./titles.store";
+import { i18n } from "../i18n";
+
+export interface EnrichedWatchListItem extends WatchListItem {
+    details?: Title;
+    displayTitle: string;
+    resolvedGenres: string[];
+}
 
 export const useWatchlistsStore = defineStore(
     "watchlists",
     () => {
         const notify = useNotificationStore();
+        const titlesStore = useTitlesStore();
 
         // --- STATE ---
         const lists = ref<WatchList[]>([]);
@@ -29,12 +37,59 @@ export const useWatchlistsStore = defineStore(
         const isInitialLoading = ref(true);
 
         // --- GETTERS ---
-        const sortedLists = computed(() => {
+        const sortedLists = computed((): WatchList[] => {
             return [...lists.value].sort((a, b) => {
                 const keyA = a.sortKey || "";
                 const keyB = b.sortKey || "";
                 return keyA.localeCompare(keyB);
             });
+        });
+
+        const enrichedListItems = computed(() => (listId: string): EnrichedWatchListItem[] => {
+            const rawItems = listItems.value[listId] ?? [];
+            const currentLocale = i18n.global.locale.value;
+
+            return rawItems.map((item) => {
+                const titleMetadata = titlesStore.titles[item.titleId];
+                const displayTitle = titleMetadata?.localizedTitles?.[currentLocale] || titleMetadata?.title || "?";
+
+                const titleGenres = titleMetadata?.genres ?? [];
+                const added = item.addedGenres ?? [];
+                const excluded = item.excludedGenres ?? [];
+                const finalGenres = [...new Set([...titleGenres, ...added])].filter((g) => !excluded.includes(g));
+
+                return {
+                    ...item,
+                    details: titleMetadata,
+                    displayTitle,
+                    resolvedGenres: finalGenres,
+                };
+            });
+        });
+
+        const availableListFilters = computed(() => (listId: string) => {
+            const items = enrichedListItems.value(listId);
+            const genres = new Set<string>();
+            let minDuration = Infinity;
+            let maxDuration = 0;
+
+            items.forEach((i) => {
+                i.resolvedGenres.forEach((g) => genres.add(g));
+
+                const duration = i.details?.durationMinutes;
+                if (duration) {
+                    if (duration < minDuration) minDuration = duration;
+                    if (duration > maxDuration) maxDuration = duration;
+                }
+            });
+
+            return {
+                genres: Array.from(genres).sort(),
+                durationRange: {
+                    min: minDuration === Infinity ? 0 : minDuration,
+                    max: maxDuration,
+                },
+            };
         });
 
         // --- RESET ---
@@ -71,7 +126,7 @@ export const useWatchlistsStore = defineStore(
             listItems.value[id] = (await WatchListsService.getWatchlistsItems(id)).items ?? [];
             listInvites.value[id] = await InvitesService.getInvitesWatchlists(id);
 
-            listItems.value[id].forEach((i) => useTitlesStore().getTitleById(i.titleId));
+            listItems.value[id].forEach((i) => titlesStore.getTitleById(i.titleId));
         }
 
         async function createList(name: string) {
@@ -246,6 +301,8 @@ export const useWatchlistsStore = defineStore(
             isProcessing,
             isInitialLoading,
             sortedLists,
+            enrichedListItems,
+            availableListFilters,
             $reset,
             fetchLists,
             fetchSingleList,
@@ -266,7 +323,7 @@ export const useWatchlistsStore = defineStore(
             key: "catelog-watchlists",
             storage: localStorage,
         },
-    }
+    },
 );
 
 function calculateMidpoint(prev: string, next: string): string {

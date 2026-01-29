@@ -1,110 +1,112 @@
 :root {
-  box-sizing: border-box;
-  color-scheme: light dark;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+    color-scheme: light dark;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 
-  /* --- BRAND COLORS --- */
-  --primary: #30a5ff;
-  --primary-hover: #1e8ad9;
-  --secondary: #ff8a30;
-  --secondary-hover: #e6761d;
-  --on-brand: #ffffff;
+    /* --- BRAND COLORS --- */
+    --primary: #30a5ff;
+    --primary-hover: #1e8ad9;
+    --secondary: #ff8a30;
+    --secondary-hover: #e6761d;
+    --on-brand: #ffffff;
 
-  /* --- LIGHT THEME --- */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f2f2f2;
-  --text-primary: #141414;
-  --text-secondary: #666666;
-  --border: #e5e5e5;
-  --ok: #28a745;
-  --danger: #ff4444;
+    /* --- LIGHT THEME --- */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f2f2f2;
+    --text-primary: #141414;
+    --text-secondary: #666666;
+    --border: #e5e5e5;
+    --ok: #28a745;
+    --danger: #ff4444;
 
-  /* --- DARK THEME --- */
-  &[data-theme="dark"] {
-    --bg-primary: #141414;
-    --bg-secondary: #1f1f1f;
-    --text-primary: #ffffff;
-    --text-secondary: #b3b3b3;
-    --border: #333333;
-  }
+    /* --- DARK THEME --- */
+    &[data-theme="dark"] {
+        --bg-primary: #141414;
+        --bg-secondary: #1f1f1f;
+        --text-primary: #ffffff;
+        --text-secondary: #b3b3b3;
+        --border: #333333;
+    }
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: inherit;
+    box-sizing: inherit;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  -webkit-tap-highlight-color: transparent;
-  font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  overscroll-behavior-y: none;
+    margin: 0;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    font-family:
+        system-ui,
+        -apple-system,
+        sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overscroll-behavior-y: none;
 }
 
 #app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 
-  /* Handle iPhone Notch & Home Indicator */
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+    /* Handle iPhone Notch & Home Indicator */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
 }
 
 button {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .loading-state {
-  padding-top: 2rem;
-  display: grid;
-  justify-content: center;
+    padding-top: 2rem;
+    display: grid;
+    justify-content: center;
 
-  svg {
-    margin: 0 auto;
-  }
+    svg {
+        margin: 0 auto;
+    }
 
-  p {
-    margin-top: 1rem;
-    font-size: 1.1rem;
-  }
+    p {
+        margin-top: 1rem;
+        font-size: 1.1rem;
+    }
 }
 
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 5rem 2rem;
-  text-align: center;
-  color: var(--text-tertiary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 2rem;
+    text-align: center;
+    color: var(--text-tertiary);
 
-  p {
-    margin-top: 1rem;
-    font-size: 1.1rem;
-  }
+    p {
+        margin-top: 1rem;
+        font-size: 1.1rem;
+    }
 }
 
 .animate-spin {
-  animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
 
-  to {
-    transform: rotate(360deg);
-  }
+    to {
+        transform: rotate(360deg);
+    }
 }

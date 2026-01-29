@@ -80,6 +80,38 @@
                     </template>
                 </Input>
             </template>
+            <template #body>
+                <div class="filter-body">
+                    <div class="filter-content">
+                        <div class="filter-section">
+                            <label class="section-label">Max délka [min]:</label>
+                            <input type="range" :min="availableFilters.durationRange.min" :max="availableFilters.durationRange.max" v-model.number="maxDurationFilter" class="duration-slider" />
+                            <div class="range-labels">
+                                <span>{{ availableFilters.durationRange.min }}</span>
+                                <span>{{ Math.round((availableFilters.durationRange.min + availableFilters.durationRange.max) / 2) }}</span>
+                                <span>{{ availableFilters.durationRange.max }}</span>
+                            </div>
+                        </div>
+                        <div class="filter-section">
+                            <label class="section-label">Žánry:</label>
+                            <Triage :items="availableFilters.genres" v-model="genreFilters" class="genre-triage-item">
+                                <template #icon="{ state }">
+                                    <span v-if="state === 'positive'" class="icon">✓</span>
+                                    <span v-if="state === 'negative'" class="icon">✕</span>
+                                </template>
+                            </Triage>
+                        </div>
+                        <div class="filter-section">
+                            <label class="section-label">Režiséři:</label>
+                        </div>
+                        <div class="filter-section">
+                            <label class="section-label">Herci:</label>
+                        </div>
+                    </div>
+
+                    <button class="reset-filters-btn" @click="resetFilters">Resetovat filtry</button>
+                </div>
+            </template>
         </Overlay>
 
         <Overlay v-model="isSearchExpanded" history-key="search">
@@ -133,13 +165,14 @@
 import { ChevronRight, Image, Library, LoaderIcon, Plus, Search, Settings, X } from "lucide-vue-next";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import Header from "../components/Header.vue";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useTitlesStore } from "../stores/titles.store";
 import type { Title, WatchListItem } from "../api";
 import DraggableList from "../components/DraggableList.vue";
 import Overlay from "../components/Overlay.vue";
 import Input from "../components/Input.vue";
+import Triage from "../components/Triage.vue";
 
 const props = defineProps<{ listId: string }>();
 
@@ -147,10 +180,36 @@ const router = useRouter();
 const watchlistsStore = useWatchlistsStore();
 const titlesStore = useTitlesStore();
 const list = computed(() => watchlistsStore.lists.find((l) => l.id === props.listId));
+const availableFilters = computed(() => watchlistsStore.availableListFilters(props.listId));
+const isFilterExpanded = ref(false);
+const filterQuery = ref("");
+const genreFilters = ref<Record<string, string>>({});
+const maxDurationFilter = ref<number>(0);
+const isSearchExpanded = ref(false);
+const searchQuery = ref("");
 const activeItems = computed({
     get() {
-        return processItems()
-            .filter(i => i.state !== "finished" && i.details?.title.toLowerCase().includes(filterQuery.value.toLowerCase()))
+        return watchlistsStore.enrichedListItems(props.listId)
+            .filter(i => {
+                if (i.state === "finished") return false;
+
+                const matchesText = i.displayTitle.toLowerCase().includes(filterQuery.value.toLowerCase());
+                if (!matchesText) return false;
+
+                if (i.details?.durationMinutes && i.details.durationMinutes > maxDurationFilter.value) return false;
+
+                const filterEntries = Object.entries(genreFilters.value);
+                if (filterEntries.length > 0) {
+                    const matchesGenres = filterEntries.every(([genre, state]) => {
+                        if (state === "positive") return i.resolvedGenres.includes(genre);
+                        if (state === "negative") return !i.resolvedGenres.includes(genre);
+                        return true;
+                    });
+                    if (!matchesGenres) return false;
+                }
+
+                return true;
+            })
             .sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || ""));
     },
     set(newActiveArray) {
@@ -163,12 +222,15 @@ const finishedItems = computed(() => {
         .filter(i => i.state === "finished" && i.details?.title.toLowerCase().includes(filterQuery.value.toLowerCase()))
         .sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
 });
-const isFilterExpanded = ref(false);
-const filterQuery = ref("");
-const isSearchExpanded = ref(false);
-const searchQuery = ref("");
 
 onMounted(() => watchlistsStore.fetchSingleList(props.listId));
+
+watch(availableFilters, (newFilters) => {
+    // Init of filters
+    if (newFilters.durationRange.max > 0 && maxDurationFilter.value === 0) {
+        maxDurationFilter.value = newFilters.durationRange.max;
+    }
+}, { immediate: true });
 
 function processItems() {
     const listItems = watchlistsStore.listItems[props.listId] ?? [];
@@ -193,13 +255,18 @@ function openSearch() {
 
 function closeFilter() {
     isFilterExpanded.value = false;
-    filterQuery.value = "";
 }
 
 function closeSearch() {
     isSearchExpanded.value = false;
     searchQuery.value = "";
     titlesStore.clearSearchResults();
+}
+
+function resetFilters() {
+    filterQuery.value = "";
+    maxDurationFilter.value = availableFilters.value.durationRange.max;
+    genreFilters.value = {};
 }
 
 async function handleQuickAdd() {

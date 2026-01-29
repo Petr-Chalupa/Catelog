@@ -927,7 +927,11 @@ components:
                 state:
                     type: string
                     enum: [planned, started, finished]
-                tags:
+                addedGenres:
+                    type: array
+                    items:
+                        type: string
+                excludedGenres:
                     type: array
                     items:
                         type: string

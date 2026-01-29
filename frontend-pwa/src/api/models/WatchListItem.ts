@@ -7,7 +7,8 @@ export type WatchListItem = {
     listId: string;
     titleId: string;
     state: WatchListItem.state;
-    tags?: Array<string>;
+    addedGenres?: Array<string>;
+    excludedGenres?: Array<string>;
     personalRating?: number;
     addedBy: string;
     sortKey?: string;
