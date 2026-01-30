@@ -15,24 +15,19 @@ app.use(router);
 app.use(i18n);
 app.directive("onlineonly", {
     mounted(el) {
-        const apply = () => {
-            if (!navigator.onLine) {
-                el.setAttribute("disabled", "true");
-                el.style.pointerEvents = "none";
-                el.style.opacity = "0.6";
-                el.title = "Offline - changes disabled";
-            } else {
-                el.removeAttribute("disabled");
-                el.style.pointerEvents = "";
-                el.style.opacity = "";
-                el.removeAttribute("title");
-            }
+        el._onlineHandler = () => {
+            const isOffline = !navigator.onLine;
+            el.style.opacity = isOffline ? "0.5" : "";
+            el.style.pointerEvents = isOffline ? "none" : "";
+            el.setAttribute("disabled", isOffline ? "true" : "false");
         };
-
-        apply();
-
-        window.addEventListener("offline", apply);
-        window.addEventListener("online", apply);
+        window.addEventListener("online", el._onlineHandler);
+        window.addEventListener("offline", el._onlineHandler);
+        el._onlineHandler();
+    },
+    unmounted(el) {
+        window.removeEventListener("online", el._onlineHandler);
+        window.removeEventListener("offline", el._onlineHandler);
     },
 });
 app.mount("#app");

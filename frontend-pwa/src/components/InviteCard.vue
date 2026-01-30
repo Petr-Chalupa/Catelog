@@ -10,16 +10,16 @@
         </div>
 
         <div v-if="isExpired" class="invite-actions">
-            <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline">
+            <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline" v-onlineonly>
                 Dismiss Expired Invite
             </button>
         </div>
         <div v-else class="invite-actions">
-            <button @click="handleAction('accept')" :disabled="disabled" class="btn-accept">
+            <button @click="handleAction('accept')" :disabled="disabled" class="btn-accept" v-onlineonly>
                 {{ isLoggedIn ? "Accept" : "Login to Accept" }}
             </button>
 
-            <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline">
+            <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline" v-onlineonly>
                 {{ isLoggedIn ? "Decline" : "Login to Decline" }}
             </button>
         </div>

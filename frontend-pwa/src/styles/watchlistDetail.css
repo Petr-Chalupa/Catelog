@@ -54,59 +54,29 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    appearance: none;
-    -webkit-appearance: none;
-    width: 22px;
-    height: 22px;
-    margin: 0;
+    width: 26px;
+    height: 26px;
+    background: transparent;
     border: 2px solid var(--text-secondary);
     border-radius: 50%;
+    padding: 0;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-    &:checked {
+    &.started {
+        background: var(--secondary);
+        border-color: var(--secondary);
+        box-shadow: 0 0 7px color-mix(in srgb, var(--secondary), transparent 50%);
+    }
+
+    &.finished {
         background: var(--primary);
         border-color: var(--primary);
-
-        &::after {
-            content: "✓";
-            font-size: 1rem;
-        }
-    }
-}
-
-.finished-section {
-    border-top: 1px solid var(--border);
-
-    .finished-summary {
-        list-style: none;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1rem;
-        color: var(--text-secondary);
-        cursor: pointer;
-        user-select: none;
-
-        &::-webkit-details-marker {
-            display: none;
-        }
-
-        .finished-title {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-        }
+        box-shadow: 0 0 7px color-mix(in srgb, var(--primary), transparent 50%);
     }
 
-    &[open] .arrow-icon {
-        transform: rotate(90deg);
-    }
-
-    .finished-item {
-        width: auto;
-        opacity: 0.5;
-        padding: 0.5rem 1rem;
+    &:active {
+        transform: scale(0.9);
     }
 }
 
@@ -123,26 +93,16 @@ main {
         overflow-y: auto;
         overflow-x: hidden;
 
+        .filter-section.state .triage-group {
+            justify-content: space-between;
+        }
+
         .section-label {
             display: inline-block;
-            margin-bottom: 1rem;
-        }
-
-        .duration-slider {
-            width: 99%;
-            accent-color: var(--primary);
-            background: var(--bg-secondary);
-            height: 6px;
-            border-radius: 3px;
-            appearance: none;
-        }
-
-        .range-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
+            font-weight: 600;
             color: var(--text-secondary);
-            margin-top: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
         }
 
         .year-input-group {
@@ -155,7 +115,7 @@ main {
                 padding: 0.5rem;
                 background: var(--bg-secondary);
                 border: 1px solid var(--border);
-                border-radius: 8px;
+                border-radius: 6px;
                 font-size: 1rem;
                 font-weight: 600;
                 text-align: center;
@@ -174,25 +134,38 @@ main {
         }
     }
 
-    .reset-filters-btn {
+    .filter-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
         margin-top: 1rem;
-        padding: 8px 16px;
         font-size: 1rem;
         color: var(--text-secondary);
-        background: var(--bg-secondary);
-        border: 1px solid color-mix(in srgb, var(--text-secondary), transparent 70%);
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s ease;
 
-        &:hover {
+        .reset-btn,
+        .pick-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100%;
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid color-mix(in srgb, var(--text-secondary), transparent 70%);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
             color: var(--danger);
             background: color-mix(in srgb, var(--danger), transparent 90%);
             border-color: color-mix(in srgb, var(--danger), transparent 50%);
         }
 
-        &:active {
-            transform: scale(0.95);
+        .pick-btn:hover {
+            color: var(--primary);
+            background: color-mix(in srgb, var(--primary), transparent 90%);
+            border-color: color-mix(in srgb, var(--primary), transparent 50%);
         }
     }
 }
@@ -272,7 +245,7 @@ main {
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    margin: 1rem;
+    margin: 1rem 1rem 0 1rem;
     background: var(--bg-secondary);
     border: 1px dashed var(--primary);
     border-radius: 10px;

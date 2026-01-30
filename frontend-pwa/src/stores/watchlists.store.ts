@@ -47,24 +47,13 @@ export const useWatchlistsStore = defineStore(
 
         const enrichedListItems = computed(() => (listId: string): EnrichedWatchListItem[] => {
             const rawItems = listItems.value[listId] ?? [];
-            const currentLocale = i18n.global.locale.value;
+            return rawItems.map((item) => enrichItem(item, titlesStore.titles, i18n.global.locale.value));
+        });
 
-            return rawItems.map((item) => {
-                const titleMetadata = titlesStore.titles[item.titleId];
-                const displayTitle = titleMetadata?.localizedTitles?.[currentLocale] || titleMetadata?.title || "?";
-
-                const titleGenres = titleMetadata?.genres ?? [];
-                const added = item.addedGenres ?? [];
-                const excluded = item.excludedGenres ?? [];
-                const finalGenres = [...new Set([...titleGenres, ...added])].filter((g) => !excluded.includes(g));
-
-                return {
-                    ...item,
-                    details: titleMetadata,
-                    displayTitle,
-                    resolvedGenres: finalGenres,
-                };
-            });
+        const enrichedListItem = computed(() => (listId: string, itemId: string): EnrichedWatchListItem | undefined => {
+            const item = listItems.value[listId]?.find((i) => i.id === itemId);
+            if (!item) return undefined;
+            return enrichItem(item, titlesStore.titles, i18n.global.locale.value);
         });
 
         const availableListFilters = computed(() => (listId: string) => {
@@ -74,6 +63,8 @@ export const useWatchlistsStore = defineStore(
             let maxDuration = 0;
             let minYear = Infinity;
             let maxYear = 0;
+            let minRating = Infinity;
+            let maxRating = 0;
             const directorsMap = new Map<string, number>();
             const actorsMap = new Map<string, number>();
 
@@ -90,6 +81,12 @@ export const useWatchlistsStore = defineStore(
                 if (year) {
                     if (year < minYear) minYear = year;
                     if (year > maxYear) maxYear = year;
+                }
+
+                const rating = i.details?.avgRating;
+                if (rating) {
+                    if (rating < minRating) minRating = rating;
+                    if (rating > maxRating) maxRating = rating;
                 }
 
                 i.details?.directors?.forEach((d) => directorsMap.set(d, (directorsMap.get(d) || 0) + 1));
@@ -112,6 +109,10 @@ export const useWatchlistsStore = defineStore(
                 yearRange: {
                     min: minYear === Infinity ? 1800 : minYear,
                     max: maxYear === 0 ? new Date().getFullYear() : maxYear,
+                },
+                ratingRange: {
+                    min: minRating === Infinity ? 0 : minRating,
+                    max: maxRating,
                 },
                 directors: getTop(directorsMap),
                 actors: getTop(actorsMap),
@@ -304,6 +305,32 @@ export const useWatchlistsStore = defineStore(
             }
         }
 
+        async function deleteWatchlistItem(listId: string, itemId: string) {
+            isProcessing.value = true;
+            try {
+                await WatchListsService.deleteWatchlistsItems(listId, itemId);
+                if (listItems.value[listId]) {
+                    listItems.value[listId] = listItems.value[listId].filter((i) => i.id !== itemId);
+                }
+
+                return true;
+            } catch (error) {
+                return false;
+            } finally {
+                isProcessing.value = false;
+            }
+        }
+
+        async function patchWatchlistItem(listId: string, itemId: string, data: Partial<WatchListItem>) {
+            isProcessing.value = true;
+            try {
+                await WatchListsService.patchWatchlistsItems(listId, itemId, data);
+                await fetchSingleList(listId);
+            } finally {
+                isProcessing.value = false;
+            }
+        }
+
         async function updateListItemOrder(listId: string, newOrderedItems: WatchListItem[], movedItem: WatchListItem) {
             const index = newOrderedItems.findIndex((i) => i.id === movedItem.id);
             const prevKey = newOrderedItems[index - 1]?.sortKey || "";
@@ -328,6 +355,7 @@ export const useWatchlistsStore = defineStore(
             isInitialLoading,
             sortedLists,
             enrichedListItems,
+            enrichedListItem,
             availableListFilters,
             $reset,
             fetchLists,
@@ -341,6 +369,8 @@ export const useWatchlistsStore = defineStore(
             revokeInvite,
             removeMember,
             addItemToList,
+            deleteWatchlistItem,
+            patchWatchlistItem,
             updateListItemOrder,
         };
     },
@@ -351,6 +381,23 @@ export const useWatchlistsStore = defineStore(
         },
     },
 );
+
+function enrichItem(item: WatchListItem, titles: Record<string, Title>, locale: string): EnrichedWatchListItem {
+    const titleMetadata = titles[item.titleId];
+    const displayTitle = titleMetadata?.localizedTitles?.[locale] || titleMetadata?.title || "?";
+
+    const titleGenres = titleMetadata?.genres ?? [];
+    const added = item.addedGenres ?? [];
+    const excluded = item.excludedGenres ?? [];
+    const finalGenres = [...new Set([...titleGenres, ...added])].filter((g) => !excluded.includes(g));
+
+    return {
+        ...item,
+        details: titleMetadata,
+        displayTitle,
+        resolvedGenres: finalGenres,
+    };
+}
 
 function calculateMidpoint(prev: string, next: string): string {
     if (!prev) return next ? String.fromCharCode(next.charCodeAt(0) - 1) : "m";

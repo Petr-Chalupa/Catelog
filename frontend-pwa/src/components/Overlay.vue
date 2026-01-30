@@ -33,7 +33,7 @@
 .content {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 2rem;
+    padding-bottom: 1rem;
 }
 
 .fade-enter-active,

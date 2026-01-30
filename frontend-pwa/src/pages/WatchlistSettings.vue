@@ -16,7 +16,7 @@
             <div class="settings-item change-name">
                 <Input v-model="editName" :disabled="watchlistsStore.isProcessing" @enter="handleSaveName">
                     <template #actions>
-                        <button :disabled="!editName.trim().length" @click="handleSaveName">
+                        <button :disabled="!editName.trim().length" @click="handleSaveName" v-onlineonly>
                             <Save v-if="!watchlistsStore.isProcessing" :size="18" />
                             <LoaderIcon v-else :size="18" class="animate-spin" />
                         </button>
@@ -31,7 +31,7 @@
             <div class="settings-item add-member">
                 <Input v-model="addMemberEmail" placeholder="E-mail" :disabled="watchlistsStore.isProcessing" @enter="addMember">
                     <template #actions>
-                        <button :disabled="!isOwner || !addMemberEmail.trim().length" @click="addMember">
+                        <button :disabled="!isOwner || !addMemberEmail.trim().length" @click="addMember" v-onlineonly>
                             <Plus v-if="!watchlistsStore.isProcessing" :size="18" />
                             <LoaderIcon v-else :size="18" class="animate-spin" />
                         </button>
@@ -43,8 +43,8 @@
                 <div v-for="member in members" :key="member.id" class="member">
                     <span>{{ member.name }}</span>
                     <span class="actions">
-                        <ShieldUser v-if="!watchlistsStore.isProcessing && isOwner" :size="24" class="transfer" @click="handleTransfer(member.id)" />
-                        <Trash v-if="!watchlistsStore.isProcessing && isOwner" :size="24" class="remove" @click="handleMemberRemove(member.id)" />
+                        <ShieldUser v-if="!watchlistsStore.isProcessing && isOwner" :size="24" class="transfer" @click="handleTransfer(member.id)" v-onlineonly />
+                        <Trash v-if="!watchlistsStore.isProcessing && isOwner" :size="24" class="remove" @click="handleMemberRemove(member.id)" v-onlineonly />
                         <LoaderIcon v-if="watchlistsStore.isProcessing" :size="24" class="animate-spin" />
                     </span>
                 </div>
@@ -54,7 +54,7 @@
                 <div v-for="invite in invites" :key="invite.id" class="invite">
                     <span>Invited > {{ invite.inviteeName }}</span>
                     <span class="actions">
-                        <Trash v-if="!watchlistsStore.isProcessing && isOwner" :size="24" class="remove" @click="handleInviteRemove(invite.id)" />
+                        <Trash v-if="!watchlistsStore.isProcessing && isOwner" :size="24" class="remove" @click="handleInviteRemove(invite.id)" v-onlineonly />
                         <LoaderIcon v-if="watchlistsStore.isProcessing" :size="24" class="animate-spin" />
                     </span>
                 </div>
@@ -62,7 +62,7 @@
         </section>
 
         <section class="settings-group">
-            <button @click="handleDelete" class="btn-delete">Delete List</button>
+            <button @click="handleDelete" class="btn-delete" v-onlineonly>Delete List</button>
         </section>
     </main>
 </template>

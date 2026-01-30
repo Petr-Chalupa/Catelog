@@ -55,13 +55,14 @@
                 <p>No pending invites at the moment.</p>
             </div>
             <div v-else class="invite-list">
-                <InviteCard v-for="i in userStore.invites" :invite="i" size="small" :disabled="userStore.isProcessing" @accept="userStore.acceptInvite(i.id)" @decline="userStore.declineInvite(i.id)" />
+                <InviteCard v-for="i in userStore.invites" :invite="i" size="small" :disabled="userStore.isProcessing" @accept="userStore.acceptInvite(i.id)"
+                    @decline="userStore.declineInvite(i.id)" />
             </div>
         </section>
 
         <section class="settings-group">
-            <button @click="handleLogout" :disabled="userStore.isProcessing" class="btn-logout">Sign Out</button>
-            <button @click="handleDelete" :disabled="userStore.isProcessing" class="btn-delete">Delete Account</button>
+            <button @click="handleLogout" :disabled="userStore.isProcessing" class="btn-logout" v-onlineonly>Sign Out</button>
+            <button @click="handleDelete" :disabled="userStore.isProcessing" class="btn-delete" v-onlineonly>Delete Account</button>
         </section>
     </main>
 </template>

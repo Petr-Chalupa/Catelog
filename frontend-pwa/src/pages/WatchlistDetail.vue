@@ -5,7 +5,6 @@
         </template>
         <template #actions>
             <Search @click="openFilter" />
-            <Dices @click="openPick" />
             <Settings @click="openSettings" />
         </template>
     </Header>
@@ -16,12 +15,12 @@
             <p>Loading items...</p>
         </section>
 
-        <section v-else-if="activeItems.length == 0" class="empty-state">
+        <section v-else-if="filteredItems.length == 0" class="empty-state">
             <Library :size="48" />
             <p>No items found. Create one to get started!</p>
         </section>
 
-        <DraggableList v-else :items="activeItems" @row-click="goToItem($event.id)" @item-moved="({ element, newArray }) => watchlistsStore.updateListItemOrder(listId, newArray, element)">
+        <DraggableList v-else :items="filteredItems" @row-click="goToItem($event.id)" @item-moved="({ element, newArray }) => watchlistsStore.updateListItemOrder(listId, newArray, element)">
             <template #body="{ item }">
                 <div class="item">
                     <img v-if="item.details?.poster" :src="item.details.poster" class="poster" />
@@ -40,32 +39,12 @@
                 </div>
             </template>
             <template #actions="{ item }">
-                <input type="radio" class="watched-btn" @click.stop="handleItemState(item)" />
+                <button class="watched-btn" :class="item.state" @click.stop="handleItemState(item)" v-onlineonly>
+                    <Play v-if="item.state === 'started'" :size="18" />
+                    <Check v-else-if="item.state === 'finished'" :size="18" />
+                </button>
             </template>
         </DraggableList>
-
-        <details v-if="finishedItems.length > 0" class="finished-section">
-            <summary class="finished-summary">
-                <ChevronRight class="arrow-icon" :size="20" />
-                <span class="finished-title">Dokončeno ({{ finishedItems.length }})</span>
-            </summary>
-            <div class="finished-list">
-                <div v-for="item in finishedItems" :key="item.id" class="item finished-item" @click="goToItem(item.id)">
-                    <img v-if="item.details?.poster" :src="item.details.poster" class="poster" />
-                    <Image v-else class="poster" />
-                    <div class="info">
-                        <span class="title">{{ item.details?.title }}</span>
-                        <span class="other">{{ item.details?.year ?? "-" }} | {{ item.details?.type }}</span>
-                        <span class="genres">
-                            <span v-for="genre in item.details?.genres?.slice(0, 3)" :key="genre" class="genre-tag">
-                                {{ genre }}
-                            </span>
-                        </span>
-                    </div>
-                    <input type="radio" checked class="watched-btn" @click.stop="handleItemState(item)" />
-                </div>
-            </div>
-        </details>
 
         <button v-if="!isSearchExpanded" class="add-item-btn" @click="openSearch">
             <Plus :size="28" />
@@ -84,17 +63,18 @@
             <template #body>
                 <div class="filter-body">
                     <div class="filter-content">
-                        <div class="filter-section">
-                            <label class="section-label">Max délka [min]:</label>
-                            <input type="range" :min="availableFilters.durationRange.min" :max="availableFilters.durationRange.max" v-model.number="maxDurationFilter" class="duration-slider" />
-                            <div class="range-labels">
-                                <span>{{ availableFilters.durationRange.min }}</span>
-                                <span>{{ Math.round((availableFilters.durationRange.min + availableFilters.durationRange.max) / 2) }}</span>
-                                <span>{{ availableFilters.durationRange.max }}</span>
-                            </div>
+                        <div class="filter-section state">
+                            <label class="section-label">Stav</label>
+                            <Triage :items="['planned', 'started', 'finished']" v-model="stateFilters" />
                         </div>
                         <div class="filter-section">
-                            <label class="section-label">Rok vydání [{{ availableFilters.yearRange.min }} - {{ availableFilters.yearRange.max }}]:</label>
+                            <RangeInput label="Maximální délka" v-model="maxDurationFilter" :min="availableFilters.durationRange.min" :max="availableFilters.durationRange.max" unit="min" />
+                        </div>
+                        <div class="filter-section">
+                            <RangeInput label="Minimální hodnocení" v-model="minRatingFilter" :min="availableFilters.ratingRange.min" :max="availableFilters.ratingRange.max" :step="0.1" />
+                        </div>
+                        <div class="filter-section">
+                            <label class="section-label">Rok vydání [{{ availableFilters.yearRange.min }} - {{ availableFilters.yearRange.max }}]</label>
                             <div class="year-input-group">
                                 <input type="number" v-model.number="minYearFilter" :min="availableFilters.yearRange.min" :max="maxYearFilter" />
                                 <span class="year-separator">—</span>
@@ -102,35 +82,29 @@
                             </div>
                         </div>
                         <div class="filter-section">
-                            <label class="section-label">Žánry:</label>
-                            <Triage :items="availableFilters.genres" v-model="genreFilters" class="genre-triage-item">
-                                <template #icon="{ state }">
-                                    <span v-if="state === 'positive'" class="icon">✓</span>
-                                    <span v-if="state === 'negative'" class="icon">✕</span>
-                                </template>
-                            </Triage>
+                            <label class="section-label">Žánry</label>
+                            <Triage :items="availableFilters.genres" v-model="genreFilters" class="genre-triage-item" />
                         </div>
                         <div class="filter-section">
-                            <label class="section-label">Režiséři:</label>
-                            <Triage :items="availableFilters.directors" v-model="directorFilters">
-                                <template #icon="{ state }">
-                                    <span v-if="state === 'positive'" class="icon">✓</span>
-                                    <span v-if="state === 'negative'" class="icon">✕</span>
-                                </template>
-                            </Triage>
+                            <label class="section-label">Režiséři</label>
+                            <Triage :items="availableFilters.directors" v-model="directorFilters" />
                         </div>
                         <div class="filter-section">
-                            <label class="section-label">Herci:</label>
-                            <Triage :items="availableFilters.actors" v-model="actorFilters">
-                                <template #icon="{ state }">
-                                    <span v-if="state === 'positive'" class="icon">✓</span>
-                                    <span v-if="state === 'negative'" class="icon">✕</span>
-                                </template>
-                            </Triage>
+                            <label class="section-label">Herci</label>
+                            <Triage :items="availableFilters.actors" v-model="actorFilters" />
                         </div>
                     </div>
 
-                    <button class="reset-filters-btn" @click="resetFilters">Resetovat filtry</button>
+                    <div class="filter-actions">
+                        <button class="reset-btn" @click="resetFilters">
+                            <RotateCcw :size="18" />
+                            <span>Resetovat filtry</span>
+                        </button>
+                        <button class="pick-btn" @click="openPick">
+                            <Dices :size="18" />
+                            <span>Pokročilý výběr</span>
+                        </button>
+                    </div>
                 </div>
             </template>
         </Overlay>
@@ -140,7 +114,7 @@
                 <Input v-model="searchQuery" placeholder="Hledat film..." @enter="handleSearch" autoFocus>
                     <template #actions>
                         <button class="search-btn" @click="handleSearch" :disabled="titlesStore.isProcessing">
-                            <Search v-if="!titlesStore.isProcessing" :size="20" />
+                            <Search v-if="!titlesStore.isProcessing" v-onlineonly :size="20" />
                             <LoaderIcon v-else :size="20" class="animate-spin" />
                         </button>
                         <button class="close-btn" @click="closeSearch">
@@ -183,10 +157,10 @@
 <style scoped src="../styles/watchlistDetail.css"></style>
 
 <script setup lang="ts">
-import { ChevronRight, Dices, Image, Library, LoaderIcon, Plus, Search, Settings, X } from "lucide-vue-next";
+import { Check, ChevronRight, Dices, Image, Library, LoaderIcon, Play, Plus, RotateCcw, Search, Settings, X } from "lucide-vue-next";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import Header from "../components/Header.vue";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useTitlesStore } from "../stores/titles.store";
 import type { Title, WatchListItem } from "../api";
@@ -194,6 +168,7 @@ import DraggableList from "../components/DraggableList.vue";
 import Overlay from "../components/Overlay.vue";
 import Input from "../components/Input.vue";
 import Triage from "../components/Triage.vue";
+import RangeInput from "../components/RangeInput.vue";
 
 const props = defineProps<{ listId: string }>();
 
@@ -205,20 +180,20 @@ const availableFilters = computed(() => watchlistsStore.availableListFilters(pro
 const isFilterExpanded = ref(false);
 const isFilterFirstOpen = ref(true);
 const filterQuery = ref("");
+const stateFilters = ref<Record<string, string>>({ planned: "neutral", started: "neutral", finished: "negative" });
 const genreFilters = ref<Record<string, string>>({});
 const maxDurationFilter = ref<number>(Infinity);
 const minYearFilter = ref<number>(0);
 const maxYearFilter = ref<number>(Infinity);
 const directorFilters = ref<Record<string, string>>({});
 const actorFilters = ref<Record<string, string>>({});
+const minRatingFilter = ref<number>(0);
 const isSearchExpanded = ref(false);
 const searchQuery = ref("");
-const activeItems = computed({
+const filteredItems = computed({
     get() {
         return watchlistsStore.enrichedListItems(props.listId)
             .filter(i => {
-                if (i.state === "finished") return false;
-
                 const matchesText = i.displayTitle.toLowerCase().includes(filterQuery.value.toLowerCase());
                 if (!matchesText) return false;
 
@@ -226,6 +201,9 @@ const activeItems = computed({
 
                 const year = i.details?.year;
                 if (year && (year < minYearFilter.value || year > maxYearFilter.value)) return false;
+
+                const rating = i.details?.avgRating;
+                if (rating && rating < minRatingFilter.value) return false;
 
                 const checkTriage = (filters: Record<string, string>, itemValues: string[]) => {
                     const active = Object.entries(filters).filter(([_, s]) => s !== "neutral");
@@ -240,6 +218,7 @@ const activeItems = computed({
                     return true;
                 };
 
+                if (!checkTriage(stateFilters.value, [i.state])) return false;
                 if (!checkTriage(genreFilters.value, i.resolvedGenres)) return false;
                 if (!checkTriage(directorFilters.value, i.details?.directors || [])) return false;
                 if (!checkTriage(actorFilters.value, i.details?.actors || [])) return false;
@@ -248,15 +227,9 @@ const activeItems = computed({
             })
             .sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || ""));
     },
-    set(newActiveArray) {
-        const finished = (watchlistsStore.listItems[props.listId] ?? []).filter(i => i.state === "finished");
-        watchlistsStore.listItems[props.listId] = [...newActiveArray, ...finished];
+    set(newArray) {
+        watchlistsStore.listItems[props.listId] = newArray;
     }
-});
-const finishedItems = computed(() => {
-    return watchlistsStore.enrichedListItems(props.listId)
-        .filter(i => i.state === "finished")
-        .sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
 });
 
 onMounted(() => watchlistsStore.fetchSingleList(props.listId));
@@ -300,6 +273,8 @@ function resetFilters() {
     maxDurationFilter.value = availableFilters.value.durationRange.max;
     minYearFilter.value = availableFilters.value.yearRange.min;
     maxYearFilter.value = availableFilters.value.yearRange.max;
+    minRatingFilter.value = availableFilters.value.ratingRange.min;
+    stateFilters.value = { planned: "neutral", started: "neutral", finished: "negative" };
     genreFilters.value = {};
     directorFilters.value = {};
     actorFilters.value = {};
@@ -328,7 +303,10 @@ async function selectTitle(title: Title) {
 }
 
 async function handleItemState(item: WatchListItem) {
-    const newState = (item.state === "finished" ? "planned" : "finished") as WatchListItem.state;
-    // await watchlistsStore.updateItemState(props.listId, item.id, newState);
+    const states = ["planned", "started", "finished"] as WatchListItem.state[];
+    const currentIndex = states.indexOf(item.state);
+    const newState = states[(currentIndex + 1) % states.length];
+
+    await watchlistsStore.patchWatchlistItem(props.listId, item.id, { state: newState });
 }
 </script>

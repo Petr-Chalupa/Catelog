@@ -1,5 +1,6 @@
 <template>
-    <draggable :model-value="items" @change="onDragChange" item-key="id" tag="div" :delay="300" :delay-on-touch-only="false" :touch-start-threshold="5" ghost-class="ghost-item" drag-class="drag-item" :animation="200" class="list-grid">
+    <draggable :model-value="items" @change="onDragChange" item-key="id" tag="div" :delay="300" :delay-on-touch-only="false" :touch-start-threshold="5" :disabled="!isOnline" ghost-class="ghost-item"
+        drag-class="drag-item" :animation="200" class="list-grid">
         <template #item="{ element, index }">
             <div class="list-row" @click="$emit('row-click', element)">
                 <div class="body">
@@ -90,9 +91,12 @@
 
 <script setup lang="ts">
 import draggable from "vuedraggable";
+import { useOnline } from "../composables/useOnline";
 
 const emits = defineEmits(["row-click", "item-moved"]);
 const props = defineProps<{ items: any[]; }>();
+
+const isOnline = useOnline();
 
 const onDragChange = (evt: any) => {
     if (evt.moved) {

@@ -44,7 +44,7 @@
         <section class="create-section">
             <Input v-model="newListName" placeholder="Name..." @enter="createNewList">
                 <template #actions>
-                    <button @click="createNewList" :disabled="watchlistsStore.isProcessing || !newListName.trim()">
+                    <button @click="createNewList" :disabled="watchlistsStore.isProcessing || !newListName.trim()" v-onlineonly>
                         <Plus v-if="!watchlistsStore.isProcessing" :size="20" />
                         <LoaderIcon v-else :size="20" class="animate-spin" />
                     </button>
