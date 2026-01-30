@@ -72,6 +72,10 @@ export const useWatchlistsStore = defineStore(
             const genres = new Set<string>();
             let minDuration = Infinity;
             let maxDuration = 0;
+            let minYear = Infinity;
+            let maxYear = 0;
+            const directorsMap = new Map<string, number>();
+            const actorsMap = new Map<string, number>();
 
             items.forEach((i) => {
                 i.resolvedGenres.forEach((g) => genres.add(g));
@@ -81,7 +85,23 @@ export const useWatchlistsStore = defineStore(
                     if (duration < minDuration) minDuration = duration;
                     if (duration > maxDuration) maxDuration = duration;
                 }
+
+                const year = i.details?.year;
+                if (year) {
+                    if (year < minYear) minYear = year;
+                    if (year > maxYear) maxYear = year;
+                }
+
+                i.details?.directors?.forEach((d) => directorsMap.set(d, (directorsMap.get(d) || 0) + 1));
+                i.details?.actors?.forEach((a) => actorsMap.set(a, (actorsMap.get(a) || 0) + 1));
             });
+
+            const getTop = (map: Map<string, number>, limit = 10) =>
+                Array.from(map.entries())
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, limit)
+                    .map((e) => e[0])
+                    .sort();
 
             return {
                 genres: Array.from(genres).sort(),
@@ -89,6 +109,12 @@ export const useWatchlistsStore = defineStore(
                     min: minDuration === Infinity ? 0 : minDuration,
                     max: maxDuration,
                 },
+                yearRange: {
+                    min: minYear === Infinity ? 1800 : minYear,
+                    max: maxYear === 0 ? new Date().getFullYear() : maxYear,
+                },
+                directors: getTop(directorsMap),
+                actors: getTop(actorsMap),
             };
         });
 

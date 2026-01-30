@@ -5,6 +5,7 @@
         </template>
         <template #actions>
             <Search @click="openFilter" />
+            <Dices @click="openPick" />
             <Settings @click="openSettings" />
         </template>
     </Header>
@@ -93,6 +94,14 @@
                             </div>
                         </div>
                         <div class="filter-section">
+                            <label class="section-label">Rok vydání [{{ availableFilters.yearRange.min }} - {{ availableFilters.yearRange.max }}]:</label>
+                            <div class="year-input-group">
+                                <input type="number" v-model.number="minYearFilter" :min="availableFilters.yearRange.min" :max="maxYearFilter" />
+                                <span class="year-separator">—</span>
+                                <input type="number" v-model.number="maxYearFilter" :min="minYearFilter" :max="availableFilters.yearRange.max" />
+                            </div>
+                        </div>
+                        <div class="filter-section">
                             <label class="section-label">Žánry:</label>
                             <Triage :items="availableFilters.genres" v-model="genreFilters" class="genre-triage-item">
                                 <template #icon="{ state }">
@@ -103,9 +112,21 @@
                         </div>
                         <div class="filter-section">
                             <label class="section-label">Režiséři:</label>
+                            <Triage :items="availableFilters.directors" v-model="directorFilters">
+                                <template #icon="{ state }">
+                                    <span v-if="state === 'positive'" class="icon">✓</span>
+                                    <span v-if="state === 'negative'" class="icon">✕</span>
+                                </template>
+                            </Triage>
                         </div>
                         <div class="filter-section">
                             <label class="section-label">Herci:</label>
+                            <Triage :items="availableFilters.actors" v-model="actorFilters">
+                                <template #icon="{ state }">
+                                    <span v-if="state === 'positive'" class="icon">✓</span>
+                                    <span v-if="state === 'negative'" class="icon">✕</span>
+                                </template>
+                            </Triage>
                         </div>
                     </div>
 
@@ -162,7 +183,7 @@
 <style scoped src="../styles/watchlistDetail.css"></style>
 
 <script setup lang="ts">
-import { ChevronRight, Image, Library, LoaderIcon, Plus, Search, Settings, X } from "lucide-vue-next";
+import { ChevronRight, Dices, Image, Library, LoaderIcon, Plus, Search, Settings, X } from "lucide-vue-next";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import Header from "../components/Header.vue";
 import { computed, onMounted, ref, watch } from "vue";
@@ -182,9 +203,14 @@ const titlesStore = useTitlesStore();
 const list = computed(() => watchlistsStore.lists.find((l) => l.id === props.listId));
 const availableFilters = computed(() => watchlistsStore.availableListFilters(props.listId));
 const isFilterExpanded = ref(false);
+const isFilterFirstOpen = ref(true);
 const filterQuery = ref("");
 const genreFilters = ref<Record<string, string>>({});
-const maxDurationFilter = ref<number>(0);
+const maxDurationFilter = ref<number>(Infinity);
+const minYearFilter = ref<number>(0);
+const maxYearFilter = ref<number>(Infinity);
+const directorFilters = ref<Record<string, string>>({});
+const actorFilters = ref<Record<string, string>>({});
 const isSearchExpanded = ref(false);
 const searchQuery = ref("");
 const activeItems = computed({
@@ -198,15 +224,25 @@ const activeItems = computed({
 
                 if (i.details?.durationMinutes && i.details.durationMinutes > maxDurationFilter.value) return false;
 
-                const filterEntries = Object.entries(genreFilters.value);
-                if (filterEntries.length > 0) {
-                    const matchesGenres = filterEntries.every(([genre, state]) => {
-                        if (state === "positive") return i.resolvedGenres.includes(genre);
-                        if (state === "negative") return !i.resolvedGenres.includes(genre);
-                        return true;
-                    });
-                    if (!matchesGenres) return false;
-                }
+                const year = i.details?.year;
+                if (year && (year < minYearFilter.value || year > maxYearFilter.value)) return false;
+
+                const checkTriage = (filters: Record<string, string>, itemValues: string[]) => {
+                    const active = Object.entries(filters).filter(([_, s]) => s !== "neutral");
+                    if (active.length === 0) return true;
+
+                    const positives = active.filter(([_, s]) => s === "positive").map(([v]) => v);
+                    if (positives.length > 0 && !positives.some(p => itemValues.includes(p))) return false;
+
+                    const negatives = active.filter(([_, s]) => s === "negative").map(([v]) => v);
+                    if (negatives.length > 0 && negatives.some(n => itemValues.includes(n))) return false;
+
+                    return true;
+                };
+
+                if (!checkTriage(genreFilters.value, i.resolvedGenres)) return false;
+                if (!checkTriage(directorFilters.value, i.details?.directors || [])) return false;
+                if (!checkTriage(actorFilters.value, i.details?.actors || [])) return false;
 
                 return true;
             })
@@ -218,24 +254,16 @@ const activeItems = computed({
     }
 });
 const finishedItems = computed(() => {
-    return processItems()
-        .filter(i => i.state === "finished" && i.details?.title.toLowerCase().includes(filterQuery.value.toLowerCase()))
+    return watchlistsStore.enrichedListItems(props.listId)
+        .filter(i => i.state === "finished")
         .sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
 });
 
 onMounted(() => watchlistsStore.fetchSingleList(props.listId));
 
-watch(availableFilters, (newFilters) => {
-    // Init of filters
-    if (newFilters.durationRange.max > 0 && maxDurationFilter.value === 0) {
-        maxDurationFilter.value = newFilters.durationRange.max;
-    }
-}, { immediate: true });
-
-function processItems() {
-    const listItems = watchlistsStore.listItems[props.listId] ?? [];
-    return listItems.map((item) => ({ ...item, details: titlesStore.titles[item.titleId] }));
-};
+function openPick() {
+    router.push({ name: "watchlistPick", params: { listId: props.listId } });
+}
 
 function openSettings() {
     router.push({ name: "watchlistSettings", params: { listId: props.listId } });
@@ -246,6 +274,10 @@ function goToItem(id: string) {
 }
 
 function openFilter() {
+    if (isFilterFirstOpen.value) {
+        resetFilters();
+        isFilterFirstOpen.value = false;
+    }
     isFilterExpanded.value = true;
 }
 
@@ -266,7 +298,11 @@ function closeSearch() {
 function resetFilters() {
     filterQuery.value = "";
     maxDurationFilter.value = availableFilters.value.durationRange.max;
+    minYearFilter.value = availableFilters.value.yearRange.min;
+    maxYearFilter.value = availableFilters.value.yearRange.max;
     genreFilters.value = {};
+    directorFilters.value = {};
+    actorFilters.value = {};
 }
 
 async function handleQuickAdd() {

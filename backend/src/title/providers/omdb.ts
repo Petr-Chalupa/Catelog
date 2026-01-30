@@ -46,8 +46,11 @@ function mapOMDbToTitle(data: any): Title {
         localizedTitles: { en: data.Title },
         year: data.Year ? parseInt(data.Year) : undefined,
         genres,
-        directors: data.Director ? data.Director.split(",").map((s: string) => s.trim()) : undefined,
-        actors: data.Actors ? data.Actors.split(",").map((s: string) => s.trim()) : undefined,
+        directors:
+            data.Director && data.Director !== "N/A"
+                ? data.Director.split(",").map((s: string) => s.trim())
+                : undefined,
+        actors: data.Actors && data.Actors !== "N/A" ? data.Actors.split(",").map((s: string) => s.trim()) : undefined,
         durationMinutes: data.Runtime ? parseInt(data.Runtime) : undefined,
         ratings: data.imdbRating && data.imdbRating !== "N/A" ? { imdb: parseFloat(data.imdbRating) } : undefined,
         poster: data.Poster && data.Poster !== "N/A" ? data.Poster : undefined,
