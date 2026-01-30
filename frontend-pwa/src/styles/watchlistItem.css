@@ -28,7 +28,7 @@
 
     .poster {
         width: 120px;
-        aspect-ratio: 2 / 3;
+        height: 180px;
         object-fit: cover;
         border-radius: 6px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -78,7 +78,6 @@
         &.planned {
             background: var(--bg-secondary);
             border-color: var(--bg-secondary);
-            box-shadow: 0 0 7px color-mix(in srgb, var(--bg-secondary), transparent 50%);
         }
 
         &.started {

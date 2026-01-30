@@ -125,7 +125,7 @@ export async function upsertWatchListItem(listId: string, item: Partial<WatchLis
             state: item.state || "planned",
             addedGenres: item.addedGenres,
             excludedGenres: item.excludedGenres,
-            personalRating: item.personalRating,
+            personalRating: item.personalRating || 0,
             sortKey: item.sortKey,
             updatedAt: new Date(),
         },

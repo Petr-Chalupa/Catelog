@@ -44,6 +44,8 @@
                 <Triage v-model="genres" :items="ALL_GENRES" :states="['neutral', 'positive']" />
             </div>
 
+            <RangeInput v-model="personalRating" label="Vlastní hodnocení" :min="0" :max="10" :step="0.1" />
+
             <div class="info-grid">
                 <div v-if="item.details?.directors?.length">
                     <span class="label">Režie</span>
@@ -71,7 +73,7 @@
 <style scoped src="../styles/watchlistItem.css"></style>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import Header from "../components/Header.vue";
@@ -79,6 +81,7 @@ import { Trash2, LoaderIcon, Merge, Image, Check, Play, Dot, Star, Calendar } fr
 import { TitleGenre, type WatchListItem } from "../api";
 import Overlay from "../components/Overlay.vue";
 import Triage from "../components/Triage.vue";
+import RangeInput from "../components/RangeInput.vue";
 
 const props = defineProps<{ listId: string; itemId: string; }>();
 
@@ -124,9 +127,23 @@ const genres = computed({
         await watchlistsStore.patchWatchlistItem(props.listId, props.itemId, { addedGenres: newAdded, excludedGenres: newExcluded });
     }
 });
+const personalRating = ref(item.value?.personalRating ?? 0);
+let ratingTimeout: ReturnType<typeof setTimeout> | null = null;
 const isMergeExpanded = ref(false);
 
 onMounted(() => watchlistsStore.fetchSingleList(props.listId));
+
+watch(() => item.value?.personalRating, (newVal) => {
+    if (newVal !== undefined) personalRating.value = newVal;
+});
+
+watch(personalRating, (newVal) => {
+    if (ratingTimeout) clearTimeout(ratingTimeout);
+
+    ratingTimeout = setTimeout(() => {
+        watchlistsStore.patchWatchlistItem(props.listId, props.itemId, { personalRating: newVal });
+    }, 500);
+});
 
 function openMerge() {
     isMergeExpanded.value = true;
@@ -138,7 +155,7 @@ function closeMerge() {
 
 async function toggleState() {
     if (!item.value) return;
-    const states = ["planned", "watching", "finished"] as WatchListItem.state[];
+    const states = ["planned", "started", "finished"] as WatchListItem.state[];
     const currentIndex = states.indexOf(item.value.state);
     const newState = states[(currentIndex + 1) % states.length];
 

@@ -23,6 +23,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    line-height: 0;
+    height: 32px;
     border: 1px solid color-mix(in srgb, var(--triage-color), transparent 50%);
     background-color: color-mix(in srgb, var(--triage-color), transparent 75%);
     color: var(--triage-color);
@@ -32,9 +34,13 @@
     cursor: pointer;
     transition: all 0.2s ease;
 
+    .body {
+        transform: translateY(-1px);
+    }
+
     .dot {
-        width: 8px;
-        height: 8px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
         background-color: color-mix(in srgb, currentColor, transparent 25%);
     }
