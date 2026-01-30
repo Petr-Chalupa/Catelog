@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { MergeCandidate } from './MergeCandidate';
+import type { TitleGenre } from './TitleGenre';
 export type Title = {
     id: string;
     type: Title.type;
@@ -10,7 +11,7 @@ export type Title = {
     localizedTitles?: Record<string, string>;
     poster?: string;
     year?: number;
-    genres?: Array<'action' | 'adventure' | 'comedy' | 'drama' | 'fantasy' | 'horror' | 'history' | 'sci_fi' | 'romance' | 'thriller' | 'animation' | 'documentary' | 'crime' | 'mystery' | 'family' | 'musical'>;
+    genres?: Array<TitleGenre>;
     ratings?: Record<string, number>;
     avgRating?: number;
     directors?: Array<string>;

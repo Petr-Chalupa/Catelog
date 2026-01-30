@@ -19,7 +19,8 @@ app.directive("onlineonly", {
             const isOffline = !navigator.onLine;
             el.style.opacity = isOffline ? "0.5" : "";
             el.style.pointerEvents = isOffline ? "none" : "";
-            el.setAttribute("disabled", isOffline ? "true" : "false");
+            if (isOffline) el.setAttribute("disabled", "true");
+            else el.removeAttribute("disabled");
         };
         window.addEventListener("online", el._onlineHandler);
         window.addEventListener("offline", el._onlineHandler);

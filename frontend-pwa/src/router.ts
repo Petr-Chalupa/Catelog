@@ -7,6 +7,7 @@ import Profile from "./pages/Profile.vue";
 import Invite from "./pages/Invite.vue";
 import WatchlistDetail from "./pages/WatchlistDetail.vue";
 import WatchlistSettings from "./pages/WatchlistSettings.vue";
+import WatchlistItem from "./pages/WatchlistItem.vue";
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -64,7 +65,7 @@ export const router = createRouter({
         {
             path: "/watchlists/:listId/items/:itemId",
             name: "watchlistItem",
-            component: { render: () => null },
+            component: WatchlistItem,
             meta: { requiresAuth: true },
             props: true,
         },

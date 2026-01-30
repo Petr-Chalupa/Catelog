@@ -1,6 +1,6 @@
 <template>
     <Transition name="fade">
-        <div v-if="isOpen" class="overlay" @keydown.esc="close">
+        <div v-if="isOpen" class="overlay">
             <div class="header">
                 <slot name="header"></slot>
             </div>
@@ -59,10 +59,21 @@ function close() {
     emit("close");
 }
 
+function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape" && isOpen.value) close();
+}
+
 watch(isOpen, (newVal) => {
     if (newVal && props.historyKey) window.history.pushState({ mode: props.historyKey }, "");
 });
 
-onMounted(() => window.addEventListener("popstate", close));
-onUnmounted(() => window.removeEventListener("popstate", close));
+onMounted(() => {
+    window.addEventListener("popstate", close);
+    window.addEventListener("keydown", handleKeydown);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("popstate", close);
+    window.removeEventListener("keydown", handleKeydown);
+});
 </script>

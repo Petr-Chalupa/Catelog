@@ -2,13 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { TitleGenre } from './TitleGenre';
 export type WatchListItem = {
     id: string;
     listId: string;
     titleId: string;
     state: WatchListItem.state;
-    addedGenres?: Array<string>;
-    excludedGenres?: Array<string>;
+    addedGenres?: Array<TitleGenre>;
+    excludedGenres?: Array<TitleGenre>;
     personalRating?: number;
     addedBy: string;
     sortKey?: string;

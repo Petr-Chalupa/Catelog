@@ -1,6 +1,6 @@
 <template>
     <div class="triage-group">
-        <div v-for="item in items" :key="getItemKey(item)" class="triage-item" :class="[`${getState(item)}`]" :style="getItemStyle(getState(item)!)" @click="cycle(item)">
+        <div v-for="item in items" :key="getItemKey(item)" class="triage-item" :class="[`${getState(item)}`]" @click="cycle(item)">
             <span class="dot"></span>
             <span class="body">
                 <slot name="body" :item="item" :state="getState(item)" :index="getStateIndex(item)">{{ item }}</slot>
@@ -18,12 +18,15 @@
 }
 
 .triage-item {
+    --triage-color: var(--text-secondary);
+
     display: flex;
     align-items: center;
     gap: 6px;
-    border: 1px solid var(--border);
-    background-color: color-mix(in srgb, var(--triage-color), transparent 85%);
+    border: 1px solid color-mix(in srgb, var(--triage-color), transparent 50%);
+    background-color: color-mix(in srgb, var(--triage-color), transparent 75%);
     color: var(--triage-color);
+    filter: contrast(1.5);
     padding: 4px 12px;
     border-radius: 8px;
     cursor: pointer;
@@ -33,30 +36,18 @@
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: #666;
+        background-color: color-mix(in srgb, currentColor, transparent 25%);
     }
 
     &.positive {
-        background: color-mix(in srgb, var(--ok), black 80%);
-        border-color: var(--ok);
-        color: var(--ok);
-
-        .dot {
-            background: var(--ok);
-        }
+        --triage-color: var(--ok);
     }
 
     &.negative {
-        background: color-mix(in srgb, var(--danger), black 80%);
-        border-color: var(--danger);
-        color: var(--danger);
+        --triage-color: var(--danger);
 
         .body {
             text-decoration: line-through;
-        }
-
-        .dot {
-            background: var(--danger);
         }
     }
 }
@@ -67,13 +58,11 @@ interface Props {
     items: any[];
     itemKey?: string;
     states?: string[];
-    colors?: string[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
     states: () => ["neutral", "positive", "negative"],
     itemKey: undefined,
-    colors: () => ["white", "green", "red"]
 });
 const stateValues = defineModel<Record<string, string>>({ default: () => ({}) });
 
@@ -86,11 +75,5 @@ function cycle(item: any) {
     const current = getState(item);
     const nextIdx = (props.states.indexOf(current!) + 1) % props.states.length;
     stateValues.value = { ...stateValues.value, [key]: props.states[nextIdx] };
-}
-
-function getItemStyle(state: string) {
-    const index = props.states.indexOf(state);
-    const color = props.colors[index] || props.colors[0];
-    return { "--triage-color": color };
-}
+} 
 </script>

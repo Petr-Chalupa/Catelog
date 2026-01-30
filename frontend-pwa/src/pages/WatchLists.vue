@@ -11,13 +11,12 @@
         </template>
     </Header>
 
-    <main>
-        <section v-if="watchlistsStore.isInitialLoading" class="loading-state">
-            <LoaderIcon :size="48" class="animate-spin" />
-            <p>Loading watchlists...</p>
-        </section>
-
-        <section v-else-if="watchlistsStore.lists.length == 0" class="empty-state">
+    <main v-if="watchlistsStore.isInitialLoading" class="loading-state">
+        <LoaderIcon :size="48" class="animate-spin" />
+        <p>Loading watchlists...</p>
+    </main>
+    <main v-else>
+        <section v-if="watchlistsStore.lists.length == 0" class="empty-state">
             <Library :size="48" />
             <p>No watchlists found. Create one to get started!</p>
         </section>

@@ -9,13 +9,12 @@
         </template>
     </Header>
 
-    <main>
-        <section v-if="watchlistsStore.isInitialLoading" class="loading-state">
-            <LoaderIcon :size="48" class="animate-spin" />
-            <p>Loading items...</p>
-        </section>
-
-        <section v-else-if="filteredItems.length == 0" class="empty-state">
+    <main v-if="watchlistsStore.isInitialLoading" class="loading-state">
+        <LoaderIcon :size="48" class="animate-spin" />
+        <p>Loading items...</p>
+    </main>
+    <main v-else>
+        <section v-if="filteredItems.length == 0" class="empty-state">
             <Library :size="48" />
             <p>No items found. Create one to get started!</p>
         </section>
@@ -27,10 +26,10 @@
                     <Image v-else class="poster" />
                     <div class="info">
                         <div class="info">
-                            <span class="title">{{ item.details?.title }}</span>
+                            <span class="title">{{ item.displayTitle }}</span>
                             <span class="other">{{ item.details?.year ?? "-" }} | {{ item.details?.type }}</span>
                             <span class="genres">
-                                <span v-for="genre in item.details?.genres?.slice(0, 3)" :key="genre" class="genre-tag">
+                                <span v-for="genre in item.resolvedGenres?.slice(0, 3)" :key="genre" class="genre-tag">
                                     {{ genre }}
                                 </span>
                             </span>
@@ -46,7 +45,7 @@
             </template>
         </DraggableList>
 
-        <button v-if="!isSearchExpanded" class="add-item-btn" @click="openSearch">
+        <button v-if="!isSearchExpanded" class="add-item-btn" @click="openSearch" v-onlineonly>
             <Plus :size="28" />
         </button>
 
@@ -113,8 +112,8 @@
             <template #header>
                 <Input v-model="searchQuery" placeholder="Hledat film..." @enter="handleSearch" autoFocus>
                     <template #actions>
-                        <button class="search-btn" @click="handleSearch" :disabled="titlesStore.isProcessing">
-                            <Search v-if="!titlesStore.isProcessing" v-onlineonly :size="20" />
+                        <button class="search-btn" @click="handleSearch" :disabled="titlesStore.isProcessing" v-onlineonly>
+                            <Search v-if="!titlesStore.isProcessing" :size="20" />
                             <LoaderIcon v-else :size="20" class="animate-spin" />
                         </button>
                         <button class="close-btn" @click="closeSearch">
@@ -131,18 +130,18 @@
                     </div>
 
                     <ul v-else-if="titlesStore.searchResults.length > 0" class="results">
-                        <li v-for="title in titlesStore.searchResults" :key="title.id" class="result-item" @click="selectTitle(title)">
+                        <li v-for="title in titlesStore.searchResults" :key="title.id" class="result-item" @click="selectTitle(title)" v-onlineonly>
                             <img v-if="title.poster" :src="title.poster" class="poster" />
                             <Image v-else class="poster" />
                             <div class="info">
-                                <span class="title">{{ title.title }}</span>
+                                <span class="title">{{ title.localizedTitles?.[locale] || title?.title || "?" }}</span>
                                 <span class="other">{{ title.year ?? "-" }} | {{ title.type }}</span>
                             </div>
                             <Plus :size="20" class="add-icon" />
                         </li>
                     </ul>
 
-                    <div v-if="searchQuery.trim()" class="quick-add-option" @click="handleQuickAdd">
+                    <div v-if="searchQuery.trim()" class="quick-add-option" @click="handleQuickAdd" v-onlineonly>
                         <div class="quick-add-icon">
                             <Plus :size="20" />
                         </div>
@@ -157,7 +156,8 @@
 <style scoped src="../styles/watchlistDetail.css"></style>
 
 <script setup lang="ts">
-import { Check, ChevronRight, Dices, Image, Library, LoaderIcon, Play, Plus, RotateCcw, Search, Settings, X } from "lucide-vue-next";
+import { Check, Dices, Image, Library, LoaderIcon, Play, Plus, RotateCcw, Search, Settings, X } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import Header from "../components/Header.vue";
 import { computed, onMounted, ref } from "vue";
@@ -173,6 +173,7 @@ import RangeInput from "../components/RangeInput.vue";
 const props = defineProps<{ listId: string }>();
 
 const router = useRouter();
+const { locale } = useI18n();
 const watchlistsStore = useWatchlistsStore();
 const titlesStore = useTitlesStore();
 const list = computed(() => watchlistsStore.lists.find((l) => l.id === props.listId));

@@ -93,6 +93,12 @@ main {
         overflow-y: auto;
         overflow-x: hidden;
 
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
         .filter-section.state .triage-group {
             justify-content: space-between;
         }

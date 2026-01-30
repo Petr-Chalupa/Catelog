@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import {
     InvitesService,
     Title,
+    TitleGenre,
     TitlesService,
     UserService,
     WatchListItem,
@@ -58,7 +59,7 @@ export const useWatchlistsStore = defineStore(
 
         const availableListFilters = computed(() => (listId: string) => {
             const items = enrichedListItems.value(listId);
-            const genres = new Set<string>();
+            const genres = new Set<TitleGenre>();
             let minDuration = Infinity;
             let maxDuration = 0;
             let minYear = Infinity;

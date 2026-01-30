@@ -563,10 +563,12 @@ paths:
                                 state:
                                     type: string
                                     enum: [planned, started, finished]
-                                tags:
+                                addedGenres:
                                     type: array
-                                    items:
-                                        type: string
+                                    items: { $ref: "#/components/schemas/TitleGenre" }
+                                excludedGenres:
+                                    type: array
+                                    items: { $ref: "#/components/schemas/TitleGenre" }
                                 personalRating:
                                     type: number
                                 sortKey:
@@ -808,27 +810,7 @@ components:
                     type: integer
                 genres:
                     type: array
-                    items:
-                        type: string
-                        enum:
-                            [
-                                action,
-                                adventure,
-                                comedy,
-                                drama,
-                                fantasy,
-                                horror,
-                                history,
-                                sci_fi,
-                                romance,
-                                thriller,
-                                animation,
-                                documentary,
-                                crime,
-                                mystery,
-                                family,
-                                musical,
-                            ]
+                    items: { $ref: "#/components/schemas/TitleGenre" }
                 ratings:
                     type: object
                     additionalProperties:
@@ -860,6 +842,28 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+
+        TitleGenre:
+            type: string
+            enum:
+                [
+                    action,
+                    adventure,
+                    comedy,
+                    drama,
+                    fantasy,
+                    horror,
+                    history,
+                    sci_fi,
+                    romance,
+                    thriller,
+                    animation,
+                    documentary,
+                    crime,
+                    mystery,
+                    family,
+                    musical,
+                ]
 
         MergeCandidate:
             type: object
@@ -929,12 +933,10 @@ components:
                     enum: [planned, started, finished]
                 addedGenres:
                     type: array
-                    items:
-                        type: string
+                    items: { $ref: "#/components/schemas/TitleGenre" }
                 excludedGenres:
                     type: array
-                    items:
-                        type: string
+                    items: { $ref: "#/components/schemas/TitleGenre" }
                 personalRating:
                     type: number
                 addedBy:

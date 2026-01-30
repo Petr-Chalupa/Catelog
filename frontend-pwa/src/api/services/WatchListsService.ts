@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { TitleGenre } from '../models/TitleGenre';
 import type { WatchList } from '../models/WatchList';
 import type { WatchListItem } from '../models/WatchListItem';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -220,7 +221,8 @@ export class WatchListsService {
         itemId: string,
         requestBody: {
             state?: 'planned' | 'started' | 'finished';
-            tags?: Array<string>;
+            addedGenres?: Array<TitleGenre>;
+            excludedGenres?: Array<TitleGenre>;
             personalRating?: number;
             sortKey?: string;
         },
