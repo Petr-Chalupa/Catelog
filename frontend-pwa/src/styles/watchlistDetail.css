@@ -10,7 +10,7 @@ main {
 
     .poster {
         width: 2.75rem;
-        height: 100%;
+        height: 4.125rem;
         object-fit: cover;
         border-radius: 4px;
     }

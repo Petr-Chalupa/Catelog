@@ -38,9 +38,10 @@
 
     h3 {
         flex: 1;
-        font-size: 1rem;
-        font-weight: 400;
+        font-size: 1.25rem;
+        font-weight: 500;
         color: var(--text-primary);
+        margin: 0.5rem;
     }
 
     .meta {
