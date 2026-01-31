@@ -49,10 +49,14 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const isOpen = defineModel<boolean>({ default: false });
-const props = defineProps<{ historyKey?: string }>();
+const props = defineProps<{ historyKey: string }>();
 const emit = defineEmits(["close"]);
+
+const route = useRoute();
+const router = useRouter();
 
 function close() {
     isOpen.value = false;
@@ -64,7 +68,13 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 watch(isOpen, (newVal) => {
-    if (newVal && props.historyKey) window.history.pushState({ mode: props.historyKey }, "");
+    const hasQuery = route.query[props.historyKey] === "open";
+
+    if (newVal && !hasQuery) {
+        router.push({ query: { ...route.query, [props.historyKey]: "open" } });
+    } else if (!newVal && hasQuery) {
+        router.back();
+    }
 });
 
 onMounted(() => {

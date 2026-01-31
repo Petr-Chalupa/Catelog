@@ -42,8 +42,7 @@ function mapOMDbToTitle(data: any): Title {
     return {
         id: randomUUID(),
         type: OMDB_TYPE_MAP[data.Type] ?? "other",
-        title: data.Title,
-        localizedTitles: { en: data.Title },
+        titles: { en: data.Title },
         year: data.Year ? parseInt(data.Year) : undefined,
         genres,
         directors:

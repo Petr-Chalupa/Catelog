@@ -26,8 +26,8 @@
                     <Image v-else class="poster" />
                     <div class="info">
                         <div class="info">
-                            <span class="title">{{ item.displayTitle }}</span>
-                            <span class="other">{{ item.details?.year ?? "-" }} | {{ item.details?.type }}</span>
+                            <span class="title">{{ titlesStore.displayTitle(item.details) }}</span>
+                            <span class="other">{{ item.details?.year ?? "-" }} | {{ item.details?.type ?? "-" }}</span>
                             <span class="genres">
                                 <span v-for="genre in item.resolvedGenres?.slice(0, 3)" :key="genre" class="genre-tag">
                                     {{ genre }}
@@ -53,7 +53,7 @@
             <template #header>
                 <Input v-model="filterQuery" placeholder="Filtrovat list..." autoFocus>
                     <template #actions>
-                        <button class="close-btn" @click="closeFilter">
+                        <button class="close-btn" @click="filterQuery = ''">
                             <X :size="20" />
                         </button>
                     </template>
@@ -108,7 +108,7 @@
             </template>
         </Overlay>
 
-        <Overlay v-model="isSearchExpanded" history-key="search">
+        <Overlay v-model="isSearchExpanded" history-key="search" @close="closeSearch">
             <template #header>
                 <Input v-model="searchQuery" placeholder="Hledat film..." @enter="handleSearch" autoFocus>
                     <template #actions>
@@ -116,7 +116,7 @@
                             <Search v-if="!titlesStore.isProcessing" :size="20" />
                             <LoaderIcon v-else :size="20" class="animate-spin" />
                         </button>
-                        <button class="close-btn" @click="closeSearch">
+                        <button class="close-btn" @click="searchQuery = ''">
                             <X :size="20" />
                         </button>
                     </template>
@@ -134,8 +134,8 @@
                             <img v-if="title.poster" :src="title.poster" class="poster" />
                             <Image v-else class="poster" />
                             <div class="info">
-                                <span class="title">{{ title.localizedTitles?.[locale] || title?.title || "?" }}</span>
-                                <span class="other">{{ title.year ?? "-" }} | {{ title.type }}</span>
+                                <span class="title">{{ titlesStore.displayTitle(title) }}</span>
+                                <span class="other">{{ title.year ?? "-" }} | {{ title.type ?? "-" }}</span>
                             </div>
                             <Plus :size="20" class="add-icon" />
                         </li>
@@ -173,7 +173,6 @@ import RangeInput from "../components/RangeInput.vue";
 const props = defineProps<{ listId: string }>();
 
 const router = useRouter();
-const { locale } = useI18n();
 const watchlistsStore = useWatchlistsStore();
 const titlesStore = useTitlesStore();
 const list = computed(() => watchlistsStore.lists.find((l) => l.id === props.listId));
@@ -195,7 +194,8 @@ const filteredItems = computed({
     get() {
         return watchlistsStore.enrichedListItems(props.listId)
             .filter(i => {
-                const matchesText = i.displayTitle.toLowerCase().includes(filterQuery.value.toLowerCase());
+                const displayTitle = titlesStore.displayTitle(i.details);
+                const matchesText = displayTitle.toLowerCase().includes(filterQuery.value.toLowerCase());
                 if (!matchesText) return false;
 
                 if (i.details?.durationMinutes && i.details.durationMinutes > maxDurationFilter.value) return false;
@@ -259,10 +259,6 @@ function openSearch() {
     isSearchExpanded.value = true;
 }
 
-function closeFilter() {
-    isFilterExpanded.value = false;
-}
-
 function closeSearch() {
     isSearchExpanded.value = false;
     searchQuery.value = "";
@@ -286,6 +282,7 @@ async function handleQuickAdd() {
 
     await watchlistsStore.addItemToList(props.listId, { name: searchQuery.value });
     searchQuery.value = "";
+    isSearchExpanded.value = false;
 }
 
 async function handleSearch() {

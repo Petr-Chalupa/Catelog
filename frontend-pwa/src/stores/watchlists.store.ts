@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import {
     InvitesService,
-    Title,
+    type Title,
     TitleGenre,
     TitlesService,
     UserService,
@@ -10,16 +10,17 @@ import {
     type Invite,
     type User,
     type WatchList,
+    type MergeCandidate,
 } from "../api";
 import { useUserStore } from "./user.store";
 import { useNotificationStore } from "./notification.store";
 import { computed, ref } from "vue";
 import { useTitlesStore } from "./titles.store";
 import { i18n } from "../i18n";
+import { useI18n } from "vue-i18n";
 
 export interface EnrichedWatchListItem extends WatchListItem {
     details?: Title;
-    displayTitle: string;
     resolvedGenres: string[];
 }
 
@@ -28,6 +29,7 @@ export const useWatchlistsStore = defineStore(
     () => {
         const notify = useNotificationStore();
         const titlesStore = useTitlesStore();
+        const { locale } = useI18n();
 
         // --- STATE ---
         const lists = ref<WatchList[]>([]);
@@ -48,26 +50,26 @@ export const useWatchlistsStore = defineStore(
 
         const enrichedListItems = computed(() => (listId: string): EnrichedWatchListItem[] => {
             const rawItems = listItems.value[listId] ?? [];
-            return rawItems.map((item) => enrichItem(item, titlesStore.titles, i18n.global.locale.value));
+            return rawItems.map((item) => enrichItem(item, titlesStore.titles, locale.value));
         });
 
         const enrichedListItem = computed(() => (listId: string, itemId: string): EnrichedWatchListItem | undefined => {
             const item = listItems.value[listId]?.find((i) => i.id === itemId);
             if (!item) return undefined;
-            return enrichItem(item, titlesStore.titles, i18n.global.locale.value);
+            return enrichItem(item, titlesStore.titles, locale.value);
         });
 
         const availableListFilters = computed(() => (listId: string) => {
             const items = enrichedListItems.value(listId);
             const genres = new Set<TitleGenre>();
+            const directors = new Set<string>();
+            const actors = new Set<string>();
             let minDuration = Infinity;
             let maxDuration = 0;
             let minYear = Infinity;
             let maxYear = 0;
             let minRating = Infinity;
             let maxRating = 0;
-            const directorsMap = new Map<string, number>();
-            const actorsMap = new Map<string, number>();
 
             items.forEach((i) => {
                 i.resolvedGenres.forEach((g) => genres.add(g));
@@ -90,16 +92,9 @@ export const useWatchlistsStore = defineStore(
                     if (rating > maxRating) maxRating = rating;
                 }
 
-                i.details?.directors?.forEach((d) => directorsMap.set(d, (directorsMap.get(d) || 0) + 1));
-                i.details?.actors?.forEach((a) => actorsMap.set(a, (actorsMap.get(a) || 0) + 1));
+                i.details?.directors?.forEach((d) => directors.add(d));
+                i.details?.actors?.forEach((a) => actors.add(a));
             });
-
-            const getTop = (map: Map<string, number>, limit = 10) =>
-                Array.from(map.entries())
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, limit)
-                    .map((e) => e[0])
-                    .sort();
 
             return {
                 genres: Array.from(genres).sort(),
@@ -115,8 +110,8 @@ export const useWatchlistsStore = defineStore(
                     min: minRating === Infinity ? 0 : minRating,
                     max: maxRating,
                 },
-                directors: getTop(directorsMap),
-                actors: getTop(actorsMap),
+                directors: Array.from(directors).sort(),
+                actors: Array.from(actors).sort(),
             };
         });
 
@@ -283,7 +278,7 @@ export const useWatchlistsStore = defineStore(
         async function addItemToList(listId: string, payload: { title?: Title; name?: string }) {
             isProcessing.value = true;
             try {
-                const titleRequest = payload.title || { title: payload.name };
+                const titleRequest = payload.title || { titles: { [locale.value]: payload.name } };
                 const savedTitle = await TitlesService.postTitles(titleRequest as Title);
                 const titleId = savedTitle.id;
 
@@ -332,6 +327,19 @@ export const useWatchlistsStore = defineStore(
             }
         }
 
+        async function mergeWatchlistItemPlaceholder(listId: string, itemId: string, candidate: MergeCandidate) {
+            if (candidate.internalId) {
+                await patchWatchlistItem(listId, itemId, { id: itemId, titleId: candidate.internalId });
+            } else {
+                const newTitle = await titlesStore.importTitle(candidate.externalIds!, candidate.displayData.type);
+                if (!newTitle) return;
+
+                await patchWatchlistItem(listId, itemId, { id: itemId, titleId: newTitle.id });
+            }
+
+            await fetchSingleList(listId);
+        }
+
         async function updateListItemOrder(listId: string, newOrderedItems: WatchListItem[], movedItem: WatchListItem) {
             const index = newOrderedItems.findIndex((i) => i.id === movedItem.id);
             const prevKey = newOrderedItems[index - 1]?.sortKey || "";
@@ -372,6 +380,7 @@ export const useWatchlistsStore = defineStore(
             addItemToList,
             deleteWatchlistItem,
             patchWatchlistItem,
+            mergeWatchlistItemPlaceholder,
             updateListItemOrder,
         };
     },
@@ -385,8 +394,6 @@ export const useWatchlistsStore = defineStore(
 
 function enrichItem(item: WatchListItem, titles: Record<string, Title>, locale: string): EnrichedWatchListItem {
     const titleMetadata = titles[item.titleId];
-    const displayTitle = titleMetadata?.localizedTitles?.[locale] || titleMetadata?.title || "?";
-
     const titleGenres = titleMetadata?.genres ?? [];
     const added = item.addedGenres ?? [];
     const excluded = item.excludedGenres ?? [];
@@ -395,7 +402,6 @@ function enrichItem(item: WatchListItem, titles: Record<string, Title>, locale: 
     return {
         ...item,
         details: titleMetadata,
-        displayTitle,
         resolvedGenres: finalGenres,
     };
 }

@@ -42,8 +42,7 @@ function mapTMDbToTitle(data: any, translations?: Record<string, string>): Title
     return {
         id: randomUUID(),
         type: TMDB_TYPE_MAP[data.media_type ?? (data.title ? "movie" : "tv")] ?? "other",
-        title: data.title || data.name,
-        localizedTitles: allTitles,
+        titles: allTitles,
         year:
             data.release_date || data.first_air_date
                 ? new Date(data.release_date || data.first_air_date).getFullYear()

@@ -21,8 +21,7 @@ export type TitleGenre =
 export interface Title {
     id: string;
     type: TitleType;
-    title: string;
-    localizedTitles?: Record<string, string>;
+    titles: Record<string, string>;
     poster?: string;
     year?: number;
     genres?: TitleGenre[];
@@ -39,12 +38,12 @@ export interface Title {
 }
 
 export interface MergeCandidate {
-    origin: TitleSource | "internal";
-    externalId?: string;
+    externalIds?: Partial<Record<TitleSource, string>>;
     internalId?: string;
     displayData: {
-        title: string;
+        titles: Record<string, string>;
         year?: number;
+        type?: TitleType;
         poster?: string;
     };
 }

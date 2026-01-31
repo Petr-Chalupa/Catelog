@@ -2,22 +2,21 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { TitleType } from './TitleType';
 export type MergeCandidate = {
-    origin: MergeCandidate.origin;
+    /**
+     * Required if origin is 'internal'
+     */
     internalId?: string;
-    externalId?: string;
+    /**
+     * Required if origin is NOT 'internal'
+     */
+    externalIds?: Record<string, string>;
     displayData: {
-        title: string;
-        year?: number;
+        titles: Record<string, string>;
+        year: number;
+        type: TitleType;
         poster?: string;
     };
 };
-export namespace MergeCandidate {
-    export enum origin {
-        INTERNAL = 'internal',
-        TMDB = 'tmdb',
-        IMDB = 'imdb',
-        CSFD = 'csfd',
-    }
-}
 

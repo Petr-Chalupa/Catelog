@@ -9,9 +9,10 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { Error } from './models/Error';
 export type { Invite } from './models/Invite';
-export { MergeCandidate } from './models/MergeCandidate';
-export { Title } from './models/Title';
+export type { MergeCandidate } from './models/MergeCandidate';
+export type { Title } from './models/Title';
 export { TitleGenre } from './models/TitleGenre';
+export { TitleType } from './models/TitleType';
 export type { User } from './models/User';
 export type { UserDevice } from './models/UserDevice';
 export type { WatchList } from './models/WatchList';

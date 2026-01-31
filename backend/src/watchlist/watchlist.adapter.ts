@@ -122,6 +122,7 @@ export async function upsertWatchListItem(listId: string, item: Partial<WatchLis
     const filter = item.id ? { id: item.id } : { listId, titleId: item.titleId };
     const update = {
         $set: {
+            titleId: item.titleId,
             state: item.state || "planned",
             addedGenres: item.addedGenres,
             excludedGenres: item.excludedGenres,

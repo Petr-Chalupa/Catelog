@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Title } from '../models/Title';
+import type { TitleType } from '../models/TitleType';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -15,12 +16,35 @@ export class TitlesService {
      */
     public static postTitles(
         requestBody: (Title | {
-            title: string;
+            titles: Record<string, string>;
         }),
     ): CancelablePromise<Title> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/titles',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Access token is missing or invalid`,
+                500: `There was an unexpected error`,
+            },
+        });
+    }
+    /**
+     * Import a title from an external source
+     * @param requestBody
+     * @returns Title Title imported successfully
+     * @throws ApiError
+     */
+    public static postTitlesImport(
+        requestBody: {
+            externalIds: Record<string, string>;
+            type: TitleType;
+        },
+    ): CancelablePromise<Title> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/titles/import',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

@@ -52,8 +52,8 @@
             .rating {
                 display: flex;
                 align-items: center;
-                gap: 0.5rem;
-                margin-left: 0.5rem;
+                gap: 0.25rem;
+                margin-left: 10px;
                 color: var(--primary);
             }
         }
@@ -137,6 +137,64 @@
                 font-size: 0.95rem;
                 color: var(--text-primary);
             }
+        }
+    }
+}
+
+:deep(.overlay .header) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+
+    h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+}
+
+.merge-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.merge-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--bg-primary);
+    }
+
+    & .poster {
+        width: 30px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    & .info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .title {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .other {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
         }
     }
 }

@@ -259,13 +259,41 @@ paths:
                             oneOf:
                                 - $ref: "#/components/schemas/Title"
                                 - type: object
-                                  required: [title]
+                                  required: [titles]
                                   properties:
-                                      title:
-                                          type: string
+                                      titles:
+                                          type: object
+                                          additionalProperties:
+                                              type: string
             responses:
                 200:
                     description: Title added
+                    content:
+                        application/json:
+                            schema: { $ref: "#/components/schemas/Title" }
+                401: { $ref: "#/components/responses/UnauthorizedError" }
+                500: { $ref: "#/components/responses/InternalServerError" }
+
+    /titles/import:
+        post:
+            summary: Import a title from an external source
+            tags: [Titles]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [externalIds, type]
+                            properties:
+                                externalIds:
+                                    type: object
+                                    additionalProperties:
+                                        type: string
+                                type: { $ref: "#/components/schemas/TitleType" }
+            responses:
+                200:
+                    description: Title imported successfully
                     content:
                         application/json:
                             schema: { $ref: "#/components/schemas/Title" }
@@ -789,18 +817,14 @@ components:
 
         Title:
             type: object
-            required: [id, type, title, public, externalIds]
+            required: [id, type, titles, public, externalIds]
             readOnly: [id, createdAt, updatedAt]
             properties:
                 id:
                     type: string
                     format: uuid
-                type:
-                    type: string
-                    enum: [movie, series]
-                title:
-                    type: string
-                localizedTitles:
+                type: { $ref: "#/components/schemas/TitleType" }
+                titles:
                     type: object
                     additionalProperties:
                         type: string
@@ -843,6 +867,10 @@ components:
                     type: string
                     format: date-time
 
+        TitleType:
+            type: string
+            enum: [movie, series, other]
+
         TitleGenre:
             type: string
             enum:
@@ -867,24 +895,28 @@ components:
 
         MergeCandidate:
             type: object
-            required: [origin, displayData]
+            required: [displayData]
             properties:
-                origin:
-                    type: string
-                    enum: [internal, tmdb, imdb, csfd]
                 internalId:
+                    description: Required if origin is 'internal'
                     type: string
                     format: uuid
-                externalId:
-                    type: string
+                externalIds:
+                    description: Required if origin is NOT 'internal'
+                    type: object
+                    additionalProperties:
+                        type: string
                 displayData:
                     type: object
-                    required: [title]
+                    required: [titles, year, type]
                     properties:
-                        title:
-                            type: string
+                        titles:
+                            type: object
+                            additionalProperties:
+                                type: string
                         year:
                             type: integer
+                        type: { $ref: "#/components/schemas/TitleType" }
                         poster:
                             type: string
 

@@ -8,7 +8,7 @@ import {
     getTitleById,
     upsertTitle,
 } from "./title.adapter";
-import { MergeCandidate, Title, TitleSource } from "./title.model";
+import { MergeCandidate, Title, TitleSource, TitleType } from "./title.model";
 
 export async function runEnrichment() {
     console.log("Starting enrichment worker");
@@ -53,6 +53,25 @@ export async function refreshTitleMetadata(titleId: string) {
     await upsertTitle(enriched);
 }
 
+export async function importTitle(externalIds: Record<string, string>, type: TitleType): Promise<Title> {
+    const results = await Promise.allSettled([
+        externalIds?.tmdb ? searchTMDbById(externalIds.tmdb, mapTitleTypeToTMDB(type)) : Promise.resolve(null),
+        externalIds?.imdb ? searchOMDbById(externalIds.imdb) : Promise.resolve(null),
+        externalIds?.csfd ? searchCSFDById(externalIds.csfd) : Promise.resolve(null),
+    ]);
+
+    const externalMatches = results
+        .filter((r): r is PromiseFulfilledResult<Title | null> => r.status === "fulfilled")
+        .flatMap((r) => r.value)
+        .filter((v): v is Title => v !== null);
+
+    const mergedExternal = mergeSearchResults(externalMatches);
+
+    const title = await upsertTitle(mergedExternal[0]);
+
+    return title;
+}
+
 export async function updatePlaceholderMergeCandidates(titleId: string) {
     const title = await getTitleById(titleId);
     if (!title || title.public) return;
@@ -62,16 +81,16 @@ export async function updatePlaceholderMergeCandidates(titleId: string) {
     const localMatches = await findLocalTitleMatches(title);
     candidates.push(
         ...localMatches.map((m) => ({
-            origin: "internal" as const,
             internalId: m.id,
-            displayData: { title: m.title, year: m.year, poster: m.poster },
-        }))
+            displayData: { titles: m.titles, year: m.year, type: m.type, poster: m.poster },
+        })),
     );
 
+    const searchByTitle = Object.values(title.titles)[0];
     const externalResults = await Promise.allSettled([
-        searchTMDb(title.title, true),
-        searchOMDb(title.title),
-        searchCSFD(title.title, true),
+        searchTMDb(searchByTitle, true),
+        searchOMDb(searchByTitle),
+        searchCSFD(searchByTitle, true),
     ]);
     const externalMatches = externalResults
         .filter((r): r is PromiseFulfilledResult<Title[]> => r.status === "fulfilled")
@@ -80,9 +99,8 @@ export async function updatePlaceholderMergeCandidates(titleId: string) {
     const mergedExternal = mergeSearchResults(externalMatches);
     mergedExternal.forEach((r) => {
         candidates.push({
-            origin: r.externalIds.tmdb ? "tmdb" : r.externalIds.imdb ? "imdb" : "csfd",
-            externalId: r.externalIds.tmdb || r.externalIds.imdb || r.externalIds.csfd,
-            displayData: { title: r.title, year: r.year, poster: r.poster },
+            externalIds: { tmdb: r.externalIds.tmdb, imdb: r.externalIds.imdb, csfd: r.externalIds.csfd },
+            displayData: { titles: r.titles, year: r.year, type: r.type, poster: r.poster },
         });
     });
 
@@ -108,12 +126,12 @@ export function mergeTitle(existing: Title, incoming: Title): Title {
         ...incoming,
         ...existing, // existing overwrites incoming if conflict
         // explicit merges
+        titles: mergeObject(existing.titles, incoming.titles),
         genres: mergeArray(existing.genres, incoming.genres),
         directors: mergeArray(existing.directors, incoming.directors),
         actors: mergeArray(existing.actors, incoming.actors),
         ratings: mergeObject(existing.ratings, incoming.ratings),
         avgRating: avgRating(mergeObject(existing.ratings, incoming.ratings)),
-        localizedTitles: mergeObject(existing.localizedTitles, incoming.localizedTitles),
         externalIds: mergeObject(existing.externalIds, incoming.externalIds),
         updatedAt: new Date(),
     };
@@ -125,10 +143,8 @@ export function mergeSearchResults(results: Title[]): Title[] {
     const merged: Title[] = [];
 
     for (const incoming of results) {
-        const incomingTitleVariations = new Set<string>([incoming.title]);
-        if (incoming.localizedTitles) {
-            Object.values(incoming.localizedTitles).forEach((t) => incomingTitleVariations.add(t));
-        }
+        const incomingTitleVariations = new Set<string>();
+        Object.values(incoming.titles).forEach((t) => incomingTitleVariations.add(t));
 
         let existingMatch = merged.find((existing) => {
             const sameImdb = incoming.externalIds?.imdb && existing.externalIds?.imdb === incoming.externalIds.imdb;
@@ -138,10 +154,9 @@ export function mergeSearchResults(results: Title[]): Title[] {
             const yearMatch = incoming.year === existing.year;
             if (!yearMatch) return false;
 
-            const existingTitleVarations = new Set<string>([existing.title]);
-            if (existing.localizedTitles) {
-                Object.values(existing.localizedTitles).forEach((t) => existingTitleVarations.add(t));
-            }
+            const existingTitleVarations = new Set<string>();
+            Object.values(existing.titles).forEach((t) => existingTitleVarations.add(t));
+
             return [...incomingTitleVariations].some((name) => existingTitleVarations.has(name));
         });
 

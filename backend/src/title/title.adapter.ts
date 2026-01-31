@@ -25,27 +25,18 @@ function buildTitleSearchQuery(title: Partial<Title>, enableTitleVars: boolean):
         });
     }
 
-    if (enableTitleVars) {
-        const titleVariations = new Set<string>();
-        if (title.title) titleVariations.add(title.title);
-        if (title.localizedTitles) {
-            Object.values(title.localizedTitles).forEach((val) => titleVariations.add(val));
+    if (enableTitleVars && title.titles) {
+        const uniqueNames = new Set(Object.values(title.titles).filter(Boolean));
+
+        if (title.year) {
+            uniqueNames.forEach((name) => {
+                ors.push({ $text: { $search: `\"${name}\"` }, year: title.year });
+            });
         }
 
-        titleVariations.forEach((t) => {
-            if (!t) return;
-
-            const strictMatch: any[] = [{ title: t }];
-
-            const langKeys = Object.keys(title.localizedTitles || {});
-            if (langKeys.length > 0) {
-                strictMatch.push({ $or: langKeys.map((lang) => ({ [`localizedTitles.${lang}`]: t })) });
-            }
-
-            ors.push({ $or: strictMatch, ...(title.year && { year: title.year }) });
+        uniqueNames.forEach((name) => {
+            ors.push({ $text: { $search: `\"${name}\"` } });
         });
-
-        if (title.title) ors.push({ $text: { $search: title.title } });
     }
 
     return ors;
@@ -56,16 +47,15 @@ export async function upsertTitle(title: Partial<Title>): Promise<Title> {
     const collection = db.collection<Title>("titles");
 
     const searchQueries = buildTitleSearchQuery(title, false);
-    const filter = searchQueries.length > 0 ? { $or: searchQueries } : { title: title.title };
+    const filter = searchQueries.length > 0 ? { $or: searchQueries } : { titles: title.titles };
 
     const update = {
         $set: {
-            title: title.title,
+            titles: title.titles,
             type: title.type,
             poster: title.poster,
             year: title.year,
             public: title.public ?? false,
-            localizedTitles: title.localizedTitles,
             genres: title.genres,
             ratings: title.ratings,
             avgRating: title.avgRating,
@@ -93,11 +83,8 @@ export async function findLocalTitleMatches(title: Title): Promise<Title[]> {
     const db = getDB();
     const result = await db
         .collection<Title>("titles")
-        .find(
-            { public: true, $or: buildTitleSearchQuery(title, true) },
-            { projection: { score: { $meta: "textScore" } } }
-        )
-        .sort({ score: { $meta: "textScore" }, year: -1 })
+        .find({ public: true, $or: buildTitleSearchQuery(title, true) })
+        .sort({ year: -1 })
         .toArray();
 
     return result;

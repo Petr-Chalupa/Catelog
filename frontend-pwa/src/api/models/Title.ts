@@ -4,11 +4,11 @@
 /* eslint-disable */
 import type { MergeCandidate } from './MergeCandidate';
 import type { TitleGenre } from './TitleGenre';
+import type { TitleType } from './TitleType';
 export type Title = {
     id: string;
-    type: Title.type;
-    title: string;
-    localizedTitles?: Record<string, string>;
+    type: TitleType;
+    titles: Record<string, string>;
     poster?: string;
     year?: number;
     genres?: Array<TitleGenre>;
@@ -23,10 +23,4 @@ export type Title = {
     createdAt?: string;
     updatedAt?: string;
 };
-export namespace Title {
-    export enum type {
-        MOVIE = 'movie',
-        SERIES = 'series',
-    }
-}
 

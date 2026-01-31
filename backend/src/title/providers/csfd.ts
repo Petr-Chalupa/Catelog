@@ -69,7 +69,7 @@ function mapCSFDToTitle(data: any): Title {
 
     return {
         id: randomUUID(),
-        title: data.title,
+        titles: Object.keys(localizedTitles).length > 0 ? localizedTitles : {},
         year: data.year ? parseInt(data.year) : undefined,
         type: CSFD_TYPE_MAP[data.type as CSFDFilmTypes] ?? "other",
         genres: data.genres?.map((g: string) => CSFD_GENRE_MAP[g]).filter(Boolean),
@@ -78,7 +78,6 @@ function mapCSFDToTitle(data: any): Title {
         durationMinutes: data.length,
         ratings: data.rating != null ? { csfd: data.rating / 10 } : undefined,
         poster: data.poster || data.photo,
-        localizedTitles: Object.keys(localizedTitles).length > 0 ? localizedTitles : undefined,
         externalIds: { csfd: String(data.id) },
         public: true,
     };

@@ -60,10 +60,10 @@
 </style>
 
 <script setup lang="ts">
-import { ArrowLeft, WifiOff } from 'lucide-vue-next';
-import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useOnline } from '../composables/useOnline';
+import { ArrowLeft, WifiOff } from "lucide-vue-next";
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useOnline } from "../composables/useOnline";
 
 const router = useRouter();
 const route = useRoute();
@@ -71,7 +71,7 @@ const isMainRoute = computed(() => route.name === "watchlists");
 const isOnline = useOnline();
 
 function goBack() {
-    if (window.history.state && window.history.state.back) {
+    if (window.history.state?.back || route.query.overlay) {
         router.back();
     } else {
         router.push({ name: "watchlists" });
