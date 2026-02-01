@@ -35,6 +35,15 @@
     align-items: center;
     gap: 0.75rem;
     justify-self: start;
+
+    .arrow-back {
+        cursor: pointer;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
 }
 
 .header-center {
@@ -48,14 +57,21 @@
     align-items: center;
     gap: 0.75rem;
     justify-self: end;
-}
 
-.arrow-back {
+    .offline {
+        color: var(--secondary);
+    }
+}
+</style>
+
+<style>
+.header-right>*:not(.offline) {
     cursor: pointer;
-}
+    transition: opacity 0.2s;
 
-.offline {
-    color: var(--secondary);
+    &:hover {
+        opacity: 0.7;
+    }
 }
 </style>
 

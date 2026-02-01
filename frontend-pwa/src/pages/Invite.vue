@@ -44,10 +44,12 @@ import { InvitesService, type Invite } from "../api";
 import InviteCard from "../components/InviteCard.vue";
 import { useUserStore } from "../stores/user.store";
 import { LoaderIcon } from "lucide-vue-next";
+import { useConfirmStore } from "../stores/confirm.store";
 
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
+const confirmStore = useConfirmStore();
 const invite = ref<Invite | null>(null);
 const loading = ref(true);
 const error = ref("");
@@ -69,7 +71,8 @@ async function handleAccept() {
 }
 
 async function handleDecline() {
-    if (confirm("Are you sure you want to decline this invitation?")) {
+    const ok = await confirmStore.ask("Decline invite", "Are you sure you want to decline this invitation?");
+    if (ok) {
         const succes = await InvitesService.deleteInvitesDecline(token);
         if (succes) router.push("/");
     }

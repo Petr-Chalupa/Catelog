@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { router } from "../router";
 import { AuthService, OpenAPI } from "../api";
+import { useConfirmStore } from "./confirm.store";
 import { useUserStore } from "./user.store";
 import { useWatchlistsStore } from "./watchlists.store";
 import { useNotificationStore } from "./notification.store";
@@ -39,6 +40,7 @@ export const useAuthStore = defineStore(
                 clearToken();
 
                 useNotificationStore().$reset();
+                useConfirmStore().$reset();
                 useTitlesStore().$reset();
                 useUserStore().$reset();
                 useWatchlistsStore().$reset();
@@ -63,5 +65,5 @@ export const useAuthStore = defineStore(
             key: "catelog-auth",
             storage: localStorage,
         },
-    }
+    },
 );

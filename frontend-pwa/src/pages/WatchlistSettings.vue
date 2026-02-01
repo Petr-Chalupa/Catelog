@@ -77,12 +77,14 @@ import { LoaderIcon, Plus, Save, ShieldUser, Trash } from "lucide-vue-next";
 import { useUserStore } from "../stores/user.store";
 import { useRouter } from "vue-router";
 import Input from "../components/Input.vue";
+import { useConfirmStore } from "../stores/confirm.store";
 
 const props = defineProps<{ listId: string }>();
 
 const router = useRouter();
 const userStore = useUserStore();
 const watchlistsStore = useWatchlistsStore();
+const confirmStore = useConfirmStore();
 const editName = ref("");
 const list = computed(() => watchlistsStore.lists.find((l) => l.id === props.listId));
 const members = computed(() => watchlistsStore.listMembers[props.listId] || []);
@@ -106,25 +108,29 @@ async function addMember() {
 }
 
 async function handleMemberRemove(userId: string) {
-    if (confirm("Remove this user from this list?")) {
+    const ok = await confirmStore.ask("Remove user", "Remove this user from this list?");
+    if (ok) {
         await watchlistsStore.removeMember(props.listId, userId);
     }
 }
 
 async function handleInviteRemove(inviteId: string) {
-    if (confirm("Revoke this invite?")) {
+    const ok = await confirmStore.ask("Revoke invite", "Revoke this invite?");
+    if (ok) {
         await watchlistsStore.revokeInvite(inviteId, props.listId);
     }
 }
 
 async function handleTransfer(userId: string) {
-    if (confirm("Transfer this list to this user?")) {
+    const ok = await confirmStore.ask("Transfer ownership", "Transfer this list to this user?");
+    if (ok) {
         await watchlistsStore.transferOwnership(props.listId, userId);
     }
 }
 
 async function handleDelete() {
-    if (confirm("PERMANENTLY delete list? This cannot be undone.")) {
+    const ok = await confirmStore.ask("Delete list", "PERMANENTLY delete list? This cannot be undone.");
+    if (ok) {
         const success = await watchlistsStore.deleteList(props.listId);
         if (success) router.push({ name: "watchlists" });
     }

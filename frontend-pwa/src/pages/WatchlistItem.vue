@@ -102,6 +102,7 @@ import Triage from "../components/Triage.vue";
 import RangeInput from "../components/RangeInput.vue";
 import { useI18n } from "vue-i18n";
 import { useTitlesStore } from "../stores/titles.store";
+import { useConfirmStore } from "../stores/confirm.store";
 
 const props = defineProps<{ listId: string; itemId: string; }>();
 
@@ -109,6 +110,7 @@ const router = useRouter();
 const { locale } = useI18n();
 const watchlistsStore = useWatchlistsStore();
 const titlesStore = useTitlesStore();
+const confirmStore = useConfirmStore();
 const ALL_GENRES = Object.values(TitleGenre);
 const item = computed(() => watchlistsStore.enrichedListItem(props.listId, props.itemId));
 const mergeCandidates = computed(() => {
@@ -173,12 +175,9 @@ function openMerge() {
     isMergeExpanded.value = true;
 }
 
-function closeMerge() {
-    isMergeExpanded.value = false;
-}
-
 async function confirmMerge(candidate: MergeCandidate) {
-    if (confirm(`Opravdu chcete propojit tento titul s ${titlesStore.displayTitle(candidate.displayData)}?`)) {
+    const ok = await confirmStore.ask("Merge title", `Opravdu chcete propojit tento titul s ${titlesStore.displayTitle(candidate.displayData)}?`);
+    if (ok) {
         await watchlistsStore.mergeWatchlistItemPlaceholder(props.listId, props.itemId, candidate);
         isMergeExpanded.value = false;
     }
@@ -194,7 +193,8 @@ async function toggleState() {
 }
 
 async function deleteItem() {
-    if (confirm("Opravdu smazat z listu?")) {
+    const ok = await confirmStore.ask("Delete title", "Opravdu smazat z listu?");
+    if (ok) {
         await watchlistsStore.deleteWatchlistItem(props.listId, props.itemId);
         router.back();
     }

@@ -158,7 +158,10 @@ export const useWatchlistsStore = defineStore(
                 const newList = await WatchListsService.postWatchlists({ name });
                 lists.value.push(newList);
                 await fetchSingleList(newList.id);
+                notify.addNotification(`List "${name}" created successfully!`, "success");
                 return newList;
+            } catch (error) {
+                notify.addNotification("Failed to create list. Please try again.", "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -174,8 +177,10 @@ export const useWatchlistsStore = defineStore(
                 delete listInvites.value[id];
                 delete listMembers.value[id];
 
+                notify.addNotification("List deleted successfully.", "success");
                 return true;
             } catch (error) {
+                notify.addNotification("Failed to delete list. Please try again.", "success");
                 return false;
             } finally {
                 isProcessing.value = false;
@@ -187,6 +192,9 @@ export const useWatchlistsStore = defineStore(
             try {
                 await WatchListsService.patchWatchlists(id, data);
                 await fetchSingleList(id);
+                notify.addNotification("List updated successfully.", "success");
+            } catch (error) {
+                notify.addNotification("Failed to update list. Please try again.", "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -198,6 +206,8 @@ export const useWatchlistsStore = defineStore(
                 await WatchListsService.postWatchlistsTransfer(listId, { newOwnerId });
                 notify.addNotification("Ownership transferred successfully", "success");
                 await fetchSingleList(listId);
+            } catch (error) {
+                notify.addNotification("Failed to transfer ownership. Please try again.", "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -245,6 +255,8 @@ export const useWatchlistsStore = defineStore(
                 notify.addNotification(`Invite sent to ${email}`, "success");
 
                 await fetchSingleList(listId);
+            } catch (error) {
+                notify.addNotification("Failed to send invite. Please try again.", "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -255,6 +267,9 @@ export const useWatchlistsStore = defineStore(
             try {
                 await InvitesService.deleteInvitesDecline(inviteId);
                 await fetchSingleList(listId);
+                notify.addNotification("Invite revoked successfully.", "success");
+            } catch (error) {
+                notify.addNotification("Failed to revoke invite. Please try again.", "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -269,6 +284,9 @@ export const useWatchlistsStore = defineStore(
                 const newMembers = list.sharedWith.filter((id) => id !== userId);
                 await WatchListsService.patchWatchlists(listId, { sharedWith: newMembers });
                 await fetchSingleList(listId);
+                notify.addNotification("Member removed successfully.", "success");
+            } catch (error) {
+                notify.addNotification("Failed to remove member. Please try again.", "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -294,7 +312,9 @@ export const useWatchlistsStore = defineStore(
                 const newItem = await WatchListsService.postWatchlistsItems(listId, { titleId });
                 if (!listItems.value[listId]) listItems.value[listId] = [];
                 listItems.value[listId].push(newItem);
+                notify.addNotification("Title added to list successfully!", "success");
             } catch (error) {
+                notify.addNotification("Failed to add item. Please try again!", "error");
                 throw error;
             } finally {
                 isProcessing.value = false;
@@ -309,8 +329,10 @@ export const useWatchlistsStore = defineStore(
                     listItems.value[listId] = listItems.value[listId].filter((i) => i.id !== itemId);
                 }
 
+                notify.addNotification("Item removed from list.", "success");
                 return true;
             } catch (error) {
+                notify.addNotification("Failed to remove item. Please try again.", "error");
                 return false;
             } finally {
                 isProcessing.value = false;
@@ -322,22 +344,30 @@ export const useWatchlistsStore = defineStore(
             try {
                 await WatchListsService.patchWatchlistsItems(listId, itemId, data);
                 await fetchSingleList(listId);
+                notify.addNotification("Item updated successfully.", "success");
+            } catch (error) {
+                notify.addNotification("Failed to update item. Please try again.", "error");
             } finally {
                 isProcessing.value = false;
             }
         }
 
         async function mergeWatchlistItemPlaceholder(listId: string, itemId: string, candidate: MergeCandidate) {
-            if (candidate.internalId) {
-                await patchWatchlistItem(listId, itemId, { id: itemId, titleId: candidate.internalId });
-            } else {
-                const newTitle = await titlesStore.importTitle(candidate.externalIds!, candidate.displayData.type);
-                if (!newTitle) return;
+            try {
+                if (candidate.internalId) {
+                    await patchWatchlistItem(listId, itemId, { id: itemId, titleId: candidate.internalId });
+                } else {
+                    const newTitle = await titlesStore.importTitle(candidate.externalIds!, candidate.displayData.type);
+                    if (!newTitle) return;
 
-                await patchWatchlistItem(listId, itemId, { id: itemId, titleId: newTitle.id });
+                    await patchWatchlistItem(listId, itemId, { id: itemId, titleId: newTitle.id });
+                }
+
+                await fetchSingleList(listId);
+                notify.addNotification("Title merged successfully.", "success");
+            } catch (error) {
+                notify.addNotification("Failed to merge title. Please try again.", "error");
             }
-
-            await fetchSingleList(listId);
         }
 
         async function updateListItemOrder(listId: string, newOrderedItems: WatchListItem[], movedItem: WatchListItem) {

@@ -76,9 +76,11 @@ import { useAuthStore } from "../stores/auth.store";
 import Header from "../components/Header.vue";
 import InviteCard from "../components/InviteCard.vue";
 import { LoaderIcon } from "lucide-vue-next";
+import { useConfirmStore } from "../stores/confirm.store";
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
+const confirmStore = useConfirmStore();
 
 onMounted(async () => userStore.fetchProfile());
 
@@ -91,14 +93,16 @@ async function handleNotificationToggle(event: Event) {
     }
 }
 
-function handleLogout() {
-    if (confirm("Are you sure you want to sign out?")) {
+async function handleLogout() {
+    const ok = await confirmStore.ask("Sign out", "Are you sure?");
+    if (ok) {
         authStore.logout();
     }
 }
 
 async function handleDelete() {
-    if (confirm("PERMANENTLY delete account? This cannot be undone.")) {
+    const ok = await confirmStore.ask("Delete account", "PERMANENTLY delete account? This cannot be undone.");
+    if (ok) {
         const success = await userStore.deleteAccount();
         if (success) authStore.logout();
     }
