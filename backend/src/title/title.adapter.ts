@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { Filter } from "mongodb";
 import { Title } from "./title.model";
 import { getDB } from "../db";
 import { WatchListItem } from "../watchlist/watchList.model";
@@ -51,16 +52,16 @@ export async function upsertTitle(title: Partial<Title>): Promise<Title> {
 
     const update = {
         $set: {
-            titles: title.titles,
+            titles: title.titles ?? {},
             type: title.type,
             poster: title.poster,
             year: title.year,
             public: title.public ?? false,
-            genres: title.genres,
-            ratings: title.ratings,
+            genres: title.genres ?? [],
+            ratings: title.ratings ?? {},
             avgRating: title.avgRating,
-            directors: title.directors,
-            actors: title.actors,
+            directors: title.directors ?? [],
+            actors: title.actors ?? [],
             durationMinutes: title.durationMinutes,
             externalIds: title.externalIds || {},
             mergeCandidates: title.mergeCandidates || [],
@@ -97,12 +98,34 @@ export async function findTitlesForEnrichment(): Promise<Title[]> {
         .find({
             public: true,
             $or: [
-                { avgRating: { $exists: false } },
                 { poster: { $exists: false } },
-                { localizedTitles: { $exists: false } },
+                { poster: { $in: [null, ""] } },
+                { year: { $exists: false } },
+                { year: null },
+                { genres: { $size: 0 } },
+                { ratings: {} },
+                { "ratings.imdb": { $exists: false } },
+                { "ratings.imdb": null },
+                { "ratings.tmdb": { $exists: false } },
+                { "ratings.tmdb": null },
+                { "ratings.csfd": { $exists: false } },
+                { "ratings.csfd": null },
+                { avgRating: { $exists: false } },
+                { avgRating: null },
+                { directors: { $size: 0 } },
+                { actors: { $size: 0 } },
+                { durationMinutes: { $exists: false } },
+                { durationMinutes: null },
+                { externalIds: {} },
+                { "externalIds.imdb": { $exists: false } },
+                { "externalIds.imdb": { $in: [null, ""] } },
+                { "externalIds.tmdb": { $exists: false } },
+                { "externalIds.tmdb": { $in: [null, ""] } },
+                { "externalIds.csfd": { $exists: false } },
+                { "externalIds.csfd": { $in: [null, ""] } },
                 { updatedAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
             ],
-        })
+        } as Filter<Title>)
         .toArray();
 
     return result;
