@@ -1,0 +1,168 @@
+{
+    "invite": {
+        "loading": "Načítám vaši pozvánku...",
+        "err-title": "Jejda!",
+        "err-msg": "Pozvánka nebyla nalezena nebo je neplatná.",
+        "goHome": "Jít domů",
+        "title": "Jste pozváni!",
+        "decline-title": "Odmítnout pozvánku",
+        "decline-msg": "Opravdu chcete tuto pozvánku odmítnout?"
+    },
+    "login": {
+        "microsoft-msg": "Pokračovat s Microsoft",
+        "google-msg": "Pokračovat s Google",
+        "msg": "Přihlaste se pro správu vašeho seznamu sledování",
+        "welcome": "Vítejte"
+    },
+    "profile": {
+        "title": "Profil",
+        "loading": "Načítám profil...",
+        "preferences": {
+            "title": "Předvolby",
+            "theme": "Motiv",
+            "dark": "Tmavý",
+            "light": "Světlý",
+            "language": "Jazyk",
+            "cs": "Čeština",
+            "en": "English"
+        },
+        "notifications": {
+            "title": "Oznámení",
+            "push": "Push oznámení"
+        },
+        "invites": {
+            "title": "Čekající pozvánky",
+            "no-invites": "Momentálně žádné čekající pozvánky."
+        },
+        "sign-out": "Odhlásit se",
+        "sign-out-msg": "Jste si jisti?",
+        "delete-account": "Smazat účet",
+        "delete-account-msg": "TRVALE smazat účet? Tato akce nelze vrátit zpět."
+    },
+    "watchlists": {
+        "loading": "Načítám seznamy sledování...",
+        "no-lists": "Žádné seznamy sledování nenalezeny. Vytvořte jeden pro začátek!",
+        "name": "Název..."
+    },
+    "wl-settings": {
+        "title": "Nastavení seznamu",
+        "loading": "Načítám nastavení...",
+        "name": "Název",
+        "sharing": {
+            "title": "Sdílení",
+            "email": "E-mail",
+            "no-members": "Žádní další členové.",
+            "no-invites": "Žádné čekající pozvánky.",
+            "invited": "Pozván"
+        },
+        "delete-list": "Smazat seznam",
+        "delete-list-msg": "TRVALE smazat seznam? Tato akce nelze vrátit zpět.",
+        "remove-member": "Odebrat uživatele",
+        "remove-member-msg": "Odebrat tohoto uživatele z tohoto seznamu?",
+        "revoke-invite": "Zrušit pozvánku",
+        "revoke-invite-msg": "Zrušit tuto pozvánku?",
+        "transfer-list": "Převést vlastnictví",
+        "transfer-list-msg": "Převést tento seznam tomuto uživateli?"
+    },
+    "wl-detail": {
+        "loading": "Načítám položky...",
+        "no-items": "Žádné položky nenalezeny. Vytvořte jednu pro začátek!",
+        "filter": {
+            "input": "Filtrovat seznam...",
+            "state": "Stav",
+            "max-length": "Maximální délka",
+            "min-rating": "Minimální hodnocení",
+            "year": "Rok vydání",
+            "genres": "Žánry",
+            "directors": "Režiséři",
+            "actors": "Herci",
+            "reset": "Resetovat filtry",
+            "pick": "Pokročilý výběr"
+        },
+        "search": {
+            "input": "Hledat název",
+            "loading": "Hledám...",
+            "add-as-placeholder": "Přidat jako vlastní"
+        }
+    },
+    "wl-item": {
+        "loading": "Načítám...",
+        "genres": "Žánry",
+        "personal-rating": "Osobní hodnocení",
+        "director": "Režie",
+        "actors": "Hrají",
+        "added": "Přidáno",
+        "merge": {
+            "title": "Kandidáti na sloučení",
+            "no-candidates": "Nebyli nalezeni žádní kandidáti na sloučení.",
+            "merge": "Sloučit název",
+            "merge-msg": "Opravdu chcete sloučit tento název s {name}?"
+        },
+        "delete-title": "Smazat název",
+        "delete-title-msg": "Opravdu smazat tento název?"
+    },
+    "confirm": {
+        "confirm": "Potvrdit",
+        "cancel": "Zrušit"
+    },
+    "invite-card": {
+        "msg": "vás pozval připojit se k",
+        "expired": "Zavřít prošlou pozvánku",
+        "accept": "Přijmout",
+        "accept-login": "Přihlásit se pro přijetí",
+        "decline": "Odmítnout",
+        "decline-login": "Přihlásit se pro odmítnutí"
+    },
+    "notifications": {
+        "p-toggle-notifs-err": "Nepodařilo se aktualizovat nastavení oznámení. Zkuste to znovu.",
+        "wl-create-error": "Nepodařilo se vytvořit seznam. Zkuste to znovu.",
+        "wl-patch-error": "Nepodařilo se aktualizovat nastavení seznamu.",
+        "wl-delete-success": "Seznam byl úspěšně smazán.",
+        "wl-delete-error": "Nepodařilo se smazat seznam.",
+        "wl-transfer-success": "Vlastnictví bylo úspěšně převedeno.",
+        "wl-transfer-error": "Nepodařilo se převést vlastnictví.",
+        "wl-invite-success": "Pozvánka odeslána na {email}",
+        "wl-invite-error": "Nepodařilo se odeslat pozvánku.",
+        "wl-invite-self-error": "Nemůžete pozvat sami sebe.",
+        "wl-invite-already-member-error": "Uživatel je již členem.",
+        "wl-invite-already-invited-error": "Uživatel je již pozván.",
+        "wl-revoke-success": "Pozvánka byla úspěšně zrušena.",
+        "wl-revoke-error": "Nepodařilo se zrušit pozvánku.",
+        "wl-member-remove-success": "Člen byl úspěšně odebrán.",
+        "wl-member-remove-error": "Nepodařilo se odebrat člena.",
+        "wl-item-add-error": "Nepodařilo se přidat položku do seznamu.",
+        "wl-item-add-already-added-error": "Nepodařilo se přidat položku do seznamu.",
+        "wl-item-exists-error": "Tento název je již v seznamu.",
+        "wl-item-patch-error": "Nepodařilo se aktualizovat položku.",
+        "wl-item-delete-success": "Položka byla odebrána ze seznamu.",
+        "wl-item-delete-error": "Nepodařilo se odebrat položku.",
+        "wl-item-merge-success": "Název byl úspěšně sloučen.",
+        "wl-item-merge-error": "Nepodařilo se sloučit název.",
+        "push": {
+            "invite-received": {
+                "title": "Nová pozvánka do seznamu sledování",
+                "body": "{senderName} vás pozval připojit se k seznamu sledování \"{listName}\"."
+            },
+            "watchlist-item-added": {
+                "title": "Přidán nový název",
+                "body": "\"{title}\" byl přidán do seznamu sledování \"{listName}\"."
+            },
+            "watchlist-item-removed": {
+                "title": "Název odebrán",
+                "body": "\"{title}\" byl odebrán z \"{listName}\"."
+            },
+            "watchlist-transferred-new-owner": {
+                "title": "Jste novým vlastníkem",
+                "body": "Vlastnictví \"{listName}\" bylo převedeno na vás."
+            },
+            "watchlist-owner-changed": {
+                "title": "Změnil se vlastník seznamu",
+                "body": "{newOwnerName} je nyní vlastníkem \"{listName}\"."
+            },
+            "watchlist-member-joined": {
+                "title": "Připojil se nový člen",
+                "body": "{userName} je nyní členem \"{listName}\"."
+            }
+        }
+    }
+}

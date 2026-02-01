@@ -72,7 +72,7 @@ export async function cleanupWatchListsForUser(userId: string): Promise<void> {
 export async function deleteWatchListById(listId: string): Promise<void> {
     const db = getDB();
 
-    const resultItems = await db.collection<WatchListItem>("watchlist_items").deleteMany({ listId });
+    await db.collection<WatchListItem>("watchlist_items").deleteMany({ listId });
     const resultList = await db.collection<WatchList>("watchlists").deleteOne({ id: listId });
     if (resultList.deletedCount === 0) throw new APIError(404, "Watchlist not found");
 
@@ -96,6 +96,7 @@ export async function transferWatchlist(listId: string, ownerId: string, newOwne
         {
             $set: { ownerId: newOwnerId },
             $pull: { sharedWith: newOwnerId },
+            $push: { sharedWith: ownerId },
         },
     );
 }

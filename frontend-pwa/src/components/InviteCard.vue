@@ -3,7 +3,7 @@
         <div class="invite-info">
             <p class="invite-text">
                 <strong>{{ invite.inviterName }}</strong>
-                invited you to join
+                {{ t("invite-card.msg") }}
             </p>
             <h3 class="watchlist-name">{{ invite.listName }}</h3>
             <span class="invite-date">{{ formatDate(invite.createdAt) }}</span>
@@ -11,16 +11,16 @@
 
         <div v-if="isExpired" class="invite-actions">
             <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline" v-onlineonly>
-                Dismiss Expired Invite
+                {{ t("invite-card.expired") }}
             </button>
         </div>
         <div v-else class="invite-actions">
             <button @click="handleAction('accept')" :disabled="disabled" class="btn-accept" v-onlineonly>
-                {{ isLoggedIn ? "Accept" : "Login to Accept" }}
+                {{ isLoggedIn ? t("invite-card.accept") : t("invite-card.accept-login") }}
             </button>
 
             <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline" v-onlineonly>
-                {{ isLoggedIn ? "Decline" : "Login to Decline" }}
+                {{ isLoggedIn ? t("invite-card.decline") : t("invite-card.decline-login") }}
             </button>
         </div>
     </div>
@@ -92,10 +92,12 @@ import { computed } from "vue";
 import { type Invite } from "../api";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth.store";
+import { useI18n } from "vue-i18n";
 
 const emits = defineEmits(["accept", "decline"]);
 const props = defineProps<{ invite: Invite; size: "small" | "large"; disabled?: boolean; }>();
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();

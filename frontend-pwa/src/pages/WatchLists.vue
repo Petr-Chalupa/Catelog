@@ -13,12 +13,12 @@
 
     <main v-if="watchlistsStore.isInitialLoading" class="loading-state">
         <LoaderIcon :size="48" class="animate-spin" />
-        <p>Loading watchlists...</p>
+        <p>{{ t("watchlists.loading") }}</p>
     </main>
     <main v-else>
         <section v-if="watchlistsStore.lists.length == 0" class="empty-state">
             <Library :size="48" />
-            <p>No watchlists found. Create one to get started!</p>
+            <p>{{ t("watchlists.no-lists") }}</p>
         </section>
 
         <DraggableList v-else :items="watchlistsStore.sortedLists" @row-click="goToList($event.id)" @item-moved="({ element, newArray }) => watchlistsStore.updateListOrder(newArray, element)">
@@ -41,7 +41,7 @@
         </DraggableList>
 
         <section class="create-section">
-            <Input v-model="newListName" placeholder="Name..." @enter="createNewList">
+            <Input v-model="newListName" :placeholder="$t('watchlists.name')" @enter="createNewList">
                 <template #actions>
                     <button @click="createNewList" :disabled="watchlistsStore.isProcessing || !newListName.trim()" v-onlineonly>
                         <Plus v-if="!watchlistsStore.isProcessing" :size="20" />
@@ -64,7 +64,9 @@ import { onMounted, ref } from "vue";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import DraggableList from "../components/DraggableList.vue";
 import Input from "../components/Input.vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const userStore = useUserStore();
 const watchlistsStore = useWatchlistsStore();
 const router = useRouter();

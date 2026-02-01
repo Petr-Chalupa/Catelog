@@ -1,7 +1,5 @@
 import { Router } from "express";
 import {
-    acceptInvite,
-    createInvite,
     declineInvite,
     getInviteByToken,
     getInviteDetails,
@@ -9,6 +7,7 @@ import {
     getWatchlistInvites,
 } from "./invite.adapter";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { inviteUserToWatchlist, processAcceptInvite } from "./invite.service";
 
 const router = Router();
 export const invitesRouter = router;
@@ -23,7 +22,7 @@ router.get("/", authMiddleware, async (req, res) => {
         invites.map(async (invite) => {
             const details = await getInviteDetails(invite.id);
             return { ...invite, ...details };
-        })
+        }),
     );
 
     res.json(enrichedInvites);
@@ -33,7 +32,7 @@ router.post("/", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const { listId, invitee } = req.body;
 
-    const invite = await createInvite(listId, userId, invitee);
+    const invite = await inviteUserToWatchlist(listId, userId, invitee);
 
     res.json(invite);
 });
@@ -47,7 +46,7 @@ router.get("/watchlists/:id", authMiddleware, async (req, res) => {
         invites.map(async (invite) => {
             const details = await getInviteDetails(invite.id);
             return { ...invite, ...details };
-        })
+        }),
     );
 
     res.json(enrichedInvites);
@@ -66,7 +65,7 @@ router.post("/:token/accept", authMiddleware, async (req, res) => {
     const userId = (req as any).user?.id;
     const { token } = req.params;
 
-    const result = await acceptInvite(token, userId);
+    const result = await processAcceptInvite(token, userId);
 
     res.json(result);
 });

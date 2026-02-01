@@ -1,5 +1,8 @@
+import dns from "dns";
 import { Db, MongoClient } from "mongodb";
 import { APIError } from "./middleware/error.middleware";
+
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 let clientInstance: MongoClient | null = null;
 let dbInstance: Db | null = null;

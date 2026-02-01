@@ -1,15 +1,11 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import webpush from "web-push";
 import { OAuth2Client } from "google-auth-library";
 import {
     createOAuthSession,
     createRefreshToken,
     deleteOAuthSession,
-    deleteUserDevice,
     getOAuthSession,
-    getUserById,
-    getUserDevices,
     upsertUser,
 } from "../user/user.adapter";
 import { APIError } from "../middleware/error.middleware";
@@ -59,7 +55,7 @@ export async function startGoogleOAuth(redirectUrl: string): Promise<string> {
 
 export async function finishGoogleOAuth(
     code: string,
-    state: string
+    state: string,
 ): Promise<{ refreshToken: string; redirectUrl: string }> {
     const session = await getOAuthSession(state);
     if (!session || session.provider !== "google") throw new APIError(400, "Invalid OAuth session");
@@ -68,7 +64,7 @@ export async function finishGoogleOAuth(
     const client = new OAuth2Client(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_CALLBACK_URL
+        process.env.GOOGLE_CALLBACK_URL,
     );
 
     const { tokens } = await client.getToken({ code, codeVerifier: session.codeVerifier });
@@ -109,7 +105,7 @@ export async function startMicrosoftOAuth(redirectUrl: string): Promise<string> 
 
 export async function finishMicrosoftOAuth(
     code: string,
-    state: string
+    state: string,
 ): Promise<{ refreshToken: string; redirectUrl: string }> {
     const session = await getOAuthSession(state);
     if (!session || session.provider !== "microsoft") throw new APIError(400, "Invalid OAuth session");
@@ -125,7 +121,7 @@ export async function finishMicrosoftOAuth(
                 code_verifier: session.codeVerifier,
                 grant_type: "authorization_code",
                 redirect_uri: process.env.MS_CALLBACK_URL!,
-            })
+            }),
         )
     ).data;
 
@@ -146,24 +142,4 @@ export async function finishMicrosoftOAuth(
     url.searchParams.set("token", accessToken);
 
     return { refreshToken, redirectUrl: url.toString() };
-}
-
-export async function sendPushNotification(userId: string, payload: { title: string; body: string; url: string }) {
-    const user = await getUserById(userId);
-    if (!user || !user.notificationsEnabled) return;
-
-    webpush.setVapidDetails(process.env.VAPID_SUBJECT!, process.env.VAPID_PUBLIC_KEY!, process.env.VAPID_PRIVATE_KEY!);
-
-    const devices = await getUserDevices(userId);
-    const notifications = devices.map((device) => {
-        return webpush
-            .sendNotification({ endpoint: device.endpoint, keys: device.keys }, JSON.stringify(payload))
-            .catch((err) => {
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                    return deleteUserDevice(userId, device.endpoint);
-                }
-            });
-    });
-
-    await Promise.all(notifications);
 }

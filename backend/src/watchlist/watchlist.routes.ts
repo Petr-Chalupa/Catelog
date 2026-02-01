@@ -12,6 +12,7 @@ import {
     upsertWatchListItem,
 } from "./watchlist.adapter";
 import { WatchList, WatchListItem } from "./watchList.model";
+import { addItemToWatchList, removeItemFromWatchList, transferWatchListOwnership } from "./watchlists.service";
 
 const router = Router();
 export const watchlistsRouter = router;
@@ -67,7 +68,8 @@ router.post("/:listId/transfer", authMiddleware, async (req, res) => {
     const { listId } = req.params;
     const { newOwnerId } = req.body as { newOwnerId: string };
 
-    await transferWatchlist(listId, userId, newOwnerId);
+    await getValidatedWatchList(listId, userId, true); // Owner check
+    await transferWatchListOwnership(listId, userId, newOwnerId);
 
     res.sendStatus(200);
 });
@@ -87,8 +89,7 @@ router.post("/:listId/items", authMiddleware, async (req, res) => {
     const { listId } = req.params;
     const { titleId } = req.body as Partial<WatchListItem>;
 
-    await getValidatedWatchList(req.params.listId, userId, true); // Owner check
-    const newItem = await upsertWatchListItem(listId, { titleId, addedBy: userId });
+    const newItem = await addItemToWatchList(listId, userId, titleId!);
 
     res.json(newItem);
 });
@@ -109,8 +110,7 @@ router.delete("/:listId/items/:itemId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const { listId, itemId } = req.params;
 
-    await getValidatedWatchList(listId, userId); // Member check
-    await deleteWatchListItem(listId, itemId);
+    await removeItemFromWatchList(listId, userId, itemId);
 
     res.sendStatus(200);
 });

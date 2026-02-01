@@ -4,19 +4,19 @@
             <div class="logo-wrapper">
                 <img src="/favicon.svg" alt="Logo" />
             </div>
-            <h1>Welcome</h1>
-            <p>Sign in to manage your watchlist</p>
+            <h1>{{ $t("login.welcome") }}</h1>
+            <p>{{ $t("login.msg") }}</p>
         </header>
 
         <div class="auth">
             <button @click="login('google')">
                 <img src="../assets/google.svg" alt="Google" />
-                <span>Continue with Google</span>
+                <span>{{ $t("login.google-msg") }}</span>
             </button>
 
             <button @click="login('microsoft')">
                 <img src="../assets/microsoft.svg" alt="Microsoft" />
-                <span>Continue with Microsoft</span>
+                <span>{{ $t("login.micorosoft-msg") }}</span>
             </button>
         </div>
     </main>

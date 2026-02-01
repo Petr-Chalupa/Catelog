@@ -15,19 +15,19 @@
 
     /* --- LIGHT THEME --- */
     --bg-primary: #ffffff;
-    --bg-secondary: #f2f2f2;
+    --bg-secondary: #f1f3f5;
     --text-primary: #141414;
-    --text-secondary: #666666;
-    --border: #e5e5e5;
+    --text-secondary: #495057;
+    --border: #dee2e6;
     --ok: #28a745;
-    --danger: #ff4444;
+    --danger: #dc3545;
 
     /* --- DARK THEME --- */
     &[data-theme="dark"] {
         --bg-primary: #141414;
         --bg-secondary: #1f1f1f;
         --text-primary: #ffffff;
-        --text-secondary: #b3b3b3;
+        --text-secondary: #d1d1d1;
         --border: #333333;
     }
 }

@@ -2,17 +2,17 @@
     <main>
         <div v-if="loading" class="loading-container">
             <LoaderIcon class="animate-spin" :size="48" />
-            <p>Fetching your invitation...</p>
+            <p>{{ $t("invite.loading") }}</p>
         </div>
 
         <div v-else-if="error" class="error-container">
-            <h2>Oops!</h2>
+            <h2>{{ $t("invite.err-title") }}</h2>
             <p>{{ error }}</p>
-            <button @click="router.push('/')" class="btn-home">Go Home</button>
+            <button @click="router.push('/')" class="btn-home">{{ $t("invite.goHome") }}</button>
         </div>
 
         <div v-else-if="invite" class="invite-container">
-            <h1>You're Invited!</h1>
+            <h1>{{ $t("invite.title") }}</h1>
 
             <InviteCard :invite="invite" size="large" :disabled="userStore.isProcessing" @accept="handleAccept" @decline="handleDecline" />
         </div>
@@ -45,7 +45,9 @@ import InviteCard from "../components/InviteCard.vue";
 import { useUserStore } from "../stores/user.store";
 import { LoaderIcon } from "lucide-vue-next";
 import { useConfirmStore } from "../stores/confirm.store";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
@@ -59,7 +61,7 @@ onMounted(async () => {
     try {
         invite.value = await InvitesService.getInvites1(token);
     } catch (err: any) {
-        error.value = "Invitation not found or invalid.";
+        error.value = t("invite.err-msg");
     } finally {
         loading.value = false;
     }
@@ -71,7 +73,7 @@ async function handleAccept() {
 }
 
 async function handleDecline() {
-    const ok = await confirmStore.ask("Decline invite", "Are you sure you want to decline this invitation?");
+    const ok = await confirmStore.ask(t("invite.decline-title"), t("invite.decline-msg"));
     if (ok) {
         const succes = await InvitesService.deleteInvitesDecline(token);
         if (succes) router.push("/");

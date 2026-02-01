@@ -11,7 +11,7 @@
 
     <main v-if="watchlistsStore.isInitialLoading" class="loading-state">
         <LoaderIcon :size="48" class="animate-spin" />
-        <p>Loading...</p>
+        <p>{{ t("wl-item.loading") }}</p>
     </main>
     <main v-else-if="item">
         <section class="hero" :style="{ '--poster-url': `url(${item.details?.poster})` }">
@@ -22,9 +22,9 @@
                 <div class="text">
                     <h1>{{ titlesStore.displayTitle(item.details) }}</h1>
                     <div class="quick-meta">
-                        <span>{{ item.details?.year }}</span>
+                        <span>{{ item.details?.year ?? "?" }}</span>
                         <Dot />
-                        <span>{{ item.details?.durationMinutes }} min</span>
+                        <span>{{ item.details?.durationMinutes ?? "?" }} min</span>
                         <span v-if="item.details?.avgRating" class="rating">
                             <Star :size="14" fill="currentColor" /> {{ item.details.avgRating }}
                         </span>
@@ -40,25 +40,25 @@
 
         <section class="details-content">
             <div class="info-group">
-                <h3>Žánry</h3>
+                <h3>{{ t("wl-item.genres") }}</h3>
                 <Triage v-model="genres" :items="ALL_GENRES" :states="['neutral', 'positive']" />
             </div>
 
-            <RangeInput v-model="personalRating" label="Vlastní hodnocení" :min="0" :max="10" :step="0.1" />
+            <RangeInput v-model="personalRating" :label="$t('wl-item.personal-rating')" :min="0" :max="10" :step="0.1" />
 
             <div class="info-grid">
                 <div v-if="item.details?.directors?.length">
-                    <span class="label">Režie</span>
+                    <span class="label">{{ t("wl-item.director") }}</span>
                     <span class="value">{{ item.details.directors.join(', ') }}</span>
                 </div>
 
                 <div v-if="item.details?.actors?.length">
-                    <span class="label">Hrají</span>
+                    <span class="label">{{ t("wl-item.actors") }}</span>
                     <span class="value">{{ item.details.actors.join(', ') }}</span>
                 </div>
 
                 <div>
-                    <span class="label">Přidáno</span>
+                    <span class="label">{{ t("wl-item.added") }}</span>
                     <span class="value">{{ new Date(item.createdAt).toLocaleDateString(locale) }}, {{ addedBy?.name }}</span>
                 </div>
             </div>
@@ -66,7 +66,7 @@
 
         <Overlay v-model="isMergeExpanded" history-key="merge">
             <template #header>
-                <h3>Merge candidates</h3>
+                <h3>{{ t("wl-item.merge.title") }}</h3>
             </template>
             <template #body>
                 <ul v-if="mergeCandidates.length > 0" class="merge-list">
@@ -82,7 +82,7 @@
                         <Merge :size="20" class="merge-icon" />
                     </li>
                 </ul>
-                <p v-else class="empty-state">Žádní kandidáti k propojení nebyli nalezeni.</p>
+                <p v-else class="empty-state">{{ t("wl-item.merge.no-candidates") }}</p>
             </template>
         </Overlay>
     </main>
@@ -95,7 +95,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWatchlistsStore } from "../stores/watchlists.store";
 import Header from "../components/Header.vue";
-import { Trash2, LoaderIcon, Merge, Image, Check, Play, Dot, Star, Calendar, X } from "lucide-vue-next";
+import { Trash2, LoaderIcon, Merge, Image, Check, Play, Dot, Star, Calendar } from "lucide-vue-next";
 import { type MergeCandidate, TitleGenre, UserService, type User, type WatchListItem } from "../api";
 import Overlay from "../components/Overlay.vue";
 import Triage from "../components/Triage.vue";
@@ -106,8 +106,8 @@ import { useConfirmStore } from "../stores/confirm.store";
 
 const props = defineProps<{ listId: string; itemId: string; }>();
 
+const { t, locale } = useI18n();
 const router = useRouter();
-const { locale } = useI18n();
 const watchlistsStore = useWatchlistsStore();
 const titlesStore = useTitlesStore();
 const confirmStore = useConfirmStore();
@@ -176,7 +176,7 @@ function openMerge() {
 }
 
 async function confirmMerge(candidate: MergeCandidate) {
-    const ok = await confirmStore.ask("Merge title", `Opravdu chcete propojit tento titul s ${titlesStore.displayTitle(candidate.displayData)}?`);
+    const ok = await confirmStore.ask(t("wl-item.merge.merge"), t("wl-item.merge.merge-msg", { name: titlesStore.displayTitle(candidate.displayData) }));
     if (ok) {
         await watchlistsStore.mergeWatchlistItemPlaceholder(props.listId, props.itemId, candidate);
         isMergeExpanded.value = false;
@@ -193,7 +193,7 @@ async function toggleState() {
 }
 
 async function deleteItem() {
-    const ok = await confirmStore.ask("Delete title", "Opravdu smazat z listu?");
+    const ok = await confirmStore.ask(t("wl-item.delete-title"), t("wl-item.delete-title-msg"));
     if (ok) {
         await watchlistsStore.deleteWatchlistItem(props.listId, props.itemId);
         router.back();

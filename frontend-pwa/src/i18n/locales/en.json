@@ -1,0 +1,168 @@
+{
+    "invite": {
+        "loading": "Fetching your invitation...",
+        "err-title": "Oops!",
+        "err-msg": "Invitation not found or invalid.",
+        "goHome": "Go Home",
+        "title": "You're Invited!",
+        "decline-title": "Decline invite",
+        "decline-msg": "Are you sure you want to decline this invitation?"
+    },
+    "login": {
+        "microsoft-msg": "Continue with Microsoft",
+        "google-msg": "Continue with Google",
+        "msg": "Sign in to manage your watchlist",
+        "welcome": "Welcome"
+    },
+    "profile": {
+        "title": "Profile",
+        "loading": "Loading profile...",
+        "preferences": {
+            "title": "Preferences",
+            "theme": "Theme",
+            "dark": "Dark",
+            "light": "Light",
+            "language": "Language",
+            "cs": "Čeština",
+            "en": "English"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "push": "Push Notifications"
+        },
+        "invites": {
+            "title": "Pending Invites",
+            "no-invites": "No pending invites at the moment."
+        },
+        "sign-out": "Sign Out",
+        "sign-out-msg": "Are you sure?",
+        "delete-account": "Delete Account",
+        "delete-account-msg": "PERMANENTLY delete account? This cannot be undone."
+    },
+    "watchlists": {
+        "loading": "Loading watchlists...",
+        "no-lists": "No watchlists found. Create one to get started!",
+        "name": "Name..."
+    },
+    "wl-settings": {
+        "title": "List settings",
+        "loading": "Loading settings...",
+        "name": "Name",
+        "sharing": {
+            "title": "Sharing",
+            "email": "E-mail",
+            "no-members": "No other members.",
+            "no-invites": "No pending invites.",
+            "invited": "Invited"
+        },
+        "delete-list": "Delete List",
+        "delete-list-msg": "PERMANENTLY delete list? This cannot be undone.",
+        "remove-member": "Remove user",
+        "remove-member-msg": "Remove this user from this list?",
+        "revoke-invite": "Revoke invite",
+        "revoke-invite-msg": "Revoke this invite?",
+        "transfer-list": "Transfer ownership",
+        "transfer-list-msg": "Transfer this list to this user?"
+    },
+    "wl-detail": {
+        "loading": "Loading items...",
+        "no-items": "No items found. Create one to get started!",
+        "filter": {
+            "input": "Filter the list...",
+            "state": "State",
+            "max-length": "Maximal duration",
+            "min-rating": "Minimal rating",
+            "year": "Release year",
+            "genres": "Genres",
+            "directors": "Directors",
+            "actors": "Actors",
+            "reset": "Reset filters",
+            "pick": "Advanced pick"
+        },
+        "search": {
+            "input": "Search for a title",
+            "loading": "Searching...",
+            "add-as-placeholder": "Add as your own"
+        }
+    },
+    "wl-item": {
+        "loading": "Loading...",
+        "genres": "Genres",
+        "personal-rating": "Personal rating",
+        "director": "Directed by",
+        "actors": "Playing",
+        "added": "Added",
+        "merge": {
+            "title": "Merge candidates",
+            "no-candidates": "No candidates for merging were found.",
+            "merge": "Merge title",
+            "merge-msg": "Do you really want to merge this title with {name}?"
+        },
+        "delete-title": "Delete title",
+        "delete-title-msg": "Really delete this title?"
+    },
+    "confirm": {
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+    },
+    "invite-card": {
+        "msg": "invited you to join",
+        "expired": "Dismiss Expired Invite",
+        "accept": "Accept",
+        "accept-login": "Login to Accept",
+        "decline": "Decline",
+        "decline-login": "Login to Decline"
+    },
+    "notifications": {
+        "p-toggle-notifs-err": "Failed to update notification settings. Please try again.",
+        "wl-create-error": "Failed to create list. Please try again.",
+        "wl-patch-error": "Failed to update list settings.",
+        "wl-delete-success": "List deleted successfully.",
+        "wl-delete-error": "Failed to delete list.",
+        "wl-transfer-success": "Ownership transferred successfully.",
+        "wl-transfer-error": "Failed to transfer ownership.",
+        "wl-invite-success": "Invite sent to {email}",
+        "wl-invite-error": "Failed to send invite.",
+        "wl-invite-self-error": "You cannot invite yourself.",
+        "wl-invite-already-member-error": "User is already a member.",
+        "wl-invite-already-invited-error": "User is already invited.",
+        "wl-revoke-success": "Invite revoked successfully.",
+        "wl-revoke-error": "Failed to revoke invite.",
+        "wl-member-remove-success": "Member removed successfully.",
+        "wl-member-remove-error": "Failed to remove member.",
+        "wl-item-add-error": "Failed to add item to the list.",
+        "wl-item-add-already-added-error": "Failed to add item to the list.",
+        "wl-item-exists-error": "This title is already in the list.",
+        "wl-item-patch-error": "Failed to update item.",
+        "wl-item-delete-success": "Item removed from the list.",
+        "wl-item-delete-error": "Failed to remove item.",
+        "wl-item-merge-success": "Title merged successfully.",
+        "wl-item-merge-error": "Failed to merge title.",
+        "push": {
+            "invite-received": {
+                "title": "New Watchlist Invitation",
+                "body": "{senderName} invited you to join the watchlist \"{listName}\"."
+            },
+            "watchlist-item-added": {
+                "title": "New Title Added",
+                "body": "\"{title}\" was added to the watchlist \"{listName}\"."
+            },
+            "watchlist-item-removed": {
+                "title": "Title Removed",
+                "body": "\"{title}\" was removed from \"{listName}\"."
+            },
+            "watchlist-transferred-new-owner": {
+                "title": "You are the new Owner",
+                "body": "The ownership of \"{listName}\" has been transferred to you."
+            },
+            "watchlist-owner-changed": {
+                "title": "Watchlist Owner Changed",
+                "body": "{newOwnerName} is now the owner of \"{listName}\"."
+            },
+            "watchlist-member-joined": {
+                "title": "New Member Joined",
+                "body": "{userName} is now a member of \"{listName}\"."
+            }
+        }
+    }
+}

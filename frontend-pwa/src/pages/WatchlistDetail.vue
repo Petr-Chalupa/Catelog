@@ -11,12 +11,12 @@
 
     <main v-if="watchlistsStore.isInitialLoading" class="loading-state">
         <LoaderIcon :size="48" class="animate-spin" />
-        <p>Loading items...</p>
+        <p>{{ t("wl-detail.loading") }}</p>
     </main>
     <main v-else>
         <section v-if="filteredItems.length == 0" class="empty-state">
             <Library :size="48" />
-            <p>No items found. Create one to get started!</p>
+            <p>{{ t("wl-detail.no-items") }}</p>
         </section>
 
         <DraggableList v-else :items="filteredItems" @row-click="goToItem($event.id)" @item-moved="({ element, newArray }) => watchlistsStore.updateListItemOrder(listId, newArray, element)">
@@ -51,7 +51,7 @@
 
         <Overlay v-model="isFilterExpanded" history-key="filter">
             <template #header>
-                <Input v-model="filterQuery" placeholder="Filtrovat list..." autoFocus>
+                <Input v-model="filterQuery" :placeholder="$t('wl-detail.filter.input')" autoFocus>
                     <template #actions>
                         <button class="close-btn" @click="filterQuery = ''">
                             <X :size="20" />
@@ -63,17 +63,19 @@
                 <div class="filter-body">
                     <div class="filter-content">
                         <div class="filter-section state">
-                            <label class="section-label">Stav</label>
+                            <label class="section-label">{{ t("wl-detail.filter.state") }}</label>
                             <Triage :items="['planned', 'started', 'finished']" v-model="stateFilters" />
                         </div>
                         <div class="filter-section">
-                            <RangeInput label="Maximální délka" v-model="maxDurationFilter" :min="availableFilters.durationRange.min" :max="availableFilters.durationRange.max" unit="min" />
+                            <RangeInput :label="$t('wl-detail.filter.max-length')" v-model="maxDurationFilter" :min="availableFilters.durationRange.min" :max="availableFilters.durationRange.max"
+                                unit="min" />
                         </div>
                         <div class="filter-section">
-                            <RangeInput label="Minimální hodnocení" v-model="minRatingFilter" :min="availableFilters.ratingRange.min" :max="availableFilters.ratingRange.max" :step="0.1" />
+                            <RangeInput :label="$t('wl-detail.filter.min-rating')" v-model="minRatingFilter" :min="availableFilters.ratingRange.min" :max="availableFilters.ratingRange.max"
+                                :step="0.1" />
                         </div>
                         <div class="filter-section">
-                            <label class="section-label">Rok vydání [{{ availableFilters.yearRange.min }} - {{ availableFilters.yearRange.max }}]</label>
+                            <label class="section-label">{{ t("wl-detail.filter.year") }} [{{ availableFilters.yearRange.min }} - {{ availableFilters.yearRange.max }}]</label>
                             <div class="year-input-group">
                                 <input type="number" v-model.number="minYearFilter" :min="availableFilters.yearRange.min" :max="maxYearFilter" />
                                 <span class="year-separator">—</span>
@@ -81,15 +83,15 @@
                             </div>
                         </div>
                         <div class="filter-section">
-                            <label class="section-label">Žánry</label>
+                            <label class="section-label">{{ t("wl-detail.filter.genres") }}</label>
                             <Triage :items="availableFilters.genres" v-model="genreFilters" class="genre-triage-item" />
                         </div>
                         <div class="filter-section">
-                            <label class="section-label">Režiséři</label>
+                            <label class="section-label">{{ t("wl-detail.filter.directors") }}</label>
                             <Triage :items="availableFilters.directors" v-model="directorFilters" />
                         </div>
                         <div class="filter-section">
-                            <label class="section-label">Herci</label>
+                            <label class="section-label">{{ t("wl-detail.filter.actors") }}</label>
                             <Triage :items="availableFilters.actors" v-model="actorFilters" />
                         </div>
                     </div>
@@ -97,11 +99,11 @@
                     <div class="filter-actions">
                         <button class="reset-btn" @click="resetFilters">
                             <RotateCcw :size="18" />
-                            <span>Resetovat filtry</span>
+                            <span>{{ t("wl-detail.filter.reset") }}</span>
                         </button>
                         <button class="pick-btn" @click="openPick">
                             <Dices :size="18" />
-                            <span>Pokročilý výběr</span>
+                            <span>{{ t("wl-detail.filter.pick") }}</span>
                         </button>
                     </div>
                 </div>
@@ -110,7 +112,7 @@
 
         <Overlay v-model="isSearchExpanded" history-key="search" @close="closeSearch">
             <template #header>
-                <Input v-model="searchQuery" placeholder="Hledat film..." @enter="handleSearch" autoFocus>
+                <Input v-model="searchQuery" :placeholder="$t('wl-detail.search.input')" @enter="handleSearch" autoFocus>
                     <template #actions>
                         <button class="search-btn" @click="handleSearch" :disabled="titlesStore.isProcessing" v-onlineonly>
                             <Search v-if="!titlesStore.isProcessing" :size="20" />
@@ -126,7 +128,7 @@
                 <div class="search-content">
                     <div v-if="titlesStore.isProcessing" class="search-loading">
                         <LoaderIcon :size="24" class="animate-spin" />
-                        <span>Hledám...</span>
+                        <span>{{ t("wl-detail.search.loading") }}</span>
                     </div>
 
                     <ul v-else-if="titlesStore.searchResults.length > 0" class="results">
@@ -145,7 +147,7 @@
                         <div class="quick-add-icon">
                             <Plus :size="20" />
                         </div>
-                        <span>Přidat jako vlastní: "<strong>{{ searchQuery }}</strong>"</span>
+                        <span>{{ t("wl-detail.search.add-as-placeholder") }}: "<strong>{{ searchQuery }}</strong>"</span>
                     </div>
                 </div>
             </template>
@@ -172,6 +174,7 @@ import RangeInput from "../components/RangeInput.vue";
 
 const props = defineProps<{ listId: string }>();
 
+const { t } = useI18n();
 const router = useRouter();
 const watchlistsStore = useWatchlistsStore();
 const titlesStore = useTitlesStore();

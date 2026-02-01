@@ -4,8 +4,8 @@
             <h3>{{ confirmStore.title }}</h3>
             <p>{{ confirmStore.message }}</p>
             <div class="actions">
-                <button @click="confirmStore.cancel" class="btn-cancel">Zrušit</button>
-                <button @click="confirmStore.confirm" class="btn-confirm">Potvrdit</button>
+                <button @click="confirmStore.cancel" class="btn-cancel">{{ t("confirm.cancel") }}</button>
+                <button @click="confirmStore.confirm" class="btn-confirm">{{ t("confirm.confirm") }}</button>
             </div>
         </div>
     </dialog>
@@ -98,7 +98,9 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useConfirmStore } from "../stores/confirm.store";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const confirmStore = useConfirmStore();
 const dialogRef = ref<HTMLDialogElement | null>(null);
 

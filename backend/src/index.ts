@@ -33,7 +33,7 @@ app.use(
         validateRequests: true,
         validateResponses: false,
         ignorePaths: /\/api\/(docs|user\/auth\/google\/callback|user\/auth\/microsoft\/callback)/,
-    })
+    }),
 );
 
 // API routes

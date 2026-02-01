@@ -1,13 +1,13 @@
 <template>
     <Header>
         <template #center>
-            <span>Profile</span>
+            <span>{{ t("profile.title") }}</span>
         </template>
     </Header>
 
     <main v-if="userStore.isInitialLoading && !userStore.profile.id" class="loading-state">
         <LoaderIcon class="animate-spin" :size="48" />
-        <p>Loading profile...</p>
+        <p>{{ t("profile.loading") }}</p>
     </main>
     <main v-else>
         <section class="profile-card">
@@ -21,38 +21,38 @@
         </section>
 
         <section class="settings-group">
-            <h3 class="group-title">Preferences</h3>
+            <h3 class="group-title">{{ t("profile.preferences.title") }}</h3>
 
             <div class="settings-item">
-                <label for="theme">Theme</label>
+                <label for="theme">{{ t("profile.preferences.theme") }}</label>
                 <select id="theme" v-model="userStore.theme" :disabled="userStore.isProcessing">
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
+                    <option value="dark">{{ t("profile.preferences.dark") }}</option>
+                    <option value="light">{{ t("profile.preferences.light") }}</option>
                 </select>
             </div>
 
             <div class="settings-item">
-                <label for="language">Language</label>
+                <label for="language">{{ t("profile.preferences.language") }}</label>
                 <select id="language" v-model="userStore.locale" :disabled="userStore.isProcessing">
-                    <option value="en">English</option>
-                    <option value="cs">Čeština</option>
+                    <option value="en">{{ t("profile.preferences.en") }}</option>
+                    <option value="cs">{{ t("profile.preferences.cs") }}</option>
                 </select>
             </div>
         </section>
 
         <section class="settings-group">
-            <h3 class="group-title">Notifications</h3>
+            <h3 class="group-title">{{ t("profile.notifications.title") }}</h3>
             <div class="settings-item">
-                <span>Push Notifications</span>
+                <span>{{ t("profile.notifications.push") }}</span>
                 <input type="checkbox" :checked="userStore.profile.notificationsEnabled" :disabled="userStore.isProcessing" @change="handleNotificationToggle" />
             </div>
         </section>
 
         <section class="settings-group invites-section">
-            <h3 class="group-title">Pending Invites</h3>
+            <h3 class="group-title">{{ t("profile.invites.title") }}</h3>
 
             <div v-if="userStore.invites.length === 0" class="no-invites">
-                <p>No pending invites at the moment.</p>
+                <p>{{ t("profile.invites.no-invites") }}</p>
             </div>
             <div v-else class="invite-list">
                 <InviteCard v-for="i in userStore.invites" :invite="i" size="small" :disabled="userStore.isProcessing" @accept="userStore.acceptInvite(i.id)"
@@ -61,8 +61,8 @@
         </section>
 
         <section class="settings-group">
-            <button @click="handleLogout" :disabled="userStore.isProcessing" class="btn-logout" v-onlineonly>Sign Out</button>
-            <button @click="handleDelete" :disabled="userStore.isProcessing" class="btn-delete" v-onlineonly>Delete Account</button>
+            <button @click="handleLogout" :disabled="userStore.isProcessing" class="btn-logout" v-onlineonly>{{ t("profile.sign-out") }}</button>
+            <button @click="handleDelete" :disabled="userStore.isProcessing" class="btn-delete" v-onlineonly>{{ t("profile.delete-account") }}</button>
         </section>
     </main>
 </template>
@@ -77,10 +77,14 @@ import Header from "../components/Header.vue";
 import InviteCard from "../components/InviteCard.vue";
 import { LoaderIcon } from "lucide-vue-next";
 import { useConfirmStore } from "../stores/confirm.store";
+import { useI18n } from "vue-i18n";
+import { useNotificationStore } from "../stores/notification.store";
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const confirmStore = useConfirmStore();
+const notify = useNotificationStore();
 
 onMounted(async () => userStore.fetchProfile());
 
@@ -90,18 +94,19 @@ async function handleNotificationToggle(event: Event) {
         await userStore.toggleNotifications(checkbox.checked);
     } catch (error) {
         checkbox.checked = !checkbox.checked; // Revert on failure
+        notify.addNotification(t("notifications.p-toggle-notifs-error"), "error");
     }
 }
 
 async function handleLogout() {
-    const ok = await confirmStore.ask("Sign out", "Are you sure?");
+    const ok = await confirmStore.ask(t("profile.sign-out"), t("profile.sign-out-msg"));
     if (ok) {
         authStore.logout();
     }
 }
 
 async function handleDelete() {
-    const ok = await confirmStore.ask("Delete account", "PERMANENTLY delete account? This cannot be undone.");
+    const ok = await confirmStore.ask(t("profile.delete-account"), t("profile.delete-account-msg"));
     if (ok) {
         const success = await userStore.deleteAccount();
         if (success) authStore.logout();

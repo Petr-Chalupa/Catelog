@@ -25,9 +25,14 @@ export const useUserStore = defineStore(
             locale,
             (newLocale) => {
                 i18n.global.locale.value = newLocale;
-                document.documentElement.lang = newLocale;
-            },
-            { immediate: true }
+                document.documentElement.lang = newLocale;                // Notify service worker of locale change
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'SET_LOCALE',
+                        locale: newLocale
+                    });
+                }            },
+            { immediate: true },
         );
 
         // --- RESET ---
@@ -135,9 +140,6 @@ export const useUserStore = defineStore(
                 }
 
                 await updateProfile({ notificationsEnabled: enabled });
-            } catch (error) {
-                console.error("Notification toggle failed", error);
-                throw error;
             } finally {
                 isProcessing.value = false;
             }
@@ -150,6 +152,10 @@ export const useUserStore = defineStore(
 
         function setLocale(newLocale: Language) {
             locale.value = newLocale;
+
+            if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: "SET_LOCALE", locale: newLocale });
+            }
         }
 
         return {
@@ -175,7 +181,7 @@ export const useUserStore = defineStore(
             key: "catelog-user",
             storage: localStorage,
         },
-    }
+    },
 );
 
 function urlBase64ToUint8Array(base64String: string) {

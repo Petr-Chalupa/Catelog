@@ -2,7 +2,7 @@
     position: relative;
     padding: 2rem 1rem;
     display: flex;
-    flex-direction: column; /* Na mobilu pod sebou */
+    flex-direction: column;
     gap: 1.5rem;
     overflow: hidden;
     background: var(--bg-secondary);
@@ -14,7 +14,7 @@
         background-image: var(--poster-url);
         background-size: cover;
         background-position: center;
-        filter: blur(20px) brightness(0.3);
+        filter: blur(20px);
         z-index: 0;
     }
 
@@ -22,7 +22,6 @@
         position: relative;
         z-index: 1;
         display: flex;
-        align-items: flex-end;
         gap: 1rem;
     }
 
@@ -36,7 +35,9 @@
     }
 
     .text {
-        flex: 1;
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        background: color-mix(in srgb, var(--bg-primary), transparent 35%);
 
         h1 {
             font-size: 1.5rem;
@@ -48,6 +49,7 @@
             display: flex;
             align-items: center;
             font-size: 1rem;
+            font-weight: 500;
 
             .rating {
                 display: flex;
@@ -71,6 +73,7 @@
         border: none;
         border-radius: 50%;
         padding: 0;
+        color: var(--text-primary);
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

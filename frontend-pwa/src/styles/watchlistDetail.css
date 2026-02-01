@@ -145,19 +145,20 @@ main {
         justify-content: space-between;
         gap: 1rem;
         margin-top: 1rem;
-        font-size: 1rem;
-        color: var(--text-secondary);
 
         .reset-btn,
         .pick-btn {
             display: flex;
             align-items: center;
-            justify-content: space-around;
+            justify-content: center;
+            gap: 0.5rem;
             width: 100%;
-            padding: 8px 16px;
+            padding: 8px;
             background: var(--bg-secondary);
             border: 1px solid color-mix(in srgb, var(--text-secondary), transparent 70%);
             border-radius: 6px;
+            font-size: 1rem;
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
         }
