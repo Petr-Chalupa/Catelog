@@ -25,13 +25,11 @@ export const useUserStore = defineStore(
             locale,
             (newLocale) => {
                 i18n.global.locale.value = newLocale;
-                document.documentElement.lang = newLocale;                // Notify service worker of locale change
-                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({
-                        type: 'SET_LOCALE',
-                        locale: newLocale
-                    });
-                }            },
+                document.documentElement.lang = newLocale;
+                if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: "SET_LOCALE", locale: newLocale });
+                }
+            },
             { immediate: true },
         );
 
@@ -152,10 +150,6 @@ export const useUserStore = defineStore(
 
         function setLocale(newLocale: Language) {
             locale.value = newLocale;
-
-            if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ type: "SET_LOCALE", locale: newLocale });
-            }
         }
 
         return {
