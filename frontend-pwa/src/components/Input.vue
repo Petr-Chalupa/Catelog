@@ -42,12 +42,10 @@
     border: none;
     color: var(--primary);
     cursor: pointer;
-    transition:
-        transform 0.2s,
-        background 0.2s;
+    transition: all 0.2s;
 
     &:hover:not(:disabled) {
-        background: var(--primary-hover);
+        color: var(--primary-hover);
         transform: translateY(-1px);
     }
 

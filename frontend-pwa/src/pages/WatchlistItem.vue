@@ -30,7 +30,7 @@
                         </span>
                     </div>
                 </div>
-                <button class="watched-btn" :class="item.state" @click.stop="toggleState()" v-onlineonly>
+                <button class="watched-btn" :class="item.state" @click.stop="handleState()" v-onlineonly>
                     <Calendar v-if="item.state === 'planned'" :size="24" />
                     <Play v-else-if="item.state === 'started'" :size="24" />
                     <Check v-else-if="item.state === 'finished'" :size="24" />
@@ -187,13 +187,9 @@ async function confirmMerge(candidate: MergeCandidate) {
     }
 }
 
-async function toggleState() {
+async function handleState() {
     if (!item.value) return;
-    const states = ["planned", "started", "finished"] as WatchListItem.state[];
-    const currentIndex = states.indexOf(item.value.state);
-    const newState = states[(currentIndex + 1) % states.length];
-
-    await watchlistsStore.patchWatchlistItem(props.listId, props.itemId, { state: newState });
+    await watchlistsStore.cycleWatchlistItemState(props.listId, item.value);
 }
 
 async function deleteItem() {

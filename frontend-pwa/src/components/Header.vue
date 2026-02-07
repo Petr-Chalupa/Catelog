@@ -79,7 +79,7 @@
 import { ArrowLeft, WifiOff } from "lucide-vue-next";
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useOnline } from "../composables/useOnline";
+import { useOnline } from "../utils/online";
 
 const router = useRouter();
 const route = useRoute();

@@ -91,7 +91,7 @@
 
 <script setup lang="ts">
 import draggable from "vuedraggable";
-import { useOnline } from "../composables/useOnline";
+import { useOnline } from "../utils/online";
 
 const emits = defineEmits(["row-click", "item-moved"]);
 const props = defineProps<{ items: any[]; }>();

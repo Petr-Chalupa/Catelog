@@ -1,0 +1,7 @@
+User-agent: *
+
+Allow: /login
+Allow: /invites/
+
+Disallow: /watchlists/
+Disallow: /profile/

@@ -112,7 +112,7 @@ export const useUserStore = defineStore(
                     const permission = await Notification.requestPermission();
                     if (permission !== "granted") throw Error("Permission denied");
 
-                    const registration = await navigator.serviceWorker.ready;
+                    const registration = await getReadyServiceWorker();
                     let subscription = await registration.pushManager.getSubscription();
                     if (!subscription) {
                         subscription = await registration.pushManager.subscribe({
@@ -129,7 +129,7 @@ export const useUserStore = defineStore(
 
                     await UserService.postUserDevicesSubscribe(deviceData);
                 } else {
-                    const registration = await navigator.serviceWorker.ready;
+                    const registration = await getReadyServiceWorker();
                     const subscription = await registration.pushManager.getSubscription();
                     if (subscription) {
                         await UserService.postUserDevicesUnsubscribe({ endpoint: subscription.endpoint });
@@ -177,6 +177,13 @@ export const useUserStore = defineStore(
         },
     },
 );
+
+async function getReadyServiceWorker(timeout = 10000) {
+    return Promise.race<ServiceWorkerRegistration>([
+        navigator.serviceWorker.ready,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Service worker not ready")), timeout)),
+    ]);
+}
 
 function urlBase64ToUint8Array(base64String: string) {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);

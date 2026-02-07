@@ -353,6 +353,25 @@ export const useWatchlistsStore = defineStore(
             }
         }
 
+        async function cycleWatchlistItemState(listId: string, item: WatchListItem) {
+            const states = ["planned", "started", "finished"] as WatchListItem.state[];
+            const currentIndex = states.indexOf(item.state);
+            const newState = states[(currentIndex + 1) % states.length];
+
+            isProcessing.value = true;
+            try {
+                await patchWatchlistItem(listId, item.id, { state: newState });
+
+                const audio = new Audio(`/sounds/${newState}.mp3`);
+                audio.volume = 0.4;
+                audio.play().catch(() => {
+                    /* Silent fail */
+                });
+            } finally {
+                isProcessing.value = false;
+            }
+        }
+
         async function mergeWatchlistItemPlaceholder(listId: string, itemId: string, candidate: MergeCandidate) {
             try {
                 if (candidate.internalId) {
@@ -412,6 +431,7 @@ export const useWatchlistsStore = defineStore(
             addItemToList,
             deleteWatchlistItem,
             patchWatchlistItem,
+            cycleWatchlistItemState,
             mergeWatchlistItemPlaceholder,
             updateListItemOrder,
         };

@@ -312,10 +312,6 @@ async function selectTitle(title: Title) {
 }
 
 async function handleItemState(item: WatchListItem) {
-    const states = ["planned", "started", "finished"] as WatchListItem.state[];
-    const currentIndex = states.indexOf(item.state);
-    const newState = states[(currentIndex + 1) % states.length];
-
-    await watchlistsStore.patchWatchlistItem(props.listId, item.id, { state: newState });
+    await watchlistsStore.cycleWatchlistItemState(props.listId, item);
 }
 </script>

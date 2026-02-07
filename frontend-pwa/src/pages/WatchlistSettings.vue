@@ -14,9 +14,9 @@
             <h3 class="group-title">{{ t("wl-settings.name") }}</h3>
 
             <div class="settings-item change-name">
-                <Input v-model="editName" :disabled="watchlistsStore.isProcessing" @enter="handleSaveName">
+                <Input v-model="editName" @enter="handleSaveName">
                     <template #actions>
-                        <button :disabled="!editName.trim().length" @click="handleSaveName" v-onlineonly>
+                        <button :disabled="watchlistsStore.isProcessing || !editName.trim().length" @click="handleSaveName" v-onlineonly>
                             <Save v-if="!watchlistsStore.isProcessing" :size="18" />
                             <LoaderIcon v-else :size="18" class="animate-spin" />
                         </button>
@@ -28,10 +28,10 @@
         <section class="settings-group">
             <h3 class="group-title">{{ t("wl-settings.sharing.title") }}</h3>
 
-            <div class="settings-item add-member">
-                <Input v-model="addMemberEmail" placeholder="E-mail" :disabled="watchlistsStore.isProcessing" @enter="addMember">
+            <div v-if="isOwner" class="settings-item add-member">
+                <Input v-model="addMemberEmail" placeholder="E-mail" @enter="addMember">
                     <template #actions>
-                        <button :disabled="!isOwner || !addMemberEmail.trim().length" @click="addMember" v-onlineonly>
+                        <button :disabled="watchlistsStore.isProcessing || !addMemberEmail.trim().length" @click="addMember" v-onlineonly>
                             <Plus v-if="!watchlistsStore.isProcessing" :size="18" />
                             <LoaderIcon v-else :size="18" class="animate-spin" />
                         </button>
@@ -101,10 +101,12 @@ watch(list, (newList) => {
 onMounted(() => watchlistsStore.fetchSingleList(props.listId));
 
 async function handleSaveName() {
+    if (!editName.value.length) return;
     await watchlistsStore.patchWatchlist(props.listId, { name: editName.value });
 }
 
 async function addMember() {
+    if (!addMemberEmail.value.length) return;
     await watchlistsStore.sendInvite(props.listId, addMemberEmail.value);
     addMemberEmail.value = "";
 }
