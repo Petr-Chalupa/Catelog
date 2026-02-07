@@ -5,6 +5,7 @@ import { getDefaultLocale, i18n, type Language } from "../i18n";
 import { useWatchlistsStore } from "./watchlists.store";
 import { useAuthStore } from "./auth.store";
 import { useNotificationStore } from "./notification.store";
+import { useConfirmStore } from "./confirm.store";
 
 const DEFAULT_PROFILE: User = { id: "", name: "", email: "", createdAt: "" };
 const DEFAULT_THEME = "dark" as const;
@@ -127,7 +128,7 @@ export const useUserStore = defineStore(
                         endpoint: raw.endpoint!,
                         keys: { p256dh: raw.keys!.p256dh!, auth: raw.keys!.auth! },
                     };
-                    useNotificationStore().addNotification(`${raw.toString()}`, "error");
+                    useConfirmStore().ask("e", JSON.stringify(raw));
 
                     await UserService.postUserDevicesSubscribe(deviceData);
                 } else {
