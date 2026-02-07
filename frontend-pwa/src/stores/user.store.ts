@@ -115,7 +115,7 @@ export const useUserStore = defineStore(
 
                     const registration = await getReadyServiceWorker();
                     let subscription = await registration.pushManager.getSubscription();
-                    console.log("Sending subscription:", subscription);
+                    useNotificationStore().addNotification(`${subscription}`, "error");
                     if (!subscription) {
                         subscription = await registration.pushManager.subscribe({
                             userVisibleOnly: true,
@@ -128,7 +128,8 @@ export const useUserStore = defineStore(
                         endpoint: raw.endpoint!,
                         keys: { p256dh: raw.keys!.p256dh!, auth: raw.keys!.auth! },
                     };
-                    console.log(raw, deviceData);
+                    useNotificationStore().addNotification(`${raw}`, "error");
+                    useNotificationStore().addNotification(`${deviceData}`, "error");
 
                     await UserService.postUserDevicesSubscribe(deviceData);
                 } else {
@@ -141,14 +142,6 @@ export const useUserStore = defineStore(
                 }
 
                 await updateProfile({ notificationsEnabled: enabled });
-            } catch (error: any) {
-                // TATO ČÁST JE KLÍČOVÁ PRO MOBIL:
-                // Vytáhneme přesnou zprávu z backendu
-                const serverError =
-                    error.response?.data?.message || JSON.stringify(error.response?.data) || error.message;
-
-                useNotificationStore().addNotification(`CHYBA: ${serverError}`, "error");
-                console.error("Notification error:", error);
             } finally {
                 isProcessing.value = false;
             }
