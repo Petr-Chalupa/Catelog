@@ -140,8 +140,6 @@ export const useUserStore = defineStore(
                 }
 
                 await updateProfile({ notificationsEnabled: enabled });
-            } catch (e: any) {
-                useConfirmStore().ask("e", JSON.stringify(e));
             } finally {
                 isProcessing.value = false;
             }

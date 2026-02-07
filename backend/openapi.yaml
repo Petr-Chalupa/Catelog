@@ -1011,7 +1011,6 @@ components:
         UserDevice:
             type: object
             required: [endpoint, keys]
-            readOnly: [id, createdAt]
             properties:
                 id:
                     type: string
