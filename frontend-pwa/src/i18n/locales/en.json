@@ -50,7 +50,6 @@
         "name": "Name",
         "sharing": {
             "title": "Sharing",
-            "email": "E-mail",
             "no-members": "No other members.",
             "no-invites": "No pending invites.",
             "invited": "Invited"
@@ -113,8 +112,39 @@
         "decline": "Decline",
         "decline-login": "Login to Decline"
     },
+    "states": {
+        "planned": "Planned",
+        "started": "Started",
+        "finished": "Finished"
+    },
+    "types": {
+        "movie": "Movie",
+        "series": "Series",
+        "other": "Other"
+    },
+    "genres": {
+        "action": "Action",
+        "adventure": "Adventure",
+        "comedy": "Comedy",
+        "drama": "Drama",
+        "fantasy": "Fantasy",
+        "horror": "Horror",
+        "history": "History",
+        "sci_fi": "Sci-Fi",
+        "romance": "Romance",
+        "thriller": "Thriller",
+        "animation": "Animation",
+        "documentary": "Documentary",
+        "crime": "Crime",
+        "mystery": "Mystery",
+        "family": "Family",
+        "musical": "Musical"
+    },
     "notifications": {
-        "p-toggle-notifs-err": "Failed to update notification settings. Please try again.",
+        "api-online": "Back online.",
+        "api-generic-error": "Something went wrong",
+        "api-network-error": "Network error: Connection to server failed.",
+        "p-toggle-notifs-error": "Failed to update notification settings. Please try again.",
         "wl-create-error": "Failed to create list. Please try again.",
         "wl-patch-error": "Failed to update list settings.",
         "wl-delete-success": "List deleted successfully.",

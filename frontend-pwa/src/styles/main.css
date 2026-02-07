@@ -11,7 +11,6 @@
     --primary-hover: #1e8ad9;
     --secondary: #ff8a30;
     --secondary-hover: #e6761d;
-    --on-brand: #ffffff;
 
     /* --- LIGHT THEME --- */
     --bg-primary: #ffffff;
@@ -64,6 +63,9 @@ body {
 }
 
 button {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
     cursor: pointer;
 }
 

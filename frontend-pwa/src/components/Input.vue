@@ -47,7 +47,7 @@
         background 0.2s;
 
     &:hover:not(:disabled) {
-        background: var(--primary-dark);
+        background: var(--primary-hover);
         transform: translateY(-1px);
     }
 

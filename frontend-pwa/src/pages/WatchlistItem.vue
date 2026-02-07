@@ -1,7 +1,7 @@
 <template>
     <Header>
         <template #center>
-            <span>{{ titlesStore.displayTitle(item?.details) }}</span>
+            <span>{{ titlesStore.translateTitle(item?.details) }}</span>
         </template>
         <template #actions>
             <Merge :size="20" v-if="!item?.details?.public && mergeCandidates.length > 0" @click="openMerge" />
@@ -20,7 +20,7 @@
 
             <div class="hero-content">
                 <div class="text">
-                    <h1>{{ titlesStore.displayTitle(item.details) }}</h1>
+                    <h1>{{ titlesStore.translateTitle(item.details) }}</h1>
                     <div class="quick-meta">
                         <span>{{ item.details?.year ?? "?" }}</span>
                         <Dot />
@@ -41,7 +41,11 @@
         <section class="details-content">
             <div class="info-group">
                 <h3>{{ t("wl-item.genres") }}</h3>
-                <Triage v-model="genres" :items="ALL_GENRES" :states="['neutral', 'positive']" />
+                <Triage v-model="genres" :items="ALL_GENRES" :states="['neutral', 'positive']">
+                    <template #body="{ item }">
+                        {{ titlesStore.translateGenre(item) }}
+                    </template>
+                </Triage>
             </div>
 
             <RangeInput v-model="personalRating" :label="$t('wl-item.personal-rating')" :min="0" :max="10" :step="0.1" />
@@ -75,8 +79,8 @@
                         <Image v-else class="poster" />
 
                         <div class="info">
-                            <span class="title">{{ titlesStore.displayTitle(candidate.displayData) }}</span>
-                            <span class="other">{{ candidate.displayData.year ?? "-" }} | {{ candidate.displayData.type ?? "-" }}</span>
+                            <span class="title">{{ titlesStore.translateTitle(candidate.displayData) }}</span>
+                            <span class="other">{{ candidate.displayData.year ?? "?" }} | {{ titlesStore.translateType(candidate.displayData.type) }}</span>
                         </div>
 
                         <Merge :size="20" class="merge-icon" />
@@ -176,7 +180,7 @@ function openMerge() {
 }
 
 async function confirmMerge(candidate: MergeCandidate) {
-    const ok = await confirmStore.ask(t("wl-item.merge.merge"), t("wl-item.merge.merge-msg", { name: titlesStore.displayTitle(candidate.displayData) }));
+    const ok = await confirmStore.ask(t("wl-item.merge.merge"), t("wl-item.merge.merge-msg", { name: titlesStore.translateTitle(candidate.displayData) }));
     if (ok) {
         await watchlistsStore.mergeWatchlistItemPlaceholder(props.listId, props.itemId, candidate);
         isMergeExpanded.value = false;

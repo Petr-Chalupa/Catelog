@@ -84,7 +84,7 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const confirmStore = useConfirmStore();
-const notify = useNotificationStore();
+const notificationStore = useNotificationStore();
 
 onMounted(async () => userStore.fetchProfile());
 
@@ -94,7 +94,7 @@ async function handleNotificationToggle(event: Event) {
         await userStore.toggleNotifications(checkbox.checked);
     } catch (error) {
         checkbox.checked = !checkbox.checked; // Revert on failure
-        notify.addNotification(t("notifications.p-toggle-notifs-error"), "error");
+        notificationStore.addNotification(t("notifications.p-toggle-notifs-error"), "error");
     }
 }
 

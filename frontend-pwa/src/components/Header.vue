@@ -92,5 +92,5 @@ function goBack() {
     } else {
         router.push({ name: "watchlists" });
     }
-};
+}
 </script>

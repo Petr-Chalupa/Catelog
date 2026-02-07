@@ -26,9 +26,9 @@ export interface EnrichedWatchListItem extends WatchListItem {
 export const useWatchlistsStore = defineStore(
     "watchlists",
     () => {
-        const notify = useNotificationStore();
+        const notificationStore = useNotificationStore();
         const titlesStore = useTitlesStore();
-        const { t, locale } = useI18n();
+        const { te, t, locale } = useI18n();
 
         // --- STATE ---
         const lists = ref<WatchList[]>([]);
@@ -114,6 +114,12 @@ export const useWatchlistsStore = defineStore(
             };
         });
 
+        const translateState = computed(() => (type?: WatchListItem.state): string => {
+            if (!type) return "?";
+            const key = `states.${type}`;
+            return te(key) ? t(key) : type;
+        });
+
         // --- RESET ---
         function $reset() {
             lists.value = [];
@@ -159,7 +165,7 @@ export const useWatchlistsStore = defineStore(
                 await fetchSingleList(newList.id);
                 return newList;
             } catch (error) {
-                notify.addNotification(t("notifications.wl-create-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-create-error"), "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -175,10 +181,10 @@ export const useWatchlistsStore = defineStore(
                 delete listInvites.value[id];
                 delete listMembers.value[id];
 
-                notify.addNotification(t("notifications.wl-delete-success"), "success");
+                notificationStore.addNotification(t("notifications.wl-delete-success"), "success");
                 return true;
             } catch (error) {
-                notify.addNotification(t("notifications.wl-delete-error"), "success");
+                notificationStore.addNotification(t("notifications.wl-delete-error"), "success");
                 return false;
             } finally {
                 isProcessing.value = false;
@@ -191,7 +197,7 @@ export const useWatchlistsStore = defineStore(
                 await WatchListsService.patchWatchlists(id, data);
                 await fetchSingleList(id);
             } catch (error) {
-                notify.addNotification(t("notifications.wl-patch-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-patch-error"), "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -202,9 +208,9 @@ export const useWatchlistsStore = defineStore(
             try {
                 await WatchListsService.postWatchlistsTransfer(listId, { newOwnerId });
                 await fetchSingleList(listId);
-                notify.addNotification(t("notifications.wl-transfer-success"), "success");
+                notificationStore.addNotification(t("notifications.wl-transfer-success"), "success");
             } catch (error) {
-                notify.addNotification(t("notifications.wl-transfer-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-transfer-error"), "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -230,17 +236,17 @@ export const useWatchlistsStore = defineStore(
             const userStore = useUserStore();
 
             if (email.toLowerCase() === userStore.profile.email.toLowerCase()) {
-                notify.addNotification(t("notifications.wl-invite-self-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-invite-self-error"), "error");
                 return;
             }
             const existingMembers = listMembers.value[listId] || [];
             if (existingMembers.some((m) => m.email.toLowerCase() === email.toLowerCase())) {
-                notify.addNotification(t("notifications.wl-invite-already-member-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-invite-already-member-error"), "error");
                 return;
             }
             const invitedMembers = listInvites.value[listId] || [];
             if (invitedMembers.some((i) => i.inviteeEmail?.toLowerCase() === email.toLowerCase())) {
-                notify.addNotification(t("notifications.wl-invite-already-invited-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-invite-already-invited-error"), "error");
                 return;
             }
 
@@ -249,11 +255,11 @@ export const useWatchlistsStore = defineStore(
                 const invitee = await UserService.getUser(undefined, email);
 
                 await InvitesService.postInvites({ listId, invitee: invitee.id });
-                notify.addNotification(t("notifications.wl-invite-success", { email }), "success");
+                notificationStore.addNotification(t("notifications.wl-invite-success", { email }), "success");
 
                 await fetchSingleList(listId);
             } catch (error) {
-                notify.addNotification(t("notifications.wl-invite-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-invite-error"), "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -264,9 +270,9 @@ export const useWatchlistsStore = defineStore(
             try {
                 await InvitesService.deleteInvitesDecline(inviteId);
                 await fetchSingleList(listId);
-                notify.addNotification(t("notifications.wl-revoke-success"), "success");
+                notificationStore.addNotification(t("notifications.wl-revoke-success"), "success");
             } catch (error) {
-                notify.addNotification(t("notifications.wl-revoke-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-revoke-error"), "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -281,9 +287,9 @@ export const useWatchlistsStore = defineStore(
                 const newMembers = list.sharedWith.filter((id) => id !== userId);
                 await WatchListsService.patchWatchlists(listId, { sharedWith: newMembers });
                 await fetchSingleList(listId);
-                notify.addNotification(t("notifications.wl-member-remove-success"), "success");
+                notificationStore.addNotification(t("notifications.wl-member-remove-success"), "success");
             } catch (error) {
-                notify.addNotification(t("notifications.wl-member-remove-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-member-remove-error"), "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -302,7 +308,7 @@ export const useWatchlistsStore = defineStore(
 
                 const existingItems = listItems.value[listId] ?? [];
                 if (existingItems.some((item) => item.titleId === titleId)) {
-                    notify.addNotification(t("notifications.wl-item-add-already-added-error"), "error");
+                    notificationStore.addNotification(t("notifications.wl-item-add-already-added-error"), "error");
                     return;
                 }
 
@@ -310,7 +316,7 @@ export const useWatchlistsStore = defineStore(
                 if (!listItems.value[listId]) listItems.value[listId] = [];
                 listItems.value[listId].push(newItem);
             } catch (error) {
-                notify.addNotification(t("notifications.wl-item-add-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-item-add-error"), "error");
                 throw error;
             } finally {
                 isProcessing.value = false;
@@ -325,10 +331,10 @@ export const useWatchlistsStore = defineStore(
                     listItems.value[listId] = listItems.value[listId].filter((i) => i.id !== itemId);
                 }
 
-                notify.addNotification(t("notifications.wl-item-delete-success"), "success");
+                notificationStore.addNotification(t("notifications.wl-item-delete-success"), "success");
                 return true;
             } catch (error) {
-                notify.addNotification(t("notifications.wl-item-delete-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-item-delete-error"), "error");
                 return false;
             } finally {
                 isProcessing.value = false;
@@ -341,7 +347,7 @@ export const useWatchlistsStore = defineStore(
                 await WatchListsService.patchWatchlistsItems(listId, itemId, data);
                 await fetchSingleList(listId);
             } catch (error) {
-                notify.addNotification(t("notifications.wl-item-patch-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-item-patch-error"), "error");
             } finally {
                 isProcessing.value = false;
             }
@@ -359,9 +365,9 @@ export const useWatchlistsStore = defineStore(
                 }
 
                 await fetchSingleList(listId);
-                notify.addNotification(t("notifications.wl-item-merge-success"), "success");
+                notificationStore.addNotification(t("notifications.wl-item-merge-success"), "success");
             } catch (error) {
-                notify.addNotification(t("notifications.wl-item-merge-error"), "error");
+                notificationStore.addNotification(t("notifications.wl-item-merge-error"), "error");
             }
         }
 
@@ -391,6 +397,7 @@ export const useWatchlistsStore = defineStore(
             enrichedListItems,
             enrichedListItem,
             availableListFilters,
+            translateState,
             $reset,
             fetchLists,
             fetchSingleList,

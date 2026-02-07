@@ -26,11 +26,11 @@
                     <Image v-else class="poster" />
                     <div class="info">
                         <div class="info">
-                            <span class="title">{{ titlesStore.displayTitle(item.details) }}</span>
-                            <span class="other">{{ item.details?.year ?? "-" }} | {{ item.details?.type ?? "-" }}</span>
+                            <span class="title">{{ titlesStore.translateTitle(item.details) }}</span>
+                            <span class="other">{{ item.details?.year ?? "?" }} | {{ titlesStore.translateType(item.details?.type) }}</span>
                             <span class="genres">
                                 <span v-for="genre in item.resolvedGenres?.slice(0, 3)" :key="genre" class="genre-tag">
-                                    {{ genre }}
+                                    {{ titlesStore.translateGenre(genre) }}
                                 </span>
                             </span>
                         </div>
@@ -64,7 +64,11 @@
                     <div class="filter-content">
                         <div class="filter-section state">
                             <label class="section-label">{{ t("wl-detail.filter.state") }}</label>
-                            <Triage :items="['planned', 'started', 'finished']" v-model="stateFilters" />
+                            <Triage :items="['planned', 'started', 'finished']" v-model="stateFilters">
+                                <template #body="{ item }">
+                                    {{ watchlistsStore.translateState(item) }}
+                                </template>
+                            </Triage>
                         </div>
                         <div class="filter-section">
                             <RangeInput :label="$t('wl-detail.filter.max-length')" v-model="maxDurationFilter" :min="availableFilters.durationRange.min" :max="availableFilters.durationRange.max"
@@ -84,7 +88,11 @@
                         </div>
                         <div class="filter-section">
                             <label class="section-label">{{ t("wl-detail.filter.genres") }}</label>
-                            <Triage :items="availableFilters.genres" v-model="genreFilters" class="genre-triage-item" />
+                            <Triage :items="availableFilters.genres" v-model="genreFilters" class="genre-triage-item">
+                                <template #body="{ item }">
+                                    {{ titlesStore.translateGenre(item) }}
+                                </template>
+                            </Triage>
                         </div>
                         <div class="filter-section">
                             <label class="section-label">{{ t("wl-detail.filter.directors") }}</label>
@@ -136,8 +144,8 @@
                             <img v-if="title.poster" :src="title.poster" class="poster" />
                             <Image v-else class="poster" />
                             <div class="info">
-                                <span class="title">{{ titlesStore.displayTitle(title) }}</span>
-                                <span class="other">{{ title.year ?? "-" }} | {{ title.type ?? "-" }}</span>
+                                <span class="title">{{ titlesStore.translateTitle(title) }}</span>
+                                <span class="other">{{ title.year ?? "?" }} | {{ titlesStore.translateType(title.type) }}</span>
                             </div>
                             <Plus :size="20" class="add-icon" />
                         </li>
@@ -197,8 +205,8 @@ const filteredItems = computed({
     get() {
         return watchlistsStore.enrichedListItems(props.listId)
             .filter(i => {
-                const displayTitle = titlesStore.displayTitle(i.details);
-                const matchesText = displayTitle.toLowerCase().includes(filterQuery.value.toLowerCase());
+                const translateTitle = titlesStore.translateTitle(i.details);
+                const matchesText = translateTitle.toLowerCase().includes(filterQuery.value.toLowerCase());
                 if (!matchesText) return false;
 
                 if (i.details?.durationMinutes && i.details.durationMinutes > maxDurationFilter.value) return false;

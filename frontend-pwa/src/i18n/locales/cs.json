@@ -50,7 +50,6 @@
         "name": "Název",
         "sharing": {
             "title": "Sdílení",
-            "email": "E-mail",
             "no-members": "Žádní další členové.",
             "no-invites": "Žádné čekající pozvánky.",
             "invited": "Pozván"
@@ -113,8 +112,39 @@
         "decline": "Odmítnout",
         "decline-login": "Přihlásit se pro odmítnutí"
     },
+    "states": {
+        "planned": "V plánu",
+        "started": "Rozkoukáno",
+        "finished": "Viděno"
+    },
+    "types": {
+        "movie": "Film",
+        "series": "Seriál",
+        "other": "Ostatní"
+    },
+    "genres": {
+        "action": "Akční",
+        "adventure": "Dobrodružný",
+        "comedy": "Komedie",
+        "drama": "Drama",
+        "fantasy": "Fantasy",
+        "horror": "Horor",
+        "history": "Historický",
+        "sci_fi": "Sci-Fi",
+        "romance": "Romantický",
+        "thriller": "Thriller",
+        "animation": "Animovaný",
+        "documentary": "Dokumentární",
+        "crime": "Krimi",
+        "mystery": "Mysteriózní",
+        "family": "Rodinný",
+        "musical": "Muzikál"
+    },
     "notifications": {
-        "p-toggle-notifs-err": "Nepodařilo se aktualizovat nastavení oznámení. Zkuste to znovu.",
+        "api-online": "Připojení obnoveno.",
+        "api-generic-error": "Něco se nepovedlo. Zkuste to prosím znovu.",
+        "api-network-error": "Chyba sítě: Připojení k serveru se nezdařilo.",
+        "p-toggle-notifs-error": "Nepodařilo se aktualizovat nastavení oznámení. Zkuste to znovu.",
         "wl-create-error": "Nepodařilo se vytvořit seznam. Zkuste to znovu.",
         "wl-patch-error": "Nepodařilo se aktualizovat nastavení seznamu.",
         "wl-delete-success": "Seznam byl úspěšně smazán.",

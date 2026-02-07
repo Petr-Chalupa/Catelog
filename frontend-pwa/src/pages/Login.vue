@@ -16,7 +16,7 @@
 
             <button @click="login('microsoft')">
                 <img src="../assets/microsoft.svg" alt="Microsoft" />
-                <span>{{ $t("login.micorosoft-msg") }}</span>
+                <span>{{ $t("login.microsoft-msg") }}</span>
             </button>
         </div>
     </main>
@@ -25,7 +25,7 @@
 <style scoped src="/src/styles/login.css"></style>
 
 <script setup lang="ts">
-const login = (provider: "google" | "microsoft") => {
+function login(provider: "google" | "microsoft") {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     const urlParams = new URLSearchParams(window.location.search);
     const finalTarget = urlParams.get("redirect");
@@ -36,5 +36,5 @@ const login = (provider: "google" | "microsoft") => {
     const encodedCallback = encodeURIComponent(callbackUrl);
 
     window.location.href = `${baseUrl}/user/auth?provider=${provider}&redirect=${encodedCallback}`;
-};
+}
 </script>

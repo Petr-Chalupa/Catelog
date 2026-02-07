@@ -92,20 +92,6 @@ select {
     }
 }
 
-input[type="text"] {
-    width: 100%;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1rem 1rem;
-    color: var(--text-primary);
-    font-size: 1rem;
-
-    &:focus {
-        outline: none;
-    }
-}
-
 input[type="checkbox"] {
     position: relative;
     width: 40px;
@@ -158,6 +144,7 @@ input[type="checkbox"] {
     .wrapper {
         width: 100%;
         border-radius: 0;
+        border-width: 1px 0 0 0;
     }
 }
 

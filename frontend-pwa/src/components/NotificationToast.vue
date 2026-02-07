@@ -10,8 +10,6 @@
     </div>
 </template>
 
-
-
 <style scoped>
 .toast-container {
     position: fixed;
