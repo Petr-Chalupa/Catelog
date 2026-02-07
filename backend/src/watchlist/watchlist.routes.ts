@@ -35,7 +35,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.get("/:listId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId } = req.params;
+    const { listId } = req.params as { listId: string };
 
     const watchlist = await getValidatedWatchList(listId, userId);
 
@@ -44,7 +44,7 @@ router.get("/:listId", authMiddleware, async (req, res) => {
 
 router.patch("/:listId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId } = req.params;
+    const { listId } = req.params as { listId: string };
     const updateData = req.body as Partial<WatchList>;
 
     const list = await getValidatedWatchList(listId, userId, true); // Member check
@@ -55,9 +55,9 @@ router.patch("/:listId", authMiddleware, async (req, res) => {
 
 router.delete("/:listId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId } = req.params;
+    const { listId } = req.params as { listId: string };
 
-    await getValidatedWatchList(req.params.listId, userId, true); // Owner check
+    await getValidatedWatchList(listId, userId, true); // Owner check
     await deleteWatchListById(listId);
 
     res.sendStatus(200);
@@ -65,7 +65,7 @@ router.delete("/:listId", authMiddleware, async (req, res) => {
 
 router.post("/:listId/transfer", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId } = req.params;
+    const { listId } = req.params as { listId: string };
     const { newOwnerId } = req.body as { newOwnerId: string };
 
     await getValidatedWatchList(listId, userId, true); // Owner check
@@ -76,7 +76,7 @@ router.post("/:listId/transfer", authMiddleware, async (req, res) => {
 
 router.get("/:listId/items", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId } = req.params;
+    const { listId } = req.params as { listId: string };
 
     await getValidatedWatchList(listId, userId); // Member check
     const items = await getWatchListItems(listId);
@@ -86,7 +86,7 @@ router.get("/:listId/items", authMiddleware, async (req, res) => {
 
 router.post("/:listId/items", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId } = req.params;
+    const { listId } = req.params as { listId: string };
     const { titleId } = req.body as Partial<WatchListItem>;
 
     const newItem = await addItemToWatchList(listId, userId, titleId!);
@@ -96,7 +96,7 @@ router.post("/:listId/items", authMiddleware, async (req, res) => {
 
 router.patch("/:listId/items/:itemId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId, itemId } = req.params;
+    const { listId, itemId } = req.params as { listId: string; itemId: string };
     const updateData = req.body as Partial<WatchListItem>;
 
     await getValidatedWatchList(listId, userId); // Member check
@@ -108,7 +108,7 @@ router.patch("/:listId/items/:itemId", authMiddleware, async (req, res) => {
 
 router.delete("/:listId/items/:itemId", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { listId, itemId } = req.params;
+    const { listId, itemId } = req.params as { listId: string; itemId: string };
 
     await removeItemFromWatchList(listId, userId, itemId);
 

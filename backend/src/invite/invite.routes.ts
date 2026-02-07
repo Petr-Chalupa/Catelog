@@ -39,7 +39,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.get("/watchlists/:id", authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     const invites = await getWatchlistInvites(userId, id);
     const enrichedInvites = await Promise.all(
@@ -63,7 +63,7 @@ router.get("/:token", async (req, res) => {
 
 router.post("/:token/accept", authMiddleware, async (req, res) => {
     const userId = (req as any).user?.id;
-    const { token } = req.params;
+    const { token } = req.params as { token: string };
 
     const result = await processAcceptInvite(token, userId);
 
@@ -72,7 +72,7 @@ router.post("/:token/accept", authMiddleware, async (req, res) => {
 
 router.delete("/:id/decline", authMiddleware, async (req, res) => {
     const userId = (req as any).user?.id;
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     await declineInvite(id, userId);
 

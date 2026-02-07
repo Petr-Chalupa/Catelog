@@ -51,7 +51,7 @@ router.get("/search", authMiddleware, async (req, res) => {
 });
 
 router.get("/:id", authMiddleware, async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     const title = await getTitleById(id);
 
@@ -59,7 +59,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 router.post("/:id/refresh", authMiddleware, async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     // Only one will actually run
     await refreshTitleMetadata(id);
