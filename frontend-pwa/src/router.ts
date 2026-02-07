@@ -2,12 +2,12 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "./stores/auth.store";
 import { useUserStore } from "./stores/user.store";
 import Login from "./pages/Login.vue";
-import Watchlists from "./pages/Watchlists.vue";
-import Profile from "./pages/Profile.vue";
-import Invite from "./pages/Invite.vue";
+import Watchlists from "./pages/WatchLists.vue";
 import WatchlistDetail from "./pages/WatchlistDetail.vue";
 import WatchlistSettings from "./pages/WatchlistSettings.vue";
 import WatchlistItem from "./pages/WatchlistItem.vue";
+import Profile from "./pages/Profile.vue";
+import Invite from "./pages/Invite.vue";
 
 export const router = createRouter({
     history: createWebHistory(),
