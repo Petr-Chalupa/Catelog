@@ -115,7 +115,6 @@ export const useUserStore = defineStore(
 
                     const registration = await getReadyServiceWorker();
                     let subscription = await registration.pushManager.getSubscription();
-                    useNotificationStore().addNotification(`${subscription}`, "error");
                     if (!subscription) {
                         subscription = await registration.pushManager.subscribe({
                             userVisibleOnly: true,
@@ -128,8 +127,7 @@ export const useUserStore = defineStore(
                         endpoint: raw.endpoint!,
                         keys: { p256dh: raw.keys!.p256dh!, auth: raw.keys!.auth! },
                     };
-                    useNotificationStore().addNotification(`${raw}`, "error");
-                    useNotificationStore().addNotification(`${deviceData}`, "error");
+                    useNotificationStore().addNotification(`${raw.toString()}`, "error");
 
                     await UserService.postUserDevicesSubscribe(deviceData);
                 } else {
