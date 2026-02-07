@@ -125,12 +125,15 @@
     "genres": {
         "action": "Akční",
         "adventure": "Dobrodružný",
+        "biography": "Životopisný",
         "comedy": "Komedie",
         "drama": "Drama",
         "fantasy": "Fantasy",
+        "fairytale": "Pohádka",
         "horror": "Horor",
         "history": "Historický",
         "sci_fi": "Sci-Fi",
+        "sport": "Sportovní",
         "romance": "Romantický",
         "thriller": "Thriller",
         "animation": "Animovaný",
@@ -138,7 +141,8 @@
         "crime": "Krimi",
         "mystery": "Mysteriózní",
         "family": "Rodinný",
-        "musical": "Muzikál"
+        "musical": "Muzikál",
+        "war": "Válečný"
     },
     "notifications": {
         "api-online": "Připojení obnoveno.",

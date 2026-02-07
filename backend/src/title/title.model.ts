@@ -3,12 +3,15 @@ export type TitleSource = "imdb" | "tmdb" | "csfd";
 export type TitleGenre =
     | "action"
     | "adventure"
+    | "biography"
     | "comedy"
     | "drama"
     | "fantasy"
+    | "fairytale"
     | "horror"
     | "history"
     | "sci_fi"
+    | "sport"
     | "romance"
     | "thriller"
     | "animation"
@@ -16,7 +19,8 @@ export type TitleGenre =
     | "crime"
     | "mystery"
     | "family"
-    | "musical";
+    | "musical"
+    | "war";
 
 export interface Title {
     id: string;

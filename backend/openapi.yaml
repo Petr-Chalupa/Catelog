@@ -877,12 +877,15 @@ components:
                 [
                     action,
                     adventure,
+                    biography,
                     comedy,
                     drama,
                     fantasy,
+                    fairytale,
                     horror,
                     history,
                     sci_fi,
+                    sport,
                     romance,
                     thriller,
                     animation,
@@ -891,6 +894,7 @@ components:
                     mystery,
                     family,
                     musical,
+                    war,
                 ]
 
         MergeCandidate:

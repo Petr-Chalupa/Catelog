@@ -26,13 +26,17 @@ const CSFD_GENRE_MAP: Record<string, TitleGenre> = {
     Dobrodružný: "adventure",
     Thriller: "thriller",
     Fantasy: "fantasy",
+    Pohádka: "fairytale",
     Rodinný: "family",
+    Sportovní: "sport",
     Historický: "history",
     Krimi: "crime",
     Animovaný: "animation",
     Muzikál: "musical",
     Dokument: "documentary",
     Mysteriózní: "mystery",
+    Válečný: "war",
+    Životopisný: "biography",
 };
 
 const CSFD_LANG_MAP: Record<string, string> = {
@@ -69,16 +73,17 @@ function mapCSFDToTitle(data: any): Title {
 
     return {
         id: randomUUID(),
-        titles: Object.keys(localizedTitles).length > 0 ? localizedTitles : {},
-        year: data.year ? parseInt(data.year) : undefined,
         type: CSFD_TYPE_MAP[data.type as CSFDFilmTypes] ?? "other",
+        titles: Object.keys(localizedTitles).length > 0 ? localizedTitles : {},
+        poster: data.poster || data.photo,
+        year: data.year ? parseInt(data.year) : undefined,
         genres: data.genres?.map((g: string) => CSFD_GENRE_MAP[g]).filter(Boolean),
+        ratings: data.rating != null ? { csfd: data.rating / 10 } : {},
         directors: data.creators?.directors?.map((d: any) => d.name),
         actors: data.creators?.actors?.map((a: any) => a.name),
         durationMinutes: data.length,
-        ratings: data.rating != null ? { csfd: data.rating / 10 } : undefined,
-        poster: data.poster || data.photo,
         externalIds: { csfd: String(data.id) },
+        mergeCandidates: [],
         public: true,
     };
 }

@@ -26,6 +26,7 @@ const TMDB_GENRE_MAP: Record<number, TitleGenre> = {
     10749: "romance",
     878: "sci_fi",
     53: "thriller",
+    10752: "war",
 };
 
 const tmdbClient: AxiosInstance = axios.create({
@@ -43,15 +44,18 @@ function mapTMDbToTitle(data: any, translations?: Record<string, string>): Title
         id: randomUUID(),
         type: TMDB_TYPE_MAP[data.media_type ?? (data.title ? "movie" : "tv")] ?? "other",
         titles: allTitles,
+        poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : undefined,
         year:
             data.release_date || data.first_air_date
                 ? new Date(data.release_date || data.first_air_date).getFullYear()
                 : undefined,
         genres: data.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean),
-        durationMinutes: data.runtime || data.episode_run_time?.[0],
         ratings: { tmdb: data.vote_average },
-        poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : undefined,
+        directors: [],
+        actors: [],
+        durationMinutes: data.runtime || data.episode_run_time?.[0],
         externalIds: { tmdb: String(data.id) },
+        mergeCandidates: [],
         public: true,
     };
 }

@@ -125,12 +125,15 @@
     "genres": {
         "action": "Action",
         "adventure": "Adventure",
+        "biography": "Biography",
         "comedy": "Comedy",
         "drama": "Drama",
         "fantasy": "Fantasy",
+        "fairytale": "Fairytale",
         "horror": "Horror",
         "history": "History",
         "sci_fi": "Sci-Fi",
+        "sport": "Sport",
         "romance": "Romance",
         "thriller": "Thriller",
         "animation": "Animation",
@@ -138,7 +141,8 @@
         "crime": "Crime",
         "mystery": "Mystery",
         "family": "Family",
-        "musical": "Musical"
+        "musical": "Musical",
+        "war": "War"
     },
     "notifications": {
         "api-online": "Back online.",

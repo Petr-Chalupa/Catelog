@@ -5,12 +5,15 @@
 export enum TitleGenre {
     ACTION = 'action',
     ADVENTURE = 'adventure',
+    BIOGRAPHY = 'biography',
     COMEDY = 'comedy',
     DRAMA = 'drama',
     FANTASY = 'fantasy',
+    FAIRYTALE = 'fairytale',
     HORROR = 'horror',
     HISTORY = 'history',
     SCI_FI = 'sci_fi',
+    SPORT = 'sport',
     ROMANCE = 'romance',
     THRILLER = 'thriller',
     ANIMATION = 'animation',
@@ -19,4 +22,5 @@ export enum TitleGenre {
     MYSTERY = 'mystery',
     FAMILY = 'family',
     MUSICAL = 'musical',
+    WAR = 'war',
 }
