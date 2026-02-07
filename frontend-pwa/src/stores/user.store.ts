@@ -128,7 +128,6 @@ export const useUserStore = defineStore(
                         endpoint: raw.endpoint!,
                         keys: { p256dh: raw.keys!.p256dh!, auth: raw.keys!.auth! },
                     };
-                    useConfirmStore().ask("e", JSON.stringify(raw));
 
                     await UserService.postUserDevicesSubscribe(deviceData);
                 } else {
@@ -141,6 +140,8 @@ export const useUserStore = defineStore(
                 }
 
                 await updateProfile({ notificationsEnabled: enabled });
+            } catch (e: any) {
+                useConfirmStore().ask("e", JSON.stringify(e));
             } finally {
                 isProcessing.value = false;
             }
