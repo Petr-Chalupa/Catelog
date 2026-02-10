@@ -13,7 +13,7 @@ export default defineConfig({
             manifest: {
                 name: "Catelog",
                 short_name: "Catelog",
-                description: "Manage and discover your favorite titles",
+                description: "When you like watching movies with your cat",
                 start_url: "/",
                 display: "standalone",
                 background_color: "#141414",
