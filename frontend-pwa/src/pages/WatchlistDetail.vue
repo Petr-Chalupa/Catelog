@@ -71,12 +71,10 @@
                             </Triage>
                         </div>
                         <div class="filter-section">
-                            <RangeInput :label="$t('wl-detail.filter.max-length')" v-model="maxDurationFilter" :min="availableFilters.durationRange.min" :max="availableFilters.durationRange.max"
-                                unit="min" />
+                            <RangeInput :label="$t('wl-detail.filter.max-length')" v-model="maxDurationFilter" :min="availableFilters.durationRange.min" :max="availableFilters.durationRange.max" unit="min" />
                         </div>
                         <div class="filter-section">
-                            <RangeInput :label="$t('wl-detail.filter.min-rating')" v-model="minRatingFilter" :min="availableFilters.ratingRange.min" :max="availableFilters.ratingRange.max"
-                                :step="0.1" />
+                            <RangeInput :label="$t('wl-detail.filter.min-rating')" v-model="minRatingFilter" :min="availableFilters.ratingRange.min" :max="availableFilters.ratingRange.max" :step="0.1" />
                         </div>
                         <div class="filter-section">
                             <label class="section-label">{{ t("wl-detail.filter.year") }} [{{ availableFilters.yearRange.min }} - {{ availableFilters.yearRange.max }}]</label>
@@ -120,9 +118,9 @@
 
         <Overlay v-model="isSearchExpanded" history-key="search" @close="closeSearch">
             <template #header>
-                <Input v-model="searchQuery" :placeholder="$t('wl-detail.search.input')" @enter="handleSearch" autoFocus>
+                <Input v-model="searchQuery" :placeholder="$t('wl-detail.search.input')" @enter="handleSearch" autoFocus v-onlineonly>
                     <template #actions>
-                        <button class="search-btn" @click="handleSearch" :disabled="titlesStore.isProcessing" v-onlineonly>
+                        <button class="search-btn" @click="handleSearch" :disabled="titlesStore.isProcessing">
                             <Search v-if="!titlesStore.isProcessing" :size="20" />
                             <LoaderIcon v-else :size="20" class="animate-spin" />
                         </button>

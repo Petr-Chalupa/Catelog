@@ -41,9 +41,9 @@
         </DraggableList>
 
         <section class="create-section">
-            <Input v-model="newListName" :placeholder="$t('watchlists.name')" @enter="createNewList">
+            <Input v-model="newListName" :placeholder="$t('watchlists.name')" @enter="createNewList" v-onlineonly>
                 <template #actions>
-                    <button @click="createNewList" :disabled="watchlistsStore.isProcessing || !newListName.trim()" v-onlineonly>
+                    <button @click="createNewList" :disabled="watchlistsStore.isProcessing || !newListName.trim()">
                         <Plus v-if="!watchlistsStore.isProcessing" :size="20" />
                         <LoaderIcon v-else :size="20" class="animate-spin" />
                     </button>

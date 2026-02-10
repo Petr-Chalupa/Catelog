@@ -14,9 +14,9 @@
             <h3 class="group-title">{{ t("wl-settings.name") }}</h3>
 
             <div class="settings-item change-name">
-                <Input v-model="editName" @enter="handleSaveName">
+                <Input v-model="editName" @enter="handleSaveName" v-onlineonly>
                     <template #actions>
-                        <button :disabled="watchlistsStore.isProcessing || !editName.trim().length" @click="handleSaveName" v-onlineonly>
+                        <button :disabled="watchlistsStore.isProcessing || !editName.trim().length" @click="handleSaveName">
                             <Save v-if="!watchlistsStore.isProcessing" :size="18" />
                             <LoaderIcon v-else :size="18" class="animate-spin" />
                         </button>
@@ -29,9 +29,9 @@
             <h3 class="group-title">{{ t("wl-settings.sharing.title") }}</h3>
 
             <div v-if="isOwner" class="settings-item add-member">
-                <Input v-model="addMemberEmail" placeholder="E-mail" @enter="addMember">
+                <Input v-model="addMemberEmail" placeholder="E-mail" @enter="addMember" v-onlineonly>
                     <template #actions>
-                        <button :disabled="watchlistsStore.isProcessing || !addMemberEmail.trim().length" @click="addMember" v-onlineonly>
+                        <button :disabled="watchlistsStore.isProcessing || !addMemberEmail.trim().length" @click="addMember">
                             <Plus v-if="!watchlistsStore.isProcessing" :size="18" />
                             <LoaderIcon v-else :size="18" class="animate-spin" />
                         </button>
