@@ -51,7 +51,7 @@
 
         <Overlay v-model="isFilterExpanded" history-key="filter">
             <template #header>
-                <Input v-model="filterQuery" :placeholder="$t('wl-detail.filter.input')" autoFocus>
+                <Input v-model="filterQuery" :placeholder="$t('wl-detail.filter.input')" autofocus>
                     <template #actions>
                         <button class="close-btn" @click="filterQuery = ''">
                             <X :size="20" />
@@ -118,7 +118,7 @@
 
         <Overlay v-model="isSearchExpanded" history-key="search" @close="closeSearch">
             <template #header>
-                <Input v-model="searchQuery" :placeholder="$t('wl-detail.search.input')" @enter="handleSearch" autoFocus v-onlineonly>
+                <Input v-model="searchQuery" :placeholder="$t('wl-detail.search.input')" @enter="handleSearch" autofocus v-onlineonly>
                     <template #actions>
                         <button class="search-btn" @click="handleSearch" :disabled="titlesStore.isProcessing">
                             <Search v-if="!titlesStore.isProcessing" :size="20" />
