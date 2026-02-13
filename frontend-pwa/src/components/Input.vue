@@ -1,6 +1,6 @@
 <template>
     <div class="wrapper">
-        <input v-model="value" @focus="isFocused = true" @blur="isFocused = false" @keyup.enter="$emit('enter')" :placeholder="placeholder" />
+        <input v-model="value" v-bind="$attrs" @focus="isFocused = true" @blur="isFocused = false" @keyup.enter="$emit('enter')" />
         <div class="actions">
             <slot name="actions"></slot>
         </div>
@@ -59,7 +59,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 
-const props = defineProps<{ placeholder?: string; autoFocus?: boolean }>();
+defineOptions({ inheritAttrs: false });
+const props = defineProps<{ autoFocus?: boolean }>();
 const value = defineModel<string>({ default: "" });
 const emit = defineEmits(["enter"]);
 
