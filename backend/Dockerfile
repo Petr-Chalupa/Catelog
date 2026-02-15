@@ -17,4 +17,4 @@ RUN npm install --omit=dev
 
 COPY --from=builder /app/backend .
 EXPOSE 3000
-CMD ["node", "src/index.js"]
+CMD ["node", "dist/index.js"]
