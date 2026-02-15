@@ -1,6 +1,11 @@
 FROM node:20-slim AS build
 WORKDIR /app
 
+ARG VITE_API_BASE_URL
+ARG VITE_VAPID_PUBLIC_KEY
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_VAPID_PUBLIC_KEY=$VITE_VAPID_PUBLIC_KEY
+
 COPY frontend-pwa/package*.json ./frontend-pwa/
 RUN cd frontend-pwa && npm install
 
