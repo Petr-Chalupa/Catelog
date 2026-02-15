@@ -14,6 +14,7 @@ COPY --from=builder /app/backend/package*.json ./
 RUN npm install --omit=dev
 
 COPY --from=builder /app/backend/dist ./dist
+COPY --from=builder /app/backend/openapi.yaml ./
 
 EXPOSE 3000
 CMD ["node", "dist/index.js"]
