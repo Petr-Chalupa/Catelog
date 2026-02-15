@@ -1,0 +1,20 @@
+FROM node:20-slim AS builder
+WORKDIR /app
+
+COPY backend/package*.json ./backend/
+RUN cd backend && npm install
+
+COPY backend/ ./backend/
+
+WORKDIR /app/backend
+RUN npm run build
+
+FROM node:20-slim
+WORKDIR /app
+
+COPY --from=builder /app/backend/package*.json ./
+RUN npm install --omit=dev
+
+COPY --from=builder /app/backend .
+EXPOSE 3000
+CMD ["node", "src/index.js"]
