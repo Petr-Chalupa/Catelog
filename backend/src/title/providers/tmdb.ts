@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { Title, TitleGenre, TitleType } from "../title.model";
+import { Title, TitleGenre, TitleType } from "../title.model.js";
 import { randomUUID } from "node:crypto";
 
 const TMDB_TYPE_MAP: Record<string, TitleType> = {
@@ -45,10 +45,7 @@ function mapTMDbToTitle(data: any, translations?: Record<string, string>): Title
         type: TMDB_TYPE_MAP[data.media_type ?? (data.title ? "movie" : "tv")] ?? "other",
         titles: allTitles,
         poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : undefined,
-        year:
-            data.release_date || data.first_air_date
-                ? new Date(data.release_date || data.first_air_date).getFullYear()
-                : undefined,
+        year: data.release_date || data.first_air_date ? new Date(data.release_date || data.first_air_date).getFullYear() : undefined,
         genres: data.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean),
         ratings: { tmdb: data.vote_average },
         directors: [],

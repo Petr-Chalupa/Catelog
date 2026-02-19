@@ -1,18 +1,16 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth.middleware";
+import { authMiddleware } from "../middleware/auth.middleware.js";
 import {
     deleteWatchListById,
-    deleteWatchListItem,
     getUserWatchLists,
     getValidatedWatchList,
     getWatchListItemById,
     getWatchListItems,
-    transferWatchlist,
     upsertWatchList,
     upsertWatchListItem,
-} from "./watchlist.adapter";
-import { WatchList, WatchListItem } from "./watchList.model";
-import { addItemToWatchList, removeItemFromWatchList, transferWatchListOwnership } from "./watchlists.service";
+} from "./watchlist.adapter.js";
+import { WatchList, WatchListItem } from "./watchList.model.js";
+import { addItemToWatchList, removeItemFromWatchList, transferWatchListOwnership } from "./watchlists.service.js";
 
 const router = Router();
 export const watchlistsRouter = router;

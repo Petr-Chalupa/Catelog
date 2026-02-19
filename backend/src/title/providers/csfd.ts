@@ -1,6 +1,6 @@
 import { csfd, CSFDFilmTypes } from "node-csfd-api";
 import { randomUUID } from "node:crypto";
-import { Title, TitleGenre, TitleType } from "../title.model";
+import { Title, TitleGenre, TitleType } from "../title.model.js";
 
 const CSFD_TYPE_MAP: Record<CSFDFilmTypes, TitleType> = {
     film: "movie",

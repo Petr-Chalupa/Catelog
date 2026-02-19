@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { APIError } from "./error.middleware";
+import { APIError } from "./error.middleware.js";
 
 export const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(",") || [];
 

@@ -1,7 +1,7 @@
-import { sendPushNotification, sendPushNotificationToWatchlistMembers } from "../notifications/notifications.service";
-import { getUserById } from "../user/user.adapter";
-import { getWatchListById } from "../watchlist/watchlist.adapter";
-import { acceptInvite, createInvite, getInviteByToken } from "./invite.adapter";
+import { sendPushNotification, sendPushNotificationToWatchlistMembers } from "../notifications/notifications.service.js";
+import { getUserById } from "../user/user.adapter.js";
+import { getWatchListById } from "../watchlist/watchlist.adapter.js";
+import { acceptInvite, createInvite } from "./invite.adapter.js";
 
 export async function inviteUserToWatchlist(listId: string, inviterId: string, inviteeId: string) {
     const invite = await createInvite(listId, inviterId, inviteeId);

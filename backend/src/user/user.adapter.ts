@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { OAuthSession, RefreshToken, User, UserDevice } from "./user.model";
-import { getDB } from "../db";
-import { cleanupWatchListsForUser } from "../watchlist/watchlist.adapter";
-import { APIError } from "../middleware/error.middleware";
+import { OAuthSession, RefreshToken, User, UserDevice } from "./user.model.js";
+import { getDB } from "../db.js";
+import { cleanupWatchListsForUser } from "../watchlist/watchlist.adapter.js";
+import { APIError } from "../middleware/error.middleware.js";
 
 export async function getUserById(userId: string): Promise<User> {
     const db = getDB();

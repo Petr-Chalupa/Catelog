@@ -1,16 +1,11 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth.middleware";
-import { searchTMDb } from "./providers/tmdb";
-import { searchOMDb } from "./providers/omdb";
-import { searchCSFD } from "./providers/csfd";
-import { Title } from "./title.model";
-import {
-    importTitle,
-    mergeSearchResults,
-    refreshTitleMetadata,
-    updatePlaceholderMergeCandidates,
-} from "./title.service";
-import { getTitleById, upsertTitle } from "./title.adapter";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { searchTMDb } from "./providers/tmdb.js";
+import { searchOMDb } from "./providers/omdb.js";
+import { searchCSFD } from "./providers/csfd.js";
+import { Title } from "./title.model.js";
+import { importTitle, mergeSearchResults, refreshTitleMetadata, updatePlaceholderMergeCandidates } from "./title.service.js";
+import { getTitleById, upsertTitle } from "./title.adapter.js";
 
 const router = Router();
 export const titlesRouter = router;
@@ -21,9 +16,7 @@ router.post("/", authMiddleware, async (req, res) => {
     const title = await upsertTitle(titleData);
     if (!title.public) {
         // Run in background
-        updatePlaceholderMergeCandidates(title.id).catch((err) =>
-            console.error(`Background discovery failed for ${title.id}:`, err),
-        );
+        updatePlaceholderMergeCandidates(title.id).catch((err) => console.error(`Background discovery failed for ${title.id}:`, err));
     }
 
     return res.json(title);
@@ -42,9 +35,7 @@ router.get("/search", authMiddleware, async (req, res) => {
     const query = q as string;
 
     const results = await Promise.allSettled([searchTMDb(query, true), searchOMDb(query), searchCSFD(query, true)]);
-    const flattenedResults = results
-        .filter((r): r is PromiseFulfilledResult<Title[]> => r.status === "fulfilled")
-        .flatMap((r) => r.value);
+    const flattenedResults = results.filter((r): r is PromiseFulfilledResult<Title[]> => r.status === "fulfilled").flatMap((r) => r.value);
     const mergedResults = mergeSearchResults(flattenedResults);
 
     res.json(mergedResults);

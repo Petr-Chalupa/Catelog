@@ -1,10 +1,10 @@
 import crypto, { randomUUID } from "crypto";
-import { Invite } from "./invite.model";
-import { WatchList } from "../watchlist/watchList.model";
-import { getValidatedWatchList, upsertWatchList } from "../watchlist/watchlist.adapter";
-import { getDB } from "../db";
-import { User } from "../user/user.model";
-import { APIError } from "../middleware/error.middleware";
+import { Invite } from "./invite.model.js";
+import { WatchList } from "../watchlist/watchList.model.js";
+import { getValidatedWatchList, upsertWatchList } from "../watchlist/watchlist.adapter.js";
+import { getDB } from "../db.js";
+import { User } from "../user/user.model.js";
+import { APIError } from "../middleware/error.middleware.js";
 
 export async function getUserInvites(userId: string, type: string): Promise<Invite[]> {
     const db = getDB();
@@ -31,9 +31,7 @@ export async function getInviteByToken(token: string): Promise<Invite> {
     return invite;
 }
 
-export async function getInviteDetails(
-    inviteId: string
-): Promise<{ inviterName: string; inviterEmail: string; inviteeName: string; inviteeEmail: string; listName: string }> {
+export async function getInviteDetails(inviteId: string): Promise<{ inviterName: string; inviterEmail: string; inviteeName: string; inviteeEmail: string; listName: string }> {
     const db = getDB();
     const invite = await db.collection<Invite>("invites").findOne({ id: inviteId });
     if (!invite) throw new APIError(404, "Invite details not found");

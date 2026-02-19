@@ -10,14 +10,14 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 // Imports that might depend on env vars
-import { connectDB, closeDB } from "./db";
-import { corsMiddleware } from "./middleware/auth.middleware";
-import { errorMiddleware } from "./middleware/error.middleware";
-import { systemRouter } from "./system/system.routes";
-import { userRouter } from "./user/user.routes";
-import { titlesRouter } from "./title/title.routes";
-import { watchlistsRouter } from "./watchlist/watchlist.routes";
-import { invitesRouter } from "./invite/invite.routes";
+import { connectDB, closeDB } from "./db.js";
+import { corsMiddleware } from "./middleware/auth.middleware.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
+import { systemRouter } from "./system/system.routes.js";
+import { userRouter } from "./user/user.routes.js";
+import { titlesRouter } from "./title/title.routes.js";
+import { watchlistsRouter } from "./watchlist/watchlist.routes.js";
+import { invitesRouter } from "./invite/invite.routes.js";
 
 const apiSpecPath = path.join(__dirname, "../openapi.yaml");
 const apiSwaggerDocument = YAML.parse(fs.readFileSync(apiSpecPath, "utf8"));

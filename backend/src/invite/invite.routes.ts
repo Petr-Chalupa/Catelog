@@ -1,13 +1,7 @@
 import { Router } from "express";
-import {
-    declineInvite,
-    getInviteByToken,
-    getInviteDetails,
-    getUserInvites,
-    getWatchlistInvites,
-} from "./invite.adapter";
-import { authMiddleware } from "../middleware/auth.middleware";
-import { inviteUserToWatchlist, processAcceptInvite } from "./invite.service";
+import { declineInvite, getInviteByToken, getInviteDetails, getUserInvites, getWatchlistInvites } from "./invite.adapter.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { inviteUserToWatchlist, processAcceptInvite } from "./invite.service.js";
 
 const router = Router();
 export const invitesRouter = router;

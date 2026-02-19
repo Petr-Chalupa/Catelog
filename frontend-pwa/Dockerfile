@@ -6,13 +6,12 @@ ARG VITE_VAPID_PUBLIC_KEY
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_VAPID_PUBLIC_KEY=$VITE_VAPID_PUBLIC_KEY
 
-COPY frontend-pwa/package*.json ./frontend-pwa/
-RUN cd frontend-pwa && npm install
-
-COPY backend/openapi.yaml ./backend/
-COPY frontend-pwa/ ./frontend-pwa/
-
 WORKDIR /app/frontend-pwa
+COPY frontend-pwa/package*.json .
+RUN npm ci
+
+COPY frontend-pwa/ .
+COPY backend/openapi.yaml ../backend/
 RUN npm run build
 
 FROM nginx:stable-alpine

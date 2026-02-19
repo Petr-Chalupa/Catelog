@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { runEnrichment } from "../title/title.service";
-import { deleteUnreferencedTitlePlaceholders } from "../title/title.adapter";
-import { deleteExpired } from "../db";
-import { systemAuthMiddleware } from "../middleware/auth.middleware";
+import { runEnrichment } from "../title/title.service.js";
+import { deleteUnreferencedTitlePlaceholders } from "../title/title.adapter.js";
+import { deleteExpired } from "../db.js";
+import { systemAuthMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
 export const systemRouter = router;

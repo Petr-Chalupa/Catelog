@@ -1,4 +1,4 @@
-import { TitleGenre } from "../title/title.model";
+import { TitleGenre } from "../title/title.model.js";
 
 export type WatchState = "planned" | "started" | "finished";
 

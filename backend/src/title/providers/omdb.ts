@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { Title, TitleGenre, TitleType } from "../title.model";
+import { Title, TitleGenre, TitleType } from "../title.model.js";
 import { randomUUID } from "node:crypto";
 
 const OMDB_TYPE_MAP: Record<string, TitleType> = {
@@ -50,10 +50,7 @@ function mapOMDbToTitle(data: any): Title {
         year: data.Year ? parseInt(data.Year) : undefined,
         genres,
         ratings: data.imdbRating && data.imdbRating !== "N/A" ? { imdb: parseFloat(data.imdbRating) } : {},
-        directors:
-            data.Director && data.Director !== "N/A"
-                ? data.Director.split(",").map((s: string) => s.trim())
-                : undefined,
+        directors: data.Director && data.Director !== "N/A" ? data.Director.split(",").map((s: string) => s.trim()) : undefined,
         actors: data.Actors && data.Actors !== "N/A" ? data.Actors.split(",").map((s: string) => s.trim()) : undefined,
         durationMinutes: data.Runtime ? parseInt(data.Runtime) : undefined,
         externalIds: { imdb: data.imdbID },

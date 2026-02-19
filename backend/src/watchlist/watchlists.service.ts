@@ -1,14 +1,7 @@
-import { sendPushNotification, sendPushNotificationToWatchlistMembers } from "../notifications/notifications.service";
-import { getTitleById } from "../title/title.adapter";
-import { getUserById } from "../user/user.adapter";
-import {
-    deleteWatchListItem,
-    getValidatedWatchList,
-    getWatchListById,
-    getWatchListItemById,
-    transferWatchlist,
-    upsertWatchListItem,
-} from "./watchlist.adapter";
+import { sendPushNotification, sendPushNotificationToWatchlistMembers } from "../notifications/notifications.service.js";
+import { getTitleById } from "../title/title.adapter.js";
+import { getUserById } from "../user/user.adapter.js";
+import { deleteWatchListItem, getValidatedWatchList, getWatchListById, getWatchListItemById, transferWatchlist, upsertWatchListItem } from "./watchlist.adapter.js";
 
 export async function addItemToWatchList(listId: string, userId: string, titleId: string) {
     const watchlist = await getValidatedWatchList(listId, userId);

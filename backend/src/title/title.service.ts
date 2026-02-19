@@ -1,14 +1,8 @@
-import { searchCSFD, searchCSFDById } from "./providers/csfd";
-import { searchOMDb, searchOMDbById } from "./providers/omdb";
-import { mapTitleTypeToTMDB, searchTMDb, searchTMDbById } from "./providers/tmdb";
-import {
-    findLocalTitleMatches,
-    findPlaceholders,
-    findTitlesForEnrichment,
-    getTitleById,
-    upsertTitle,
-} from "./title.adapter";
-import { MergeCandidate, Title, TitleSource, TitleType } from "./title.model";
+import { searchCSFD, searchCSFDById } from "./providers/csfd.js";
+import { searchOMDb, searchOMDbById } from "./providers/omdb.js";
+import { mapTitleTypeToTMDB, searchTMDb, searchTMDbById } from "./providers/tmdb.js";
+import { findLocalTitleMatches, findPlaceholders, findTitlesForEnrichment, getTitleById, upsertTitle } from "./title.adapter.js";
+import { MergeCandidate, Title, TitleSource, TitleType } from "./title.model.js";
 
 export async function runEnrichment() {
     console.log("Starting enrichment worker");
@@ -33,9 +27,7 @@ export async function refreshTitleMetadata(titleId: string) {
     let enriched: Title = { ...title };
 
     const [tmdbData, omdbData, csfdData] = await Promise.allSettled([
-        title.externalIds?.tmdb
-            ? searchTMDbById(title.externalIds.tmdb, mapTitleTypeToTMDB(title.type))
-            : Promise.resolve(null),
+        title.externalIds?.tmdb ? searchTMDbById(title.externalIds.tmdb, mapTitleTypeToTMDB(title.type)) : Promise.resolve(null),
         title.externalIds?.imdb ? searchOMDbById(title.externalIds.imdb) : Promise.resolve(null),
         title.externalIds?.csfd ? searchCSFDById(title.externalIds.csfd) : Promise.resolve(null),
     ]);
@@ -87,14 +79,8 @@ export async function updatePlaceholderMergeCandidates(titleId: string) {
     );
 
     const searchByTitle = Object.values(title.titles)[0];
-    const externalResults = await Promise.allSettled([
-        searchTMDb(searchByTitle, true),
-        searchOMDb(searchByTitle),
-        searchCSFD(searchByTitle, true),
-    ]);
-    const externalMatches = externalResults
-        .filter((r): r is PromiseFulfilledResult<Title[]> => r.status === "fulfilled")
-        .flatMap((r) => r.value);
+    const externalResults = await Promise.allSettled([searchTMDb(searchByTitle, true), searchOMDb(searchByTitle), searchCSFD(searchByTitle, true)]);
+    const externalMatches = externalResults.filter((r): r is PromiseFulfilledResult<Title[]> => r.status === "fulfilled").flatMap((r) => r.value);
 
     const mergedExternal = mergeSearchResults(externalMatches);
     mergedExternal.forEach((r) => {

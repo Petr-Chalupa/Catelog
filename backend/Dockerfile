@@ -1,20 +1,20 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY backend/package*.json ./backend/
-RUN cd backend && npm install
+COPY backend/package*.json .
+RUN npm ci
 
-COPY backend/ ./backend/
-RUN cd backend && npm run build
+COPY backend/ .
+RUN npm run build
 
 FROM node:20-alpine
 WORKDIR /app
 
-COPY --from=builder /app/backend/package*.json ./
-RUN npm install --omit=dev
+COPY backend/package*.json .
+RUN npm ci --omit=dev
 
-COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/openapi.yaml ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/openapi.yaml .
 
 EXPOSE 3000
 CMD ["node", "dist/index.js"]

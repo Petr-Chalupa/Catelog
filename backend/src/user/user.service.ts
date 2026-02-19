@@ -1,14 +1,8 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
-import {
-    createOAuthSession,
-    createRefreshToken,
-    deleteOAuthSession,
-    getOAuthSession,
-    upsertUser,
-} from "../user/user.adapter";
-import { APIError } from "../middleware/error.middleware";
+import { createOAuthSession, createRefreshToken, deleteOAuthSession, getOAuthSession, upsertUser } from "../user/user.adapter.js";
+import { APIError } from "../middleware/error.middleware.js";
 import axios from "axios";
 
 export function issueJWT(userId: string): string {
@@ -53,19 +47,12 @@ export async function startGoogleOAuth(redirectUrl: string): Promise<string> {
     return url.toString();
 }
 
-export async function finishGoogleOAuth(
-    code: string,
-    state: string,
-): Promise<{ refreshToken: string; redirectUrl: string }> {
+export async function finishGoogleOAuth(code: string, state: string): Promise<{ refreshToken: string; redirectUrl: string }> {
     const session = await getOAuthSession(state);
     if (!session || session.provider !== "google") throw new APIError(400, "Invalid OAuth session");
     if (session.expiresAt < new Date()) throw new APIError(400, "OAuth session expired");
 
-    const client = new OAuth2Client(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_CALLBACK_URL,
-    );
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, process.env.GOOGLE_CALLBACK_URL);
 
     const { tokens } = await client.getToken({ code, codeVerifier: session.codeVerifier });
     const ticket = await client.verifyIdToken({ idToken: tokens.id_token!, audience: process.env.GOOGLE_CLIENT_ID });
@@ -103,10 +90,7 @@ export async function startMicrosoftOAuth(redirectUrl: string): Promise<string> 
     return url.toString();
 }
 
-export async function finishMicrosoftOAuth(
-    code: string,
-    state: string,
-): Promise<{ refreshToken: string; redirectUrl: string }> {
+export async function finishMicrosoftOAuth(code: string, state: string): Promise<{ refreshToken: string; redirectUrl: string }> {
     const session = await getOAuthSession(state);
     if (!session || session.provider !== "microsoft") throw new APIError(400, "Invalid OAuth session");
     if (session.expiresAt < new Date()) throw new APIError(400, "OAuth session expired");

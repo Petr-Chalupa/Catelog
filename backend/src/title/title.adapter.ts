@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { Filter } from "mongodb";
-import { Title } from "./title.model";
-import { getDB } from "../db";
-import { WatchListItem } from "../watchlist/watchList.model";
-import { APIError } from "../middleware/error.middleware";
+import { Title } from "./title.model.js";
+import { getDB } from "../db.js";
+import { WatchListItem } from "../watchlist/watchList.model.js";
+import { APIError } from "../middleware/error.middleware.js";
 
 export async function getTitleById(titleId: string): Promise<Title> {
     const db = getDB();

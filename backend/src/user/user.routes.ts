@@ -1,25 +1,9 @@
 import { Router } from "express";
-import { ALLOWED_ORIGINS, authMiddleware } from "../middleware/auth.middleware";
-import {
-    deleteRefreshToken,
-    deleteUser,
-    deleteUserDevice,
-    getUserByEmail,
-    getUserById,
-    upsertUser,
-    upsertUserDevice,
-    verifyRefreshToken,
-} from "./user.adapter";
-import {
-    finishGoogleOAuth,
-    finishMicrosoftOAuth,
-    issueJWT,
-    issueRefreshTokenCookie,
-    startGoogleOAuth,
-    startMicrosoftOAuth,
-} from "./user.service";
-import { APIError } from "../middleware/error.middleware";
-import { User, UserDevice } from "./user.model";
+import { ALLOWED_ORIGINS, authMiddleware } from "../middleware/auth.middleware.js";
+import { deleteRefreshToken, deleteUser, deleteUserDevice, getUserByEmail, getUserById, upsertUser, upsertUserDevice, verifyRefreshToken } from "./user.adapter.js";
+import { finishGoogleOAuth, finishMicrosoftOAuth, issueJWT, issueRefreshTokenCookie, startGoogleOAuth, startMicrosoftOAuth } from "./user.service.js";
+import { APIError } from "../middleware/error.middleware.js";
+import { User, UserDevice } from "./user.model.js";
 
 const router = Router();
 export const userRouter = router;

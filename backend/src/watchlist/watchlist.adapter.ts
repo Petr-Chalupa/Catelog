@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { getDB } from "../db";
-import { deleteUnreferencedTitlePlaceholders } from "../title/title.adapter";
-import { WatchList, WatchListItem } from "./watchList.model";
-import { APIError } from "../middleware/error.middleware";
+import { getDB } from "../db.js";
+import { deleteUnreferencedTitlePlaceholders } from "../title/title.adapter.js";
+import { WatchList, WatchListItem } from "./watchList.model.js";
+import { APIError } from "../middleware/error.middleware.js";
 
 export async function getWatchListById(listId: string): Promise<WatchList> {
     const db = getDB();

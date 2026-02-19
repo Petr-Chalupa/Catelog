@@ -1,11 +1,8 @@
 import webpush from "web-push";
-import { deleteUserDevice, getUserById, getUserDevices } from "../user/user.adapter";
-import { getWatchListById } from "../watchlist/watchlist.adapter";
+import { deleteUserDevice, getUserById, getUserDevices } from "../user/user.adapter.js";
+import { getWatchListById } from "../watchlist/watchlist.adapter.js";
 
-export async function sendPushNotification(
-    userId: string,
-    payload: { msgKey: string; params?: Record<string, string>; url?: string },
-) {
+export async function sendPushNotification(userId: string, payload: { msgKey: string; params?: Record<string, string>; url?: string }) {
     const user = await getUserById(userId);
     if (!user || !user.notificationsEnabled) return;
 
@@ -13,23 +10,17 @@ export async function sendPushNotification(
 
     const devices = await getUserDevices(userId);
     const notifications = devices.map((device) => {
-        return webpush
-            .sendNotification({ endpoint: device.endpoint, keys: device.keys }, JSON.stringify(payload))
-            .catch((err) => {
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                    return deleteUserDevice(userId, device.endpoint);
-                }
-            });
+        return webpush.sendNotification({ endpoint: device.endpoint, keys: device.keys }, JSON.stringify(payload)).catch((err) => {
+            if (err.statusCode === 410 || err.statusCode === 404) {
+                return deleteUserDevice(userId, device.endpoint);
+            }
+        });
     });
 
     await Promise.all(notifications);
 }
 
-export async function sendPushNotificationToWatchlistMembers(
-    listId: string,
-    excludeUserId: string,
-    payload: { msgKey: string; params?: Record<string, string>; url?: string },
-) {
+export async function sendPushNotificationToWatchlistMembers(listId: string, excludeUserId: string, payload: { msgKey: string; params?: Record<string, string>; url?: string }) {
     const list = await getWatchListById(listId);
 
     const allMembers = new Set([list.ownerId, ...list.sharedWith]);
