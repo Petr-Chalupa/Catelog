@@ -1,15 +1,13 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import fs from "fs";
-import path from "path";
+import { fileURLToPath } from "url";
 import * as OpenApiValidator from "express-openapi-validator";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yaml";
-import * as dotenv from "dotenv";
-dotenv.config();
-
-// Imports that might depend on env vars
+//
 import { connectDB, closeDB } from "./db.js";
 import { corsMiddleware } from "./middleware/auth.middleware.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
@@ -19,7 +17,7 @@ import { titlesRouter } from "./title/title.routes.js";
 import { watchlistsRouter } from "./watchlist/watchlist.routes.js";
 import { invitesRouter } from "./invite/invite.routes.js";
 
-const apiSpecPath = path.join(__dirname, "../openapi.yaml");
+const apiSpecPath = fileURLToPath(import.meta.resolve("../openapi.yaml"));
 const apiSwaggerDocument = YAML.parse(fs.readFileSync(apiSpecPath, "utf8"));
 const app = express();
 
