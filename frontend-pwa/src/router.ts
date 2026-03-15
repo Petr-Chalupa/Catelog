@@ -49,13 +49,6 @@ export const router = createRouter({
             props: true,
         },
         {
-            path: "/watchlists/:listId/pick",
-            name: "watchlistPick",
-            component: { render: () => null },
-            meta: { requiresAuth: true },
-            props: true,
-        },
-        {
             path: "/watchlists/:listId/settings",
             name: "watchlistSettings",
             component: WatchlistSettings,

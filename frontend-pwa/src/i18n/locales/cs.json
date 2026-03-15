@@ -75,8 +75,7 @@
             "genres": "Žánry",
             "directors": "Režiséři",
             "actors": "Herci",
-            "reset": "Resetovat filtry",
-            "pick": "Pokročilý výběr"
+            "reset": "Resetovat filtry"
         },
         "search": {
             "input": "Hledat",

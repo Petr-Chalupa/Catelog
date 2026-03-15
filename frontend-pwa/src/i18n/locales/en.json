@@ -75,8 +75,7 @@
             "genres": "Genres",
             "directors": "Directors",
             "actors": "Actors",
-            "reset": "Reset filters",
-            "pick": "Advanced pick"
+            "reset": "Reset filters"
         },
         "search": {
             "input": "Search for a title",

@@ -107,10 +107,6 @@
                             <RotateCcw :size="18" />
                             <span>{{ t("wl-detail.filter.reset") }}</span>
                         </button>
-                        <button class="pick-btn" @click="openPick">
-                            <Dices :size="18" />
-                            <span>{{ t("wl-detail.filter.pick") }}</span>
-                        </button>
                     </div>
                 </div>
             </template>
@@ -243,10 +239,6 @@ const filteredItems = computed({
 });
 
 onMounted(() => watchlistsStore.fetchSingleList(props.listId));
-
-function openPick() {
-    router.push({ name: "watchlistPick", params: { listId: props.listId } });
-}
 
 function openSettings() {
     router.push({ name: "watchlistSettings", params: { listId: props.listId } });
