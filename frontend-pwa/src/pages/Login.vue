@@ -9,12 +9,12 @@
         </header>
 
         <div class="auth">
-            <button @click="login('google')">
+            <button @click="login('google')" :disabled="userStore.isAuthLoading">
                 <img src="../assets/google.svg" alt="Google" />
                 <span>{{ $t("login.google-msg") }}</span>
             </button>
 
-            <button @click="login('microsoft')">
+            <button @click="login('microsoft')" :disabled="userStore.isAuthLoading">
                 <img src="../assets/microsoft.svg" alt="Microsoft" />
                 <span>{{ $t("login.microsoft-msg") }}</span>
             </button>
@@ -25,16 +25,28 @@
 <style scoped src="/src/styles/login.css"></style>
 
 <script setup lang="ts">
-function login(provider: "google" | "microsoft") {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    const urlParams = new URLSearchParams(window.location.search);
-    const finalTarget = urlParams.get("redirect");
+import { authClient } from "../utils/auth";
+import { useRouter, useRoute } from "vue-router";
+import { useUserStore } from "../stores/user.store";
 
-    let callbackUrl = `${window.location.origin}/login/callback`;
-    if (finalTarget) callbackUrl += `?redirect=${encodeURIComponent(finalTarget)}`;
+const router = useRouter();
+const route = useRoute();
+const userStore = useUserStore();
 
-    const encodedCallback = encodeURIComponent(callbackUrl);
+async function login(provider: "google" | "microsoft") {
+    const redirectTo = route.query.redirect as string;
+    await authClient.signIn.social(
+        {
+            provider: provider,
+            callbackURL: `${window.location.origin}/login/callback${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`,
+        },
+        {
+            onSuccess: () => {
+                console.log("f");
 
-    window.location.href = `${baseUrl}/user/auth?provider=${provider}&redirect=${encodedCallback}`;
+                router.push(redirectTo || "/");
+            },
+        },
+    );
 }
 </script>

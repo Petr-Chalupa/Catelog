@@ -4,10 +4,12 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { toNodeHandler } from "better-auth/node";
 import * as OpenApiValidator from "express-openapi-validator";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yaml";
 //
+import { createAuth, getAuth } from "./auth.js";
 import { connectDB, closeDB } from "./db.js";
 import { corsMiddleware } from "./middleware/auth.middleware.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
@@ -21,34 +23,40 @@ const apiSpecPath = fileURLToPath(import.meta.resolve("../openapi.yaml"));
 const apiSwaggerDocument = YAML.parse(fs.readFileSync(apiSpecPath, "utf8"));
 const app = express();
 
-// Common middleware
-app.use(cors({ origin: corsMiddleware, credentials: true }));
-app.use(cookieParser());
-app.use(express.json());
-app.use(
-    OpenApiValidator.middleware({
-        apiSpec: apiSpecPath,
-        validateRequests: true,
-        validateResponses: false,
-        ignorePaths: /\/api\/(docs|user\/auth\/google\/callback|user\/auth\/microsoft\/callback)/,
-    }),
-);
-
-// API routes
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(apiSwaggerDocument, { customSiteTitle: "Catelog API" }));
-app.use("/api/system", systemRouter);
-app.use("/api/user", userRouter);
-app.use("/api/titles", titlesRouter);
-app.use("/api/watchlists", watchlistsRouter);
-app.use("/api/invites", invitesRouter);
-
-// Global error handler
-app.use(errorMiddleware);
-
-// Lifecycle
 (async () => {
     try {
         await connectDB();
+        createAuth();
+
+        // Common middleware
+        app.use(cors({ origin: corsMiddleware, credentials: true }));
+        app.use(cookieParser());
+        app.use(
+            OpenApiValidator.middleware({
+                apiSpec: apiSpecPath,
+                validateRequests: true,
+                validateResponses: false,
+                ignorePaths: /\/api\/auth\//,
+            }),
+        );
+
+        // API Auth routes (must be handled before JSON middleware)
+        app.all("/api/auth/{*any}", toNodeHandler(getAuth()));
+
+        // JSON middleware
+        app.use(express.json());
+
+        // API routes
+        app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(apiSwaggerDocument, { customSiteTitle: "Catelog API" }));
+        app.use("/api/system", systemRouter);
+        app.use("/api/user", userRouter);
+        app.use("/api/titles", titlesRouter);
+        app.use("/api/watchlists", watchlistsRouter);
+        app.use("/api/invites", invitesRouter);
+
+        // Global error handler
+        app.use(errorMiddleware);
+
         const port = process.env.PORT || 3000;
         app.listen(port, () => console.log(`Server running on PORT: ${port}`));
     } catch (err) {

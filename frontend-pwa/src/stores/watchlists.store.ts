@@ -71,7 +71,7 @@ export const useWatchlistsStore = defineStore(
             let maxRating = 0;
 
             items.forEach((i) => {
-                i.resolvedGenres.forEach((g) => genres.add(g));
+                i.resolvedGenres.forEach((g) => genres.add(g as TitleGenre));
 
                 const duration = i.details?.durationMinutes;
                 if (duration) {

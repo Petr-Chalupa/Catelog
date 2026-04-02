@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAuthStore } from "./stores/auth.store";
 import { useUserStore } from "./stores/user.store";
 import Login from "./pages/Login.vue";
 import Watchlists from "./pages/WatchLists.vue";
@@ -20,20 +19,6 @@ export const router = createRouter({
             path: "/login",
             name: "login",
             component: Login,
-        },
-        {
-            path: "/login/callback",
-            component: { render: () => null },
-            beforeEnter: (to, from, next) => {
-                const authStore = useAuthStore();
-                const token = to.query.token as string;
-                const redirectTo = to.query.redirect as string;
-                if (token) {
-                    authStore.setToken(token);
-                    return next(redirectTo || "/");
-                }
-                next("/login");
-            },
         },
         {
             path: "/watchlists",
@@ -81,18 +66,21 @@ export const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    const authStore = useAuthStore();
     const userStore = useUserStore();
 
-    if (to.meta.requiresAuth && !authStore.token) {
+    while (userStore.isAuthLoading) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    if (to.meta.requiresAuth && !userStore.isAuthenticated) {
         return next({ name: "login", query: { redirect: to.fullPath } });
     }
 
-    if (authStore.token && !userStore.profile?.id) {
+    if (userStore.isAuthenticated && !userStore.profile?.id) {
         try {
-            userStore.fetchProfile();
+            await userStore.fetchProfile();
         } catch (error) {
-            authStore.logout();
+            await userStore.logout();
         }
     }
     next();

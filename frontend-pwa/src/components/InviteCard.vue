@@ -16,11 +16,11 @@
         </div>
         <div v-else class="invite-actions">
             <button @click="handleAction('accept')" :disabled="disabled" class="btn-accept" v-onlineonly>
-                {{ isLoggedIn ? t("invite-card.accept") : t("invite-card.accept-login") }}
+                {{ userStore.isAuthenticated ? t("invite-card.accept") : t("invite-card.accept-login") }}
             </button>
 
             <button @click="handleAction('decline')" :disabled="disabled" class="btn-decline" v-onlineonly>
-                {{ isLoggedIn ? t("invite-card.decline") : t("invite-card.decline-login") }}
+                {{ userStore.isAuthenticated ? t("invite-card.decline") : t("invite-card.decline-login") }}
             </button>
         </div>
     </div>
@@ -91,17 +91,16 @@
 import { computed } from "vue";
 import { type Invite } from "../api";
 import { useRoute, useRouter } from "vue-router";
-import { useAuthStore } from "../stores/auth.store";
+import { useUserStore } from "../stores/user.store";
 import { useI18n } from "vue-i18n";
 
 const emits = defineEmits(["accept", "decline"]);
 const props = defineProps<{ invite: Invite; size: "small" | "large"; disabled?: boolean; }>();
 
 const { t } = useI18n();
-const authStore = useAuthStore();
+const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
-const isLoggedIn = computed(() => !!authStore.token);
 const isExpired = computed(() => new Date(props.invite.expiresAt) < new Date());
 
 function formatDate(d: string) {
@@ -109,7 +108,7 @@ function formatDate(d: string) {
 }
 
 function handleAction(type: "accept" | "decline") {
-    if (!isLoggedIn.value) {
+    if (!userStore.isAuthenticated) {
         router.push({ name: "login", query: { redirect: route.fullPath } });
         return;
     }

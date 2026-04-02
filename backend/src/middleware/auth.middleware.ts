@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import { APIError } from "./error.middleware.js";
-
-export const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(",") || [];
+import { ALLOWED_ORIGINS, getAuth } from "../auth.js";
+import { getUserBy_Id } from "../user/user.adapter.js";
 
 export const corsMiddleware = (origin: string | undefined, callback: (err: any, origin?: any) => void) => {
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
@@ -12,18 +11,19 @@ export const corsMiddleware = (origin: string | undefined, callback: (err: any, 
     }
 };
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader?.startsWith("Bearer ")) throw new APIError(401, "No token provided");
-
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-        (req as any).user = decoded;
+        const session = await getAuth().api.getSession({ headers: req.headers as any, query: req.query });
+
+        if (!session || !session.user) throw new APIError(401, "No authenticated session");
+
+        const user = await getUserBy_Id(session.user.id);
+        (req as any).user = user;
+        (req as any).session = session.session;
+
         next();
     } catch (err) {
-        throw new APIError(401, "Invalid or expired token");
+        throw new APIError(401, "Invalid or expired session");
     }
 };
 

@@ -3,7 +3,7 @@ import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import { router } from "./router";
 import { i18n } from "./i18n";
-import { initAPI } from "./api/api";
+import { initAPI } from "./utils/api";
 import { vOnlineOnly } from "./utils/online";
 import App from "./App.vue";
 

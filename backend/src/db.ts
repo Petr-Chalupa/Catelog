@@ -42,12 +42,6 @@ export async function ensureIndexes() {
     await users.createIndex({ id: 1 }, { unique: true });
     await users.createIndex({ email: 1 }, { unique: true });
 
-    const oauthSessions = db.collection("oauth_sessions");
-    await oauthSessions.createIndex({ state: 1 }, { unique: true });
-
-    const refreshTokens = db.collection("refresh_tokens");
-    await refreshTokens.createIndex({ token: 1 }, { unique: true });
-
     const userDevices = db.collection("user_devices");
     await userDevices.createIndex({ id: 1 }, { unique: true });
     await userDevices.createIndex({ userId: 1 });
@@ -78,8 +72,6 @@ export async function deleteExpired() {
 
     const indexName = "expiresAt_1";
     const configs = [
-        { col: "oauth_sessions", ttl: 60 * 60 * 24 }, // 1 Day
-        { col: "refresh_tokens", ttl: 30 * 24 * 60 * 60 }, // 30 Days
         { col: "invites", ttl: 30 * 24 * 60 * 60 }, // 30 Days
     ];
 

@@ -1,67 +1,18 @@
 import { Router } from "express";
-import { ALLOWED_ORIGINS, authMiddleware } from "../middleware/auth.middleware.js";
-import { deleteRefreshToken, deleteUser, deleteUserDevice, getUserByEmail, getUserById, upsertUser, upsertUserDevice, verifyRefreshToken } from "./user.adapter.js";
-import { finishGoogleOAuth, finishMicrosoftOAuth, issueJWT, issueRefreshTokenCookie, startGoogleOAuth, startMicrosoftOAuth } from "./user.service.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import {
+    deleteUser,
+    deleteUserDevice,
+    getUserByEmail,
+    getUserById,
+    upsertUser,
+    upsertUserDevice,
+} from "./user.adapter.js";
 import { APIError } from "../middleware/error.middleware.js";
 import { User, UserDevice } from "./user.model.js";
 
 const router = Router();
 export const userRouter = router;
-
-router.get("/auth", async (req, res) => {
-    const { provider, redirect } = req.query as { provider: string; redirect: string };
-
-    const isSafe = ALLOWED_ORIGINS.some((origin) => redirect.startsWith(origin));
-    if (!isSafe) throw new APIError(403, "Forbidden: Redirect URL not whitelisted");
-
-    if (provider === "google") return res.redirect(await startGoogleOAuth(redirect));
-    if (provider === "microsoft") return res.redirect(await startMicrosoftOAuth(redirect));
-
-    throw new APIError(400, "Unsupported provider");
-});
-
-router.get("/auth/google/callback", async (req, res) => {
-    const { code, state } = req.query as { code: string; state: string };
-
-    const result = await finishGoogleOAuth(code, state);
-
-    res.cookie("refreshToken", result.refreshToken, issueRefreshTokenCookie());
-
-    res.redirect(result.redirectUrl);
-});
-
-router.get("/auth/microsoft/callback", async (req, res) => {
-    const { code, state } = req.query as { code: string; state: string };
-
-    const result = await finishMicrosoftOAuth(code, state);
-
-    res.cookie("refreshToken", result.refreshToken, issueRefreshTokenCookie());
-
-    res.redirect(result.redirectUrl);
-});
-
-router.post("/auth/refresh", async (req, res) => {
-    const oldRefreshToken = req.cookies.refreshToken;
-    if (!oldRefreshToken) throw new APIError(401, "Invalid session");
-
-    const result = await verifyRefreshToken(oldRefreshToken);
-
-    res.cookie("refreshToken", result.token, issueRefreshTokenCookie());
-
-    const jwt = issueJWT(result.userId);
-    res.json({ accessToken: jwt });
-});
-
-router.post("/auth/logout", async (req, res) => {
-    const token = req.cookies.refreshToken;
-
-    if (token) {
-        await deleteRefreshToken(token);
-    }
-
-    res.clearCookie("refreshToken");
-    res.sendStatus(200);
-});
 
 router.get("/", authMiddleware, async (req, res) => {
     const { id, email } = req.query as { id?: string; email?: string };
@@ -73,17 +24,13 @@ router.get("/", authMiddleware, async (req, res) => {
 });
 
 router.get("/me", authMiddleware, async (req, res) => {
-    const userId = (req as any).user.id;
-    const user = await getUserById(userId);
-
-    return res.json(user);
+    return res.json((req as any).user);
 });
 
 router.patch("/me", authMiddleware, async (req, res) => {
-    const userId = (req as any).user.id;
+    const user = (req as any).user;
     const updateData = req.body as Partial<User>;
 
-    const user = await getUserById(userId);
     const updatedUser = await upsertUser({ ...user, ...updateData });
 
     return res.json(updatedUser);

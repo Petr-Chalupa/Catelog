@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { OAuthSession, RefreshToken, User, UserDevice } from "./user.model.js";
+import { ObjectId } from "mongodb";
+import { User, UserDevice } from "./user.model.js";
 import { getDB } from "../db.js";
 import { cleanupWatchListsForUser } from "../watchlist/watchlist.adapter.js";
 import { APIError } from "../middleware/error.middleware.js";
@@ -7,6 +8,18 @@ import { APIError } from "../middleware/error.middleware.js";
 export async function getUserById(userId: string): Promise<User> {
     const db = getDB();
     const user = await db.collection<User>("users").findOne({ id: userId });
+    if (!user) throw new APIError(404, "User not found");
+
+    return user;
+}
+
+/**
+ * Mutation of getUserById for searching via internal _id
+ * Used for fetching complete user data from session
+ */
+export async function getUserBy_Id(user_Id: string): Promise<User> {
+    const db = getDB();
+    const user = await db.collection<User & { _id: ObjectId }>("users").findOne({ _id: new ObjectId(user_Id) });
     if (!user) throw new APIError(404, "User not found");
 
     return user;
@@ -29,7 +42,9 @@ export async function upsertUser(user: Partial<User>): Promise<User> {
         $set: {
             name: user.name,
             email: user.email,
-            notificationsEnabled: user.notificationsEnabled,
+            emailVerified: user.emailVerified ?? false,
+            image: user.image ?? "",
+            notificationsEnabled: user.notificationsEnabled ?? false,
             updatedAt: new Date(),
         },
         $setOnInsert: {
@@ -53,71 +68,6 @@ export async function deleteUser(userId: string): Promise<void> {
 
     const result = await db.collection<User>("users").deleteOne({ id: userId });
     if (result.deletedCount !== 1) throw new APIError(404, "User not found");
-}
-
-export async function createOAuthSession(session: Omit<OAuthSession, "expiresAt">): Promise<OAuthSession> {
-    const db = getDB();
-    const newSession: OAuthSession = {
-        ...session,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 mins
-    };
-
-    const result = await db.collection<OAuthSession>("oauth_sessions").insertOne(newSession);
-    if (!result.acknowledged) throw new APIError(500, "Failed to create OAuth session");
-
-    return newSession;
-}
-
-export async function getOAuthSession(state: string): Promise<OAuthSession> {
-    const db = getDB();
-    const result = await db.collection<OAuthSession>("oauth_sessions").findOne({ state });
-    if (!result) throw new APIError(401, "Invalid or expired OAuth state");
-
-    return result;
-}
-
-export async function deleteOAuthSession(state: string): Promise<void> {
-    const db = getDB();
-    const result = await db.collection<OAuthSession>("oauth_sessions").deleteOne({ state });
-    if (result.deletedCount === 0) throw new APIError(404, "User not found");
-}
-
-export async function createRefreshToken(userId: string): Promise<string> {
-    const db = getDB();
-    const token = randomUUID();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
-
-    await db.collection<RefreshToken>("refresh_tokens").insertOne({
-        token,
-        userId,
-        expiresAt,
-        createdAt: new Date(),
-    });
-
-    return token;
-}
-
-export async function verifyRefreshToken(oldToken: string): Promise<{ token: string; userId: string }> {
-    const db = getDB();
-    const collection = db.collection<RefreshToken>("refresh_tokens");
-    const stored = await collection.findOne({ token: oldToken });
-
-    if (!stored || stored.expiresAt < new Date()) {
-        if (stored) await collection.deleteOne({ token: oldToken });
-        throw new APIError(401, "Session expired");
-    }
-
-    await collection.deleteOne({ token: oldToken });
-    const newToken = await createRefreshToken(stored.userId);
-
-    return { token: newToken, userId: stored.userId };
-}
-
-export async function deleteRefreshToken(token: string): Promise<void> {
-    const db = getDB();
-    const result = await db.collection<RefreshToken>("refresh_tokens").deleteOne({ token });
-    if (result.deletedCount !== 1) throw new APIError(404, "Refresh token not found");
 }
 
 export async function upsertUserDevice(userId: string, device: UserDevice): Promise<UserDevice> {

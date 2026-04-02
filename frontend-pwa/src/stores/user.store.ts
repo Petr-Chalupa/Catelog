@@ -1,11 +1,13 @@
 import { defineStore } from "pinia";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { type Invite, UserService, type User, InvitesService, type UserDevice } from "../api";
 import { getDefaultLocale, i18n, type Language } from "../i18n";
 import { useWatchlistsStore } from "./watchlists.store";
-import { useAuthStore } from "./auth.store";
 import { useNotificationStore } from "./notification.store";
 import { useConfirmStore } from "./confirm.store";
+import { router } from "../router";
+import { authClient, useSession } from "../utils/auth";
+import { useTitlesStore } from "./titles.store";
 
 const DEFAULT_PROFILE: User = { id: "", name: "", email: "", createdAt: "" };
 const DEFAULT_THEME = "dark" as const;
@@ -13,13 +15,20 @@ const DEFAULT_THEME = "dark" as const;
 export const useUserStore = defineStore(
     "user",
     () => {
-        // --- STATE ---
+        // --- AUTH STATE ---
+        const session = useSession();
+
+        // --- USER STATE ---
         const profile = ref<User>({ ...DEFAULT_PROFILE });
         const invites = ref<Invite[]>([]);
         const theme = ref<"light" | "dark">(DEFAULT_THEME);
         const locale = ref<Language>(getDefaultLocale());
         const isProcessing = ref(false);
         const isInitialLoading = ref(true);
+
+        // --- AUTH GETTERS ---
+        const isAuthLoading = computed(() => session.value?.isPending ?? true);
+        const isAuthenticated = computed(() => !!session.value?.data?.user);
 
         // --- WATCHERS ---
         watch(theme, (newTheme) => (document.documentElement.dataset.theme = newTheme), { immediate: true });
@@ -38,13 +47,33 @@ export const useUserStore = defineStore(
         // --- RESET ---
         function $reset() {
             profile.value = { ...DEFAULT_PROFILE };
+            invites.value = [];
             theme.value = DEFAULT_THEME;
             locale.value = getDefaultLocale();
             isProcessing.value = false;
             isInitialLoading.value = true;
         }
 
-        // --- FETCHING ---
+        // --- AUTH ACTIONS ---
+        async function logout() {
+            isProcessing.value = true;
+            try {
+                await authClient.signOut();
+
+                $reset();
+
+                useNotificationStore().$reset();
+                useConfirmStore().$reset();
+                useTitlesStore().$reset();
+                useWatchlistsStore().$reset();
+
+                router.push("/login");
+            } finally {
+                isProcessing.value = false;
+            }
+        }
+
+        // --- USER ACTIONS ---
         async function fetchProfile() {
             try {
                 profile.value = await UserService.getUserMe();
@@ -54,7 +83,6 @@ export const useUserStore = defineStore(
             }
         }
 
-        // --- CORE ACTIONS ---
         async function updateProfile(data: Partial<User>) {
             isProcessing.value = true;
             try {
@@ -79,12 +107,8 @@ export const useUserStore = defineStore(
             isProcessing.value = true;
             try {
                 await InvitesService.postInvitesAccept(inviteId);
-
-                const authStore = useAuthStore();
-                if (authStore.token) {
-                    await fetchProfile();
-                    await useWatchlistsStore().fetchLists();
-                }
+                await fetchProfile();
+                await useWatchlistsStore().fetchLists();
                 return true;
             } catch (e) {
                 return false;
@@ -155,6 +179,11 @@ export const useUserStore = defineStore(
         }
 
         return {
+            // Auth
+            isAuthLoading,
+            isAuthenticated,
+            logout,
+            // User
             profile,
             invites,
             theme,
@@ -176,6 +205,7 @@ export const useUserStore = defineStore(
         persist: {
             key: "catelog-user",
             storage: localStorage,
+            pick: ["profile", "theme", "locale"],
         },
     },
 );

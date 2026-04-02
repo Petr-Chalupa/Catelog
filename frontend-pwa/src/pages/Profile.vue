@@ -72,7 +72,6 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useUserStore } from "../stores/user.store";
-import { useAuthStore } from "../stores/auth.store";
 import Header from "../components/Header.vue";
 import InviteCard from "../components/InviteCard.vue";
 import { LoaderIcon } from "lucide-vue-next";
@@ -81,7 +80,6 @@ import { useI18n } from "vue-i18n";
 import { useNotificationStore } from "../stores/notification.store";
 
 const { t } = useI18n();
-const authStore = useAuthStore();
 const userStore = useUserStore();
 const confirmStore = useConfirmStore();
 const notificationStore = useNotificationStore();
@@ -101,7 +99,7 @@ async function handleNotificationToggle(event: Event) {
 async function handleLogout() {
     const ok = await confirmStore.ask(t("profile.sign-out"), t("profile.sign-out-msg"));
     if (ok) {
-        authStore.logout();
+        userStore.logout();
     }
 }
 
@@ -109,7 +107,7 @@ async function handleDelete() {
     const ok = await confirmStore.ask(t("profile.delete-account"), t("profile.delete-account-msg"));
     if (ok) {
         const success = await userStore.deleteAccount();
-        if (success) authStore.logout();
+        if (success) userStore.logout();
     }
 }
 </script>

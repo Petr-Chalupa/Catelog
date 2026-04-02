@@ -3,7 +3,10 @@ import { Request, Response, NextFunction } from "express";
 export class APIError extends Error {
     public readonly timestamp: string;
 
-    constructor(public status: number, message: string) {
+    constructor(
+        public status: number,
+        message: string,
+    ) {
         super(message);
         this.name = "APIError";
         this.timestamp = new Date().toISOString();

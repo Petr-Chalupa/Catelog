@@ -5,7 +5,7 @@ info:
 servers:
     - url: /api
 security:
-    - bearerAuth: []
+    - cookieAuth: []
 
 paths:
     /system/tasks/enrich:
@@ -30,116 +30,6 @@ paths:
                 200:
                     description: Maintenance complete
                 401: { $ref: "#/components/responses/UnauthorizedError" }
-                500: { $ref: "#/components/responses/InternalServerError" }
-
-    /user/auth:
-        get:
-            summary: Start OAuth flow
-            tags: [Auth]
-            security: []
-            parameters:
-                - name: provider
-                  in: query
-                  required: true
-                  schema:
-                      type: string
-                - name: redirect
-                  in: query
-                  required: true
-                  schema:
-                      type: string
-            responses:
-                302:
-                    description: Redirect to OAuth
-                400:
-                    description: Invalid provider
-                    content:
-                        application/json:
-                            schema: { $ref: "#/components/schemas/Error" }
-                403: { $ref: "#/components/responses/ForbiddenError" }
-                500: { $ref: "#/components/responses/InternalServerError" }
-
-    /user/auth/google/callback:
-        get:
-            summary: Google OAuth callback
-            tags: [Auth]
-            security: []
-            parameters:
-                - name: code
-                  in: query
-                  required: true
-                  schema:
-                      type: string
-                - name: state
-                  in: query
-                  required: true
-                  schema:
-                      type: string
-            responses:
-                302:
-                    description: Redirect to frontend with auth result
-                400:
-                    description: Invalid OAuth session
-                    content:
-                        application/json:
-                            schema: { $ref: "#/components/schemas/Error" }
-                404: { $ref: "#/components/responses/NotFoundError" }
-                500: { $ref: "#/components/responses/InternalServerError" }
-
-    /user/auth/microsoft/callback:
-        get:
-            summary: Microsoft OAuth callback
-            tags: [Auth]
-            security: []
-            parameters:
-                - name: code
-                  in: query
-                  required: true
-                  schema:
-                      type: string
-                - name: state
-                  in: query
-                  required: true
-                  schema:
-                      type: string
-            responses:
-                302:
-                    description: Redirect to frontend with auth result
-                400:
-                    description: Invalid OAuth session
-                    content:
-                        application/json:
-                            schema: { $ref: "#/components/schemas/Error" }
-                404: { $ref: "#/components/responses/NotFoundError" }
-                500: { $ref: "#/components/responses/InternalServerError" }
-
-    /user/auth/refresh:
-        post:
-            summary: Exchange a refresh token for a new access token
-            tags: [Auth]
-            security: []
-            responses:
-                200:
-                    description: New token issued
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                required: [accessToken]
-                                properties:
-                                    accessToken:
-                                        type: string
-                401: { $ref: "#/components/responses/UnauthorizedError" }
-                500: { $ref: "#/components/responses/InternalServerError" }
-
-    /user/auth/logout:
-        post:
-            summary: Revoke the refresh token and clear cookies
-            tags: [Auth]
-            security: []
-            responses:
-                200:
-                    description: Successfully logged out
                 500: { $ref: "#/components/responses/InternalServerError" }
 
     /user:
@@ -764,10 +654,10 @@ paths:
 
 components:
     securitySchemes:
-        bearerAuth:
-            type: http
-            scheme: bearer
-            bearerFormat: JWT
+        cookieAuth:
+            type: apiKey
+            in: cookie
+            name: better-auth.session_token
         systemKey:
             type: apiKey
             in: header
@@ -997,7 +887,11 @@ components:
                 email:
                     type: string
                     format: email
+                emailVerified:
+                    type: boolean
                 name:
+                    type: string
+                image:
                     type: string
                 notificationsEnabled:
                     type: boolean
