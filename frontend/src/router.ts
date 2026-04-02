@@ -65,7 +65,7 @@ export const router = createRouter({
     ],
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, from) => {
     const userStore = useUserStore();
 
     while (userStore.isAuthLoading) {
@@ -73,7 +73,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (to.meta.requiresAuth && !userStore.isAuthenticated) {
-        return next({ name: "login", query: { redirect: to.fullPath } });
+        return { name: "login", query: { redirect: to.fullPath } };
     }
 
     if (userStore.isAuthenticated && !userStore.profile?.id) {
@@ -83,5 +83,4 @@ router.beforeEach(async (to, from, next) => {
             await userStore.logout();
         }
     }
-    next();
 });
