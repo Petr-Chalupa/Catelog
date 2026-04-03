@@ -25,6 +25,11 @@
         "vite": "^8.0.3",
         "vite-plugin-pwa": "^1.2.0"
     },
+    "overrides": {
+        "vite-plugin-pwa": {
+            "vite": "$vite"
+        }
+    },
     "scripts": {
         "gen:api": "npx openapi-typescript-codegen --input ../backend/openapi.yaml --output src/api --client axios",
         "dev": "npm run gen:api && vite",
