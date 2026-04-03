@@ -6,6 +6,7 @@ servers:
     - url: /api
 security:
     - cookieAuth: []
+    - cookieAuthSecure: []
 
 paths:
     /system/tasks/enrich:
@@ -658,6 +659,10 @@ components:
             type: apiKey
             in: cookie
             name: better-auth.session_token
+        cookieAuthSecure:
+            type: apiKey
+            in: cookie
+            name: __Secure-better-auth.session_token
         systemKey:
             type: apiKey
             in: header
