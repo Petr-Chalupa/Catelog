@@ -26,27 +26,21 @@
 
 <script setup lang="ts">
 import { authClient } from "../utils/auth";
-import { useRouter, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import { useUserStore } from "../stores/user.store";
 
-const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 
 async function login(provider: "google" | "microsoft") {
     const redirectTo = route.query.redirect as string;
+
     await authClient.signIn.social(
         {
             provider: provider,
-            callbackURL: `${window.location.origin}/login/callback${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`,
-        },
-        {
-            onSuccess: () => {
-                console.log("f");
-
-                router.push(redirectTo || "/");
-            },
-        },
+            callbackURL: redirectTo || "/",
+            errorCallbackURL: "/login"
+        }
     );
 }
 </script>
