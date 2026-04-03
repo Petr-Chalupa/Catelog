@@ -2,7 +2,10 @@
     <Header>
         <template #left>
             <router-link to="/profile" class="profile">
-                <CircleUserRound :size="30" />
+                <div class="picture">
+                    <img v-if="userStore.profile.image" :src="userStore.profile.image" />
+                    <CircleUserRound v-else />
+                </div>
                 <div class="info">
                     <span class="name">{{ userStore.profile.name }}</span>
                     <span class="email">{{ userStore.profile.email }}</span>

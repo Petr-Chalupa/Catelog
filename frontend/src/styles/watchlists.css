@@ -16,8 +16,19 @@
     color: var(--text-primary);
     text-decoration: none;
 
-    svg {
-        color: var(--text-secondary);
+    .picture {
+        width: 35px;
+        height: 35px;
+
+        > * {
+            width: inherit;
+            height: inherit;
+            border-radius: 50%;
+        }
+
+        svg {
+            color: var(--text-secondary);
+        }
     }
 
     .info {

@@ -12,16 +12,24 @@ main {
     gap: 1rem;
     padding-bottom: 2rem;
 
-    .avatar-circle {
+    .user-picture {
         width: 60px;
         height: 60px;
-        background: var(--primary);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        font-weight: bold;
+
+        > * {
+            width: inherit;
+            height: inherit;
+            border-radius: 50%;
+        }
+
+        span {
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
     }
 
     .user-info {

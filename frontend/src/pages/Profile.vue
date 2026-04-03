@@ -11,8 +11,9 @@
     </main>
     <main v-else>
         <section class="profile-card">
-            <div class="avatar-circle">
-                {{ userStore.profile.name?.charAt(0) }}
+            <div class="user-picture">
+                <img v-if="userStore.profile.image" :src="userStore.profile.image" />
+                <span v-else>{{ userStore.profile.name?.charAt(0) }}</span>
             </div>
             <div class="user-info">
                 <h2>{{ userStore.profile.name }}</h2>
