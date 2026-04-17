@@ -1,7 +1,7 @@
 <template>
     <Header>
         <template #center>
-            <span>Search - <ClientOnly fallback="Unknown list">{{ list ? list.name : "Unknown list" }}</ClientOnly></span>
+            <span>Search - {{ list ? list.name : "Unknown list" }}</span>
         </template>
     </Header>
 

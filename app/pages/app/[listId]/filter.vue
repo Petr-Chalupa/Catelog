@@ -2,7 +2,7 @@
     <Header>
         <template #center>
             <span>
-                Filter - <ClientOnly fallback="Unknown list">{{ list ? list.name : "Unknown list" }}</ClientOnly>
+                Filter - {{ list ? list.name : "Unknown list" }}
             </span>
         </template>
         <template #actions>

@@ -2,7 +2,7 @@
     <Header>
         <template #center>
             <span>
-                Details - <ClientOnly fallback="Unknown item">{{ item ? localeTitle(item.title.titles) : "Unknown item" }}</ClientOnly>
+                Details - {{ item ? localeTitle(item.title.titles) : "Unknown item" }}
             </span>
         </template>
         <template #actions>

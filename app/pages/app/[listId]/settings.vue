@@ -1,7 +1,7 @@
 <template>
     <Header>
         <template #center>
-            <span>Settings - <ClientOnly fallback="Unknown list">{{ list ? list.name : "Unknown list" }}</ClientOnly></span>
+            <span>Settings - {{ list ? list.name : "Unknown list" }}</span>
         </template>
     </Header>
 
