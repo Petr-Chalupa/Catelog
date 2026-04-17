@@ -35,6 +35,7 @@ jobs:
                   push: true
                   build-args: |
                       NUXT_BETTER_AUTH_SECRET=${{ secrets.NUXT_BETTER_AUTH_SECRET }}
+                      NUXT_PUBLIC_SITE_URL=${{ secrets.NUXT_PUBLIC_SITE_URL }}
                       NUXT_PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.NUXT_PUBLIC_VAPID_PUBLIC_KEY }}
                   platforms: linux/arm64
                   tags: ghcr.io/petr-chalupa/catelog:latest
