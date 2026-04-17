@@ -3,14 +3,14 @@ export default defineNuxtPlugin(async () => {
     const userStore = useUserStore();
     const invitesStore = useInvitesStore();
     const watchlistsStore = useWatchlistsStore();
-    console.log("--- OUSIDE RUN ---");
 
-    await callOnce(async () => {
-        console.log("--- IS LOGGED IN? ---");
-        if (!loggedIn.value) return;
-        console.log("--- STARTING STORE FETCH ---");
-
-        await Promise.allSettled([userStore.fetch(), invitesStore.fetch(), watchlistsStore.fetch()]);
-        console.log("--- FETCH COMPLETE ---");
-    });
+    watch(
+        loggedIn,
+        async (isLoggedIn) => {
+            if (isLoggedIn) {
+                await Promise.allSettled([userStore.fetch(), invitesStore.fetch(), watchlistsStore.fetch()]);
+            }
+        },
+        { immediate: true, once: true },
+    );
 });
