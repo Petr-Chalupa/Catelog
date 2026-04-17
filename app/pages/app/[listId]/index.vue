@@ -1,7 +1,9 @@
 <template>
     <Header>
         <template #center>
-            <span>{{ list ? list.name : "Unknown list" }}</span>
+            <span>
+                <ClientOnly fallback="Unknown list">{{ list ? list.name : "Unknown list" }}</ClientOnly>
+            </span>
         </template>
         <template #actions>
             <Icon name="lucide:filter" :size="25" @click="goToListFilter" />
