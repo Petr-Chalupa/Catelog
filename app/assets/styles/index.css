@@ -1,0 +1,141 @@
+:root {
+    box-sizing: border-box;
+    color-scheme: dark light;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+
+    /* --- BRAND COLORS --- */
+    --primary: #30a5ff;
+    --secondary: #ff8a30;
+    --ok: #28a745;
+    --info: var(--primary);
+    --warn: var(--secondary);
+    --error: #dc3545;
+    --danger: var(--error);
+
+    /* --- LIGHT THEME --- */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f1f3f5;
+    --text-primary: #141414;
+    --text-secondary: #495057;
+    --border: #dee2e6;
+
+    /* --- DARK THEME --- */
+    &.dark {
+        --bg-primary: #141414;
+        --bg-secondary: #1f1f1f;
+        --text-primary: #ffffff;
+        --text-secondary: #d1d1d1;
+        --border: #333333;
+    }
+
+    --header-height: 3.5rem;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100dvh;
+    font-family:
+        system-ui,
+        -apple-system,
+        sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overscroll-behavior-y: none;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+main {
+    width: 100%;
+    min-width: 10rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+
+    > * {
+        min-width: 20rem;
+    }
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background-color: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    font: inherit;
+    color: var(--text-primary);
+}
+
+button {
+    --bg: var(--primary);
+    --text: var(--text-primary);
+
+    background-color: var(--bg);
+    border: 1px solid color-mix(in srgb, var(--bg), black 5%);
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    color: var(--text);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--bg), black 15%);
+    }
+
+    &[data-theme="ghost"] {
+        --bg: var(--border);
+    }
+
+    &[data-theme="secondary"] {
+        --bg: var(--secondary);
+    }
+
+    &[data-theme="danger"] {
+        --bg: var(--danger);
+    }
+}
+
+a {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+
+    &:hover,
+    &:active {
+        color: var(--primary);
+    }
+}
+
+.is-offline,
+:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}

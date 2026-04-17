@@ -1,0 +1,55 @@
+main {
+    display: grid;
+    justify-content: center;
+    padding-top: 2rem;
+}
+
+section {
+    margin-top: 1.5rem;
+
+    h3 {
+        margin: 0 0 1rem 0;
+    }
+
+    .body {
+        display: grid;
+        gap: 0.5rem;
+    }
+}
+
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+
+    small {
+        opacity: 0.6;
+        font-size: 0.8rem;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+
+    button {
+        display: flex;
+    }
+}
+
+.empty-hint {
+    font-style: italic;
+    opacity: 0.5;
+    margin: 0;
+}

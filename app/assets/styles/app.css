@@ -1,0 +1,79 @@
+.profile {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    color: var(--text-primary);
+    text-decoration: none;
+
+    &:deep(.image) {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+
+    .info {
+        font-size: large;
+    }
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - var(--header-height));
+
+    .loading-state,
+    .empty-state,
+    .lists {
+        flex: 1;
+    }
+}
+
+.lists {
+    overflow-y: auto;
+
+    .body {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+
+        h3 {
+            flex: 1;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0.5rem;
+        }
+
+        .shared {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            line-height: 1;
+        }
+    }
+
+    .actions button {
+        background: transparent;
+        border: none;
+        margin: 0.25rem 0 0 0.5rem;
+        border-radius: 6px;
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+}
+
+.create {
+    padding-top: 0.5rem;
+
+    :deep(input) {
+        height: 3.5rem;
+        border-bottom-left-radius: 0;
+    }
+
+    :deep(.actions button:last-child) {
+        border-bottom-right-radius: 0;
+    }
+}

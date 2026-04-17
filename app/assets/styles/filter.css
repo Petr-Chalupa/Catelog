@@ -1,0 +1,43 @@
+main {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+section {
+    :deep(.range-label),
+    h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .body {
+        margin-top: 0.5rem;
+    }
+}
+
+.search :deep(input) {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.ranges .range-input {
+    margin-bottom: 1rem;
+}
+
+.directors,
+.actors,
+.genres {
+    .body {
+        max-height: 17rem;
+        overflow-y: auto;
+    }
+}
+
+.directors,
+.actors {
+    .triage-group {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}

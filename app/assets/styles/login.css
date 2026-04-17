@@ -1,0 +1,48 @@
+header {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    padding-top: 2rem;
+
+    .logo {
+        margin: 0 auto;
+
+        img {
+            width: 70px;
+            height: 70px;
+            box-shadow: 0 8px 24px var(--primary);
+            border-radius: 18px;
+        }
+    }
+
+    h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 1.5rem 0 0 0;
+    }
+
+    .error {
+        margin: 0;
+        text-align: center;
+        color: var(--error);
+    }
+}
+
+.social {
+    display: grid;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 3rem;
+
+    button {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: large;
+
+        img {
+            width: 2rem;
+            height: 2rem;
+        }
+    }
+}

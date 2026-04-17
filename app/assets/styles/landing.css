@@ -1,0 +1,33 @@
+header {
+    position: sticky;
+    inset: 0 0 auto 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+
+    h1 {
+        font-size: 1.25rem;
+        margin: 0;
+    }
+}
+
+main {
+    display: grid;
+    padding: 0 1rem 0 1rem;
+
+    h2 {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    p {
+        margin: 2rem 0 5rem 0;
+        text-align: center;
+    }
+
+    a {
+        margin: 0 auto;
+    }
+}

@@ -1,0 +1,75 @@
+main {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - var(--header-height));
+
+    .loading-state,
+    .empty-state,
+    .items {
+        flex: 1;
+    }
+}
+
+.items {
+    overflow-y: auto;
+
+    :deep(.list-row) {
+        .body {
+            gap: 1rem;
+        }
+
+        .image {
+            width: 2.75rem;
+            height: 4.125rem;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            .title {
+                font-size: 1.25rem;
+                font-weight: 500;
+                line-height: 1;
+            }
+
+            .other {
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+            }
+
+            .genres {
+                display: flex;
+                gap: 0.25rem;
+
+                .genre-tag {
+                    display: flex;
+                    align-items: center;
+                    height: 1rem;
+                    background: var(--border);
+                    padding: 0 5px;
+                    border-radius: 4px;
+                    font-size: 0.7rem;
+                    text-transform: uppercase;
+                }
+            }
+        }
+    }
+}
+
+.add {
+    padding-top: 0.5rem;
+
+    :deep(input) {
+        height: 3.5rem;
+        border-bottom-left-radius: 0;
+    }
+
+    :deep(.actions button) {
+        border-bottom-right-radius: 0;
+    }
+}

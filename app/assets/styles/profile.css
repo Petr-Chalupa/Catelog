@@ -1,0 +1,84 @@
+main {
+    display: grid;
+    justify-content: center;
+    padding-top: 2rem;
+}
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 2rem;
+
+    &:deep(.image) {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+    }
+
+    .info {
+        display: grid;
+
+        > * {
+            margin: 0;
+        }
+    }
+}
+
+section {
+    margin-top: 1.5rem;
+
+    h3 {
+        margin: 0 0 1rem 0;
+    }
+
+    .body {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    &.notif .body {
+        display: flex;
+
+        button {
+            width: fit-content;
+        }
+    }
+
+    &.invites .body {
+        gap: 0;
+
+        .invite {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+
+            &:not(:last-child) {
+                padding-bottom: 0.5rem;
+                margin-bottom: 0.5rem;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .info {
+                display: grid;
+
+                & > span > span {
+                    padding-left: 0.25rem;
+                }
+
+                .to {
+                    color: var(--primary);
+                }
+            }
+
+            .actions {
+                display: grid;
+                gap: 0.25rem;
+
+                button {
+                    padding: 0.25rem 0.5rem;
+                }
+            }
+        }
+    }
+}
