@@ -40,8 +40,7 @@ export default defineNuxtConfig({
         },
     },
     routeRules: {
-        "/": { prerender: true },
-        "/app/**": { ssr: true, auth: { redirectTo: "/login" } },
+        "/app/**": { auth: { redirectTo: "/login" } },
     },
     app: {
         head: {

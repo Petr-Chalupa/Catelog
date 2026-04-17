@@ -34,25 +34,9 @@ jobs:
                   file: ./Dockerfile
                   push: true
                   build-args: |
-                      # Real secrets
                       NUXT_BETTER_AUTH_SECRET=${{ secrets.NUXT_BETTER_AUTH_SECRET }}
                       NUXT_PUBLIC_SITE_URL=${{ secrets.NUXT_PUBLIC_SITE_URL }}
                       NUXT_PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.NUXT_PUBLIC_VAPID_PUBLIC_KEY }}
                       NUXT_PUBLIC_ENV=production
-
-                      # Dummy secrets for server
-                      NUXT_MONGO_URI=mongodb://localhost:27017/unused
-                      NUXT_MONGO_DB=build_dummy
-                      NUXT_SYSTEM_MAINTENANCE_KEY=build_dummy
-                      NUXT_GOOGLE_CLIENT_ID=build_dummy
-                      NUXT_GOOGLE_CLIENT_SECRET=build_dummy
-                      NUXT_MS_CLIENT_ID=build_dummy
-                      NUXT_MS_CLIENT_SECRET=build_dummy
-                      NUXT_TMDB_API_KEY=build_dummy
-                      NUXT_TMDB_BASE_URL=https://api.themoviedb.org/3
-                      NUXT_OMDB_API_KEY=build_dummy
-                      NUXT_OMDB_BASE_URL=https://www.omdbapi.com
-                      NUXT_VAPID_PRIVATE_KEY=build_dummy
-                      NUXT_VAPID_SUBJECT=mailto:admin@example.com
                   platforms: linux/arm64
                   tags: ghcr.io/petr-chalupa/catelog:latest
