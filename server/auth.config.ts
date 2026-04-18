@@ -20,7 +20,7 @@ export default defineServerAuth({
             trustedProviders: ["google", "microsoft"],
         },
     },
-    baseURL: config.public.SITE_URL,
+    baseURL: config.public.BETTER_AUTH_BASE_URL,
     basePath: "/api/auth",
     secret: config.BETTER_AUTH_SECRET,
     session: {

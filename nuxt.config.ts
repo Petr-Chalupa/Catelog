@@ -35,7 +35,7 @@ export default defineNuxtConfig({
         VAPID_SUBJECT: "",
         public: {
             ENV: "",
-            SITE_URL: "",
+            BETTER_AUTH_BASE_URL: "",
             VAPID_PUBLIC_KEY: "",
         },
     },
