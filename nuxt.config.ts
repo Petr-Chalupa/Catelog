@@ -18,11 +18,6 @@ export default defineNuxtConfig({
             include: ["fractional-indexing", "zod", "vuedraggable"],
         },
     },
-    nitro: {
-        prerender: {
-            crawlLinks: false,
-        },
-    },
     runtimeConfig: {
         MONGO_URI: "",
         MONGO_DB: "",
@@ -45,7 +40,6 @@ export default defineNuxtConfig({
         },
     },
     routeRules: {
-        "/": { prerender: true },
         "/app/**": { auth: { redirectTo: "/login" } },
     },
     app: {
