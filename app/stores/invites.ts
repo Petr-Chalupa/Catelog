@@ -4,7 +4,7 @@ export const useInvitesStore = defineStore(
     "invites",
     () => {
         const { $api } = useNuxtApp();
-        const session = useUserSession();
+        const { user } = useUserSession();
         const toasts = useToasts();
 
         // --- STATE ---
@@ -60,7 +60,7 @@ export const useInvitesStore = defineStore(
                 const { _id } = await $api<UserPublic>("/api/users", { method: "GET", query: { email } as UserQuery });
                 await $api<InvitePublic>(`/api/invites`, {
                     method: "POST",
-                    body: { listId, inviteeId: _id, inviterId: session.user.value?.id! } as InviteCreate,
+                    body: { listId, inviteeId: _id, inviterId: user.value?.id } as InviteCreate,
                 });
             } catch (e) {
                 toasts.error("Failed to send invite", e);

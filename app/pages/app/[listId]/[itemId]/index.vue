@@ -7,7 +7,7 @@
         </template>
         <template #actions>
             <Icon name="lucide:merge" :size="25" @click="goToItemMerge" v-if="item && item.title.mergeCandidates.length > 0" />
-            <Icon name="lucide:trash-2" :size="25" @click="handleDelete" />
+            <Icon name="lucide:trash-2" :size="25" @click="handleDelete" v-online-only />
         </template>
     </Header>
 
@@ -33,13 +33,13 @@
         </section>
 
         <section class="rating">
-            <RangeInput v-model="item.personalRating" :min="0" :max="10" :step="0.1" label="Rating" />
+            <RangeInput v-model="item.personalRating" :min="0" :max="10" :step="0.1" label="Rating" v-online-only />
         </section>
 
         <section class="genres">
             <h3>Genres</h3>
             <div class="body">
-                <Triage v-model="genres" :items="ALL_GENRES" :states="['neutral', 'positive']">
+                <Triage v-model="genres" :items="ALL_GENRES" :states="['neutral', 'positive']" v-online-only>
                     <template #body="{ item }: { item: TitleGenre }">{{ resolveGenre(item) }}</template>
                 </Triage>
             </div>

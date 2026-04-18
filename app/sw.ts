@@ -1,9 +1,29 @@
 import { precacheAndRoute } from "workbox-precaching";
+import { registerRoute, setCatchHandler } from "workbox-routing";
+import { NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
 
-declare let self: ServiceWorkerGlobalScope & { __WB_MANIFEST: any };
+declare let self: ServiceWorkerGlobalScope;
 
+// --- CACHING ---
 precacheAndRoute(self.__WB_MANIFEST);
 
+registerRoute(({ request }) => request.mode === "navigate", new NetworkFirst({ cacheName: "pages" }));
+
+registerRoute(
+    ({ request }) => request.destination === "style" || request.destination === "script",
+    new StaleWhileRevalidate({ cacheName: "assets" }),
+);
+
+setCatchHandler(async ({ event }) => {
+    const request = (event as FetchEvent).request;
+    if (request.mode === "navigate") {
+        const cached = await caches.match("/app");
+        if (cached) return cached;
+    }
+    return Response.error();
+});
+
+// --- PUSH NOTIFICATIONS ---
 self.addEventListener("push", (event) => {
     if (!event.data) return;
 
@@ -27,4 +47,13 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
     event.notification.close();
     event.waitUntil(self.clients.openWindow(event.notification.data));
+});
+
+// --- LIFECYCLE ---
+self.addEventListener("install", () => {
+    self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+    event.waitUntil(self.clients.claim());
 });

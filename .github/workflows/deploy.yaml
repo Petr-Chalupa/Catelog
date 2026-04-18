@@ -35,7 +35,7 @@ jobs:
                   push: true
                   build-args: |
                       NUXT_BETTER_AUTH_SECRET=${{ secrets.NUXT_BETTER_AUTH_SECRET }}
-                      NUXT_PUBLIC_BETTER_AUTH_BASE_URL=${{ secrets.NUXT_PUBLIC_BETTER_AUTH_BASE_URL }}
+                      NUXT_PUBLIC_SITE_URL=${{ secrets.NUXT_PUBLIC_SITE_URL }}
                       NUXT_PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.NUXT_PUBLIC_VAPID_PUBLIC_KEY }}
                       NUXT_PUBLIC_ENV=production
                   platforms: linux/arm64

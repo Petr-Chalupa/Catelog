@@ -1,12 +1,10 @@
 main {
     display: grid;
-    justify-content: center;
-    padding-top: 2rem;
+    gap: 1rem;
+    padding: 1rem;
 }
 
 section {
-    margin-top: 1.5rem;
-
     h3 {
         margin: 0 0 1rem 0;
     }

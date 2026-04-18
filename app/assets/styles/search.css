@@ -1,11 +1,16 @@
 main {
     display: flex;
     flex-direction: column;
-    height: calc(100dvh - var(--header-height));
+
+    .loading-state,
+    .empty-state,
+    .results {
+        flex: 1;
+    }
 }
 
 .search {
-    padding: 0.5rem;
+    padding: 1rem;
 
     :deep(input) {
         height: 2.5rem;

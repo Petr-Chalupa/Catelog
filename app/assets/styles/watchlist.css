@@ -1,7 +1,8 @@
 main {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    height: calc(100dvh - var(--header-height));
+    gap: 1rem;
 
     .loading-state,
     .empty-state,
@@ -62,8 +63,6 @@ main {
 }
 
 .add {
-    padding-top: 0.5rem;
-
     :deep(input) {
         height: 3.5rem;
         border-bottom-left-radius: 0;

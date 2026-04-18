@@ -18,6 +18,11 @@ export default defineNuxtConfig({
             include: ["fractional-indexing", "zod", "vuedraggable"],
         },
     },
+    nitro: {
+        prerender: {
+            crawlLinks: false,
+        },
+    },
     runtimeConfig: {
         MONGO_URI: "",
         MONGO_DB: "",
@@ -35,11 +40,12 @@ export default defineNuxtConfig({
         VAPID_SUBJECT: "",
         public: {
             ENV: "",
-            BETTER_AUTH_BASE_URL: "",
+            SITE_URL: "",
             VAPID_PUBLIC_KEY: "",
         },
     },
     routeRules: {
+        "/": { prerender: true },
         "/app/**": { auth: { redirectTo: "/login" } },
     },
     app: {
@@ -75,6 +81,7 @@ export default defineNuxtConfig({
             short_name: "Catelog",
             description: "When you like watching movies with your cat",
             lang: "en",
+            id: "/app",
             start_url: "/app",
             display: "standalone",
             background_color: "#141414",
@@ -88,7 +95,10 @@ export default defineNuxtConfig({
             ],
         },
         injectManifest: {
-            globPatterns: ["**/*.{js,css,html,png,svg,ico}"],
+            globPatterns: ["**/*.{js,css,html,png,svg,ico,woff2,json}"],
+        },
+        client: {
+            installPrompt: true,
         },
     },
     piniaPluginPersistedstate: {

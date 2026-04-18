@@ -1,4 +1,6 @@
 <template>
+  <VitePwaManifest />
+
   <ToastContainer />
 
   <Confirm />

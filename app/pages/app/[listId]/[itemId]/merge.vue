@@ -2,7 +2,7 @@
     <Header>
         <template #center>
             <span>
-                Merge - <ClientOnly fallback="Unknown item">{{ item ? localeTitle(item.title.titles) : "Unknown item" }}</ClientOnly>
+                Merge - {{ item ? localeTitle(item.title.titles) : "Unknown item" }}
             </span>
         </template>
     </Header>
@@ -21,7 +21,7 @@
                 </div>
             </template>
             <template #actions="{ item }: { item: MergeCandidate }">
-                <Icon name="lucide:merge" :size="30" @click="handleMergeTitle(item)" />
+                <Icon name="lucide:merge" :size="30" @click="handleMergeTitle(item)" v-online-only />
             </template>
         </List>
     </main>

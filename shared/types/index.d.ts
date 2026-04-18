@@ -38,7 +38,7 @@ declare module "nuxt/schema" {
     }
     interface PublicRuntimeConfig {
         ENV: string;
-        BETTER_AUTH_BASE_URL: string;
+        SITE_URL: string;
         VAPID_PUBLIC_KEY: string;
     }
 }

@@ -5,7 +5,7 @@ export const useWatchlistsStore = defineStore(
     "watchlists",
     () => {
         const { $api } = useNuxtApp();
-        const session = useUserSession();
+        const { user } = useUserSession();
         const toasts = useToasts();
 
         // --- STATE ---
@@ -92,7 +92,7 @@ export const useWatchlistsStore = defineStore(
             try {
                 const newList = await $api<WatchlistPublic>("/api/watchlists", {
                     method: "POST",
-                    body: { ownerId: session.user.value?.id!, name, sortKey } as WatchlistUpdate,
+                    body: { ownerId: user.value?.id, name, sortKey } as WatchlistUpdate,
                 });
                 lists.value.push(newList);
             } catch (e) {
@@ -167,7 +167,7 @@ export const useWatchlistsStore = defineStore(
                 const { _id } = await $api<TitlePublic>("/api/titles/public", { method: "POST", body: title });
                 const newItem = await $api<WatchlistItemPublic>(`/api/watchlists/${listId}/items`, {
                     method: "POST",
-                    body: { listId, titleId: _id, addedById: session.user.value?.id!, sortKey } as WatchlistItemCreate,
+                    body: { listId, titleId: _id, addedById: user.value?.id, sortKey } as WatchlistItemCreate,
                 });
                 listItems.push(newItem);
             } catch (e) {
@@ -191,7 +191,7 @@ export const useWatchlistsStore = defineStore(
                 });
                 const newItem = await $api<WatchlistItemPublic>(`/api/watchlists/${listId}/items`, {
                     method: "POST",
-                    body: { listId, titleId: _id, addedById: session.user.value?.id!, sortKey } as WatchlistItemCreate,
+                    body: { listId, titleId: _id, addedById: user.value?.id, sortKey } as WatchlistItemCreate,
                 });
                 listItems.push(newItem);
             } catch (e) {
