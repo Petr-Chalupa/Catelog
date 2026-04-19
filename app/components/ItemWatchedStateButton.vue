@@ -44,7 +44,7 @@ import finished from "~/assets/sounds/finished.mp3";
 
 const soundMap: Record<WatchlistItemPublic["state"], string> = { planned, started, finished };
 
-const { updateItem } = useWatchlistsStore();
+const { updateItem } = useWatchlists();
 
 const props = defineProps<{ listId: string; item: WatchlistItemPublic }>();
 
@@ -62,7 +62,7 @@ async function handleClick() {
     audio.volume = 0.4;
     audio.play().catch(() => { /* Silent fail */ });
 
-    await updateItem(props.listId, props.item._id, { state: newState });
+    await updateItem({ listId: props.listId, itemId: props.item._id, body: { state: newState } });
 
     emit("click", props.item);
 }

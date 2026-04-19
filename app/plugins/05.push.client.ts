@@ -1,9 +1,9 @@
 export default defineNuxtPlugin(async () => {
-    const { user } = useUserStore();
+    const { user } = useUser();
     const { isSupported, permission, subscribeDevice } = usePush();
 
     watch(
-        () => user?.notificationsEnabled,
+        () => user.value?.notificationsEnabled,
         async (enabled) => {
             if (!enabled || !isSupported() || permission.value !== "granted") return;
 

@@ -9,9 +9,9 @@
     </Header>
 
     <main>
-        <LoadingState v-if="!isReadyLists" />
+        <LoadingState v-if="isLoadingLists" />
 
-        <EmptyState v-else-if="lists.length === 0" />
+        <EmptyState v-else-if="!lists || lists.length === 0" />
 
         <section class="lists" v-else>
             <List :items="lists" isDraggable @item-moved="({ element, newIndex }) => reorderLists(element, newIndex)" @row-click="goToList">
@@ -33,10 +33,9 @@
 <style scoped src="~/assets/styles/app.css"></style>
 
 <script setup lang="ts">
-const { user } = useUserStore();
-const watchlistsStore = useWatchlistsStore();
-const { getSortedLists: lists, isReadyLists } = storeToRefs(watchlistsStore);
-const { createList, reorderLists } = watchlistsStore;
+const { user } = useUser();
+const { getSortedLists, isLoadingLists, createList, reorderLists } = useWatchlists();
+const lists = computed(() => getSortedLists.value);
 const newListName = ref("");
 
 function goToList(list: WatchlistPublic) {

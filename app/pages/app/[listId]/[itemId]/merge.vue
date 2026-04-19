@@ -7,7 +7,7 @@
         </template>
     </Header>
 
-    <LoadingState v-if="!isReadyLists || !isReadyItems[listId]" />
+    <LoadingState v-if="isLoadingLists || itemsQuery.isLoading.value" />
 
     <EmptyState v-else-if="!list || !item">There is nothing to merge right now</EmptyState>
 
@@ -33,20 +33,14 @@
 const route = useRoute();
 const { localeTitle } = useTitle();
 const { confirm } = useConfirm();
-
-const watchlistsStore = useWatchlistsStore();
-const { isReadyLists, isReadyItems, items } = storeToRefs(watchlistsStore);
-const { getList, fetchItems, mergeItem } = watchlistsStore;
+const { lists, isLoadingLists, useItems, mergeItem } = useWatchlists();
 
 const listId = computed(() => route.params.listId as string);
-const list = computed(() => getList(listId.value));
+const list = computed(() => lists.value?.find((l) => l._id === listId.value));
 
 const itemId = computed(() => route.params.itemId as string);
-const item = computed(() => items.value[listId.value]?.find((i) => i._id === itemId.value));
-
-watchEffect(() => {
-    if (listId.value) fetchItems(listId.value);
-});
+const itemsQuery = useItems(listId);
+const item = computed(() => itemsQuery.sorted.value.find((i) => i._id === itemId.value));
 
 async function handleMergeTitle(candidate: MergeCandidate) {
     const ok = await confirm("Merge Item", "This action is irreversible!");

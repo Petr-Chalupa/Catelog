@@ -20,7 +20,7 @@ setCatchHandler(async ({ event }) => {
         const cached = await caches.match("/app");
         if (cached) return cached;
     }
-    return Response.error();
+    return new Response("Offline", { status: 200 });
 });
 
 // --- PUSH NOTIFICATIONS ---

@@ -1,6 +1,6 @@
 export default function () {
     const { $api } = useNuxtApp();
-    const { user } = useUserStore();
+    const { user } = useUser();
     const toasts = useToasts();
 
     const isSupported = () =>
@@ -11,7 +11,7 @@ export default function () {
     const permission = ref(isSupported() ? Notification.permission : "default");
 
     const needsPermission = computed(
-        () => user?.notificationsEnabled && isSupported() && permission.value !== "granted",
+        () => user.value?.notificationsEnabled && isSupported() && permission.value !== "granted",
     );
 
     const requestPermission = async () => {
@@ -21,7 +21,7 @@ export default function () {
     };
 
     const subscribeDevice = async () => {
-        if (!user) {
+        if (!user.value) {
             toasts.warn("User not loaded. Cannot subscribe device.");
             return;
         }
@@ -36,7 +36,7 @@ export default function () {
         });
         const subJSON = newSub.toJSON();
         const newDevice: UserDeviceCreate = {
-            userId: user._id,
+            userId: user.value._id,
             deviceName: navigator.userAgent,
             endpoint: newSub.endpoint,
             keys: { p256dh: subJSON.keys!.p256dh!, auth: subJSON.keys!.auth! },
@@ -46,25 +46,25 @@ export default function () {
     };
 
     const enableNotifications = async () => {
-        if (!user) {
+        if (!user.value) {
             toasts.warn("User not loaded. Cannot enable notifications.");
             return;
         }
 
         await $api("/api/users/me", { method: "PATCH", body: { notificationsEnabled: true } as UserUpdate });
-        user.notificationsEnabled = true;
+        user.value.notificationsEnabled = true;
 
         if (permission.value === "granted") await subscribeDevice();
     };
 
     const disableNotifications = async () => {
-        if (!user) {
+        if (!user.value) {
             toasts.warn("User not loaded. Cannot disable notifications.");
             return;
         }
 
         await $api("/api/users/me", { method: "PATCH", body: { notificationsEnabled: false } as UserUpdate });
-        user.notificationsEnabled = false;
+        user.value.notificationsEnabled = false;
 
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();

@@ -5,7 +5,7 @@
         </template>
     </Header>
 
-    <LoadingState v-if="!isReady" />
+    <LoadingState v-if="isLoadingUser || isLoadingInvites" />
 
     <EmptyState v-else-if="!user">This seems like an error</EmptyState>
 
@@ -42,7 +42,7 @@
         <section class="invites">
             <h3>Invites</h3>
             <div class="body">
-                <template v-if="invites.length === 0">
+                <template v-if="!invites || invites.length === 0">
                     <i>You have no incoming invites.</i>
                 </template>
                 <template v-else v-online-only>
@@ -77,14 +77,8 @@
 const colorMode = useColorMode();
 const { needsPermission, requestPermission, enableNotifications, disableNotifications } = usePush();
 const { confirm } = useConfirm();
-
-const userStore = useUserStore();
-const { user, isReady } = storeToRefs(userStore);
-const { signOut, deleteAccount } = userStore;
-
-const invitesStore = useInvitesStore();
-const { invites } = storeToRefs(invitesStore);
-const { acceptInvite, declineInvite } = invitesStore;
+const { user, isLoading: isLoadingUser, signOut, deleteAccount } = useUser();
+const { invites, isLoading: isLoadingInvites, acceptInvite, declineInvite } = useInvites();
 
 function expiresIn(expiresAt: Date) {
     const now = new Date();

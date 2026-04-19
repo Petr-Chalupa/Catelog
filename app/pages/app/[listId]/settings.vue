@@ -5,7 +5,7 @@
         </template>
     </Header>
 
-    <LoadingState v-if="!isReadyLists" />
+    <LoadingState v-if="isLoadingLists" />
 
     <EmptyState v-else-if="!list" />
 
@@ -58,17 +58,15 @@
 
 <script setup lang="ts">
 const route = useRoute();
-const userStore = useUserStore();
+const { user } = useUser();
+const { sendInvite } = useInvites();
+const { lists, isLoadingLists, updateList, deleteList } = useWatchlists();
 const { confirm } = useConfirm();
-const { sendInvite } = useInvitesStore();
 
-const watchlistsStore = useWatchlistsStore();
-const { isReadyLists } = storeToRefs(watchlistsStore);
-const { getList, updateList, deleteList } = watchlistsStore;
 const listId = computed(() => route.params.listId as string);
-const list = computed(() => getList(listId.value));
+const list = computed(() => lists.value?.find((l) => l._id === listId.value));
 const members = computed(() => list.value?.sharedWith || []);
-const isOwner = computed(() => list.value?.owner._id === userStore.user?._id);
+const isOwner = computed(() => list.value?.owner._id === user.value?._id);
 
 const editName = ref("");
 const addMemberEmail = ref("");
@@ -80,7 +78,7 @@ watch(list, (newList) => {
 async function handleSaveName() {
     if (!editName.value.trim() || editName.value === list.value?.name) return;
 
-    await updateList(listId.value, { name: editName.value });
+    await updateList({ listId: listId.value, body: { name: editName.value } });
 }
 
 async function handleAddMember() {
@@ -89,20 +87,20 @@ async function handleAddMember() {
     const email = addMemberEmail.value;
     addMemberEmail.value = "";
 
-    await sendInvite(listId.value, email);
+    await sendInvite({ listId: listId.value, email });
 }
 
 async function handleMemberRemove(userId: string) {
     const ok = await confirm("Remove Member", "Are you sure you want to remove this user?");
     if (ok) {
         const newMembers = members.value.filter((m) => m._id !== userId).map((m) => m._id);
-        await updateList(listId.value, { sharedWith: newMembers });
+        await updateList({ listId: listId.value, body: { sharedWith: newMembers } });
     }
 }
 
 async function handleTransfer(userId: string) {
     const ok = await confirm("Transfer Ownership", "You will no longer be the owner of this list.");
-    if (ok) await updateList(listId.value, { ownerId: userId });
+    if (ok) await updateList({ listId: listId.value, body: { ownerId: userId } });
 }
 
 async function handleDelete() {
@@ -116,8 +114,8 @@ async function handleDelete() {
 async function handleLeave() {
     const ok = await confirm("Leave List", "You will lose access to this watchlist.");
     if (ok) {
-        const newMembers = members.value.filter((m) => m._id !== userStore.user?._id).map((m) => m._id);
-        await updateList(listId.value, { sharedWith: newMembers });
+        const newMembers = members.value.filter((m) => m._id !== user.value?._id).map((m) => m._id);
+        await updateList({ listId: listId.value, body: { sharedWith: newMembers } });
         navigateTo("/app");
     }
 }

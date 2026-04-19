@@ -11,7 +11,7 @@
         </template>
     </Header>
 
-    <LoadingState v-if="!isReadyLists || !isReadyItems[listId]" />
+    <LoadingState v-if="isLoadingLists || itemsQuery.isLoading.value" />
 
     <EmptyState v-else-if="!list || !item">This seems like an error</EmptyState>
 
@@ -64,19 +64,17 @@
 const route = useRoute();
 const { localeTitle, resolveGenre } = useTitle();
 const { confirm } = useConfirm();
-
-const watchlistsStore = useWatchlistsStore();
-const { isReadyLists, isReadyItems, items } = storeToRefs(watchlistsStore);
-const { getList, fetchItems, updateItem, deleteItem } = watchlistsStore;
+const { lists, isLoadingLists, useItems, updateItem, deleteItem } = useWatchlists();
 
 const listId = computed(() => route.params.listId as string);
-const list = computed(() => getList(listId.value));
+const list = computed(() => lists.value?.find((l) => l._id === listId.value));
 
 const itemId = computed(() => route.params.itemId as string);
-const item = computed(() => items.value[listId.value]?.find((i) => i._id === itemId.value));
+const itemsQuery = useItems(listId);
+const item = computed(() => itemsQuery.sorted.value.find((i) => i._id === itemId.value));
 
 const debouncedUpdate = useDebounce((body: WatchlistItemUpdate) => {
-    updateItem(listId.value, itemId.value, body);
+    updateItem({ listId: listId.value, itemId: itemId.value, body });
 }, 500);
 
 const ALL_GENRES = TitleGenreSchema.options;
@@ -107,9 +105,6 @@ const genres = computed({
     }
 });
 
-watchEffect(() => {
-    if (listId.value) fetchItems(listId.value);
-});
 
 watch(() => item.value?.personalRating, (newRating) => {
     if (newRating !== undefined) debouncedUpdate({ personalRating: newRating });
@@ -122,7 +117,7 @@ function goToItemMerge() {
 async function handleDelete() {
     const ok = await confirm("Delete Item", "This action is irreversible!");
     if (ok) {
-        await deleteItem(listId.value, itemId.value);
+        await deleteItem({ listId: listId.value, itemId: itemId.value });
         navigateTo(`/app/${listId.value}`);
     }
 }

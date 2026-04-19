@@ -5,7 +5,7 @@
         </template>
     </Header>
 
-    <LoadingState v-if="!isReadyLists || !isReadyItems[listId]" />
+    <LoadingState v-if="isLoadingLists || itemsQuery.isLoading.value" />
 
     <EmptyState v-else-if="!list">This seems like an error</EmptyState>
 
@@ -14,7 +14,7 @@
             <Input placeholder="Search title" v-model="inputModel" :actions="[]" v-online-only />
         </section>
 
-        <LoadingState v-if="pending" />
+        <LoadingState v-if="searchPending" />
 
         <EmptyState v-else-if="searchResults.length === 0">
             Try searching something
@@ -50,22 +50,16 @@ const { $api } = useNuxtApp();
 const route = useRoute();
 const router = useRouter();
 const { localeTitle, resolveGenres } = useTitle();
-
-const watchlistsStore = useWatchlistsStore();
-const { isReadyLists, isReadyItems } = storeToRefs(watchlistsStore);
-const { getList, getSortedItems, createItem, fetchItems } = watchlistsStore;
+const { lists, isLoadingLists, useItems, createItem } = useWatchlists();
 
 const listId = computed(() => route.params.listId as string);
-const list = computed(() => getList(listId.value));
-const currentItems = computed(() => getSortedItems(listId.value));
+const list = computed(() => lists.value?.find((l) => l._id === listId.value));
+const itemsQuery = useItems(listId);
+const currentItems = computed(() => itemsQuery.sorted.value);
 
 const inputModel = ref(route.query.q as string ?? "");
 const query = ref(route.query.q as string ?? "");
 const isAdding = ref<TitleCreate | null>(null);
-
-watchEffect(() => {
-    if (listId.value) fetchItems(listId.value);
-});
 
 const isAlreadyInList = (res: TitleCreate) => {
     return currentItems.value.some(item => {
@@ -82,7 +76,7 @@ const debouncedUpdate = useDebounce((val: string) => {
 
 watch(inputModel, (newVal) => debouncedUpdate(newVal));
 
-const { data: searchResults, pending } = await useLazyAsyncData(
+const { data: searchResults, pending: searchPending } = await useLazyAsyncData(
     `search-${query.value}`,
     () => {
         if (query.value.length < 3) return Promise.resolve([]);
@@ -103,7 +97,7 @@ async function handleAddToList(title: TitleCreate) {
         type: title.type
     };
 
-    await createItem(listId.value, titleImport);
+    await createItem({ listId: listId.value, title: titleImport });
     isAdding.value = null;
 }
 </script>

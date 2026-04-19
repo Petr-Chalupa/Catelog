@@ -10,7 +10,7 @@
     </Header>
 
     <main>
-        <LoadingState v-if="!isReadyLists || !isReadyItems[listId]" />
+        <LoadingState v-if="isLoadingLists && itemsQuery.isLoading.value" />
 
         <EmptyState v-else-if="items.length === 0" />
 
@@ -46,19 +46,14 @@
 <script setup lang="ts">
 const route = useRoute();
 const { localeTitle, resolveGenres } = useTitle();
-
-const watchlistsStore = useWatchlistsStore();
-const { isReadyLists, isReadyItems } = storeToRefs(watchlistsStore);
-const { getList, fetchItems, getSortedItems, reorderItems, createItemPrivate } = watchlistsStore;
+const { lists, isLoadingLists, useItems, createItemPrivate, reorderItems } = useWatchlists();
+const { getFilteredItems } = useWatchlistFiltersStore();
 
 const listId = computed(() => route.params.listId as string);
-const list = computed(() => getList(listId.value));
-const items = computed(() => getSortedItems(listId.value));
+const list = computed(() => lists.value?.find((l) => l._id === listId.value));
+const itemsQuery = useItems(listId);
+const items = computed(() => getFilteredItems(itemsQuery.sorted.value));
 const newItemTitle = ref("");
-
-watchEffect(() => {
-    if (listId.value) fetchItems(listId.value);
-});
 
 function goToListFilter() {
     navigateTo(`/app/${listId.value}/filter`);
@@ -79,6 +74,6 @@ function goToTitleSearch(title: string) {
 
 function handleCreateItem(title: string) {
     newItemTitle.value = "";
-    createItemPrivate(listId.value, title);
+    createItemPrivate({ listId: listId.value, title });
 }
 </script>

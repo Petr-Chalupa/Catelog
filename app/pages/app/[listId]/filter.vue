@@ -10,7 +10,7 @@
         </template>
     </Header>
 
-    <LoadingState v-if="!isReadyLists || !isReadyItems[listId]" />
+    <LoadingState v-if="isLoadingLists || itemsQuery.isLoading.value" />
 
     <EmptyState v-else-if="!list">This seems like an error</EmptyState>
 
@@ -74,25 +74,24 @@
 <script setup lang="ts">
 const route = useRoute();
 const { resolveGenre, resolveState, resolveType } = useTitle();
-
-const watchlistsStore = useWatchlistsStore();
-const { isReadyLists, isReadyItems, items, itemFilters } = storeToRefs(watchlistsStore);
-const { getList, fetchItems } = watchlistsStore;
+const { lists, isLoadingLists, useItems } = useWatchlists();
+const { filters } = storeToRefs(useWatchlistFiltersStore());
 
 const listId = computed(() => route.params.listId as string);
-const list = computed(() => getList(listId.value));
-const listItems = computed(() => items.value[listId.value] || []);
+const list = computed(() => lists.value?.find((l) => l._id === listId.value));
+const itemsQuery = useItems(listId);
+const items = computed(() => itemsQuery.sorted.value);
 
-const filterBuffer = ref<WatchlistFilters>({ ...itemFilters.value });
+const filterBuffer = ref<WatchlistFilters>({ ...filters.value });
 const ALL_STATES = WatchStateSchema.options;
 const ALL_TYPES = TitleTypeSchema.options;
 const ALL_GENRES = TitleGenreSchema.options;
 const ALL_DIRECTORS = computed(() => {
-    const directors = listItems.value.flatMap((item) => item.title.directors);
+    const directors = items.value.flatMap((item) => item.title.directors);
     return [...new Set(directors)].sort();
 });
 const ALL_ACTORS = computed(() => {
-    const actors = listItems.value.flatMap((item) => item.title.actors);
+    const actors = items.value.flatMap((item) => item.title.actors);
     return [...new Set(actors)].sort();
 });
 const YEAR_BOUNDS = computed(() => getBounds(i => i.title.year));
@@ -102,18 +101,15 @@ const DURATION_BOUNDS = computed(() => {
 });
 const RATING_BOUNDS = computed(() => getBounds(i => i.title.avgRating));
 
-watchEffect(() => {
-    if (listId.value) fetchItems(listId.value);
-});
 
 const debouncedUpdate = useDebounce((newVal: WatchlistFilters) => {
-    itemFilters.value = { ...newVal };
+    filters.value = { ...newVal };
 }, 400);
 
 watch(filterBuffer, (newVal) => debouncedUpdate(newVal), { deep: true });
 
 function getBounds(path: (item: WatchlistItemPublic) => number | undefined | null) {
-    const values = listItems.value.map(path).filter((v): v is number => v !== undefined && v !== null);
+    const values = items.value.map(path).filter((v): v is number => v !== undefined && v !== null);
     if (values.length === 0) return { min: 0, max: 100 };
     return { min: Math.min(...values), max: Math.max(...values) };
 }

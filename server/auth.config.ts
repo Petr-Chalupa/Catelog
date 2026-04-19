@@ -35,10 +35,14 @@ export default defineServerAuth({
         google: {
             clientId: config.GOOGLE_CLIENT_ID,
             clientSecret: config.GOOGLE_CLIENT_SECRET,
+            accessType: "offline",
+            prompt: "select_account consent",
         },
         microsoft: {
             clientId: config.MS_CLIENT_ID,
             clientSecret: config.MS_CLIENT_SECRET,
+            accessType: "offline",
+            prompt: "select_account consent",
         },
     },
 });
