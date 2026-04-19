@@ -1,9 +1,7 @@
 <template>
     <Header>
         <template #center>
-            <span>
-                Filter - {{ list ? list.name : "Unknown list" }}
-            </span>
+            <span>Filter - <ClientOnly fallback="Unknown list">{{ list?.name ?? "Unknown list" }}</ClientOnly></span>
         </template>
         <template #actions>
             <Icon name="lucide:delete" :size="25" @click="handleFiltersReset" />

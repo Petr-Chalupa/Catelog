@@ -1,9 +1,7 @@
 <template>
     <Header>
         <template #center>
-            <span>
-                Merge - {{ item ? localeTitle(item.title.titles) : "Unknown item" }}
-            </span>
+            <span>Merge - {{ item ? localeTitle(item.title.titles) : "Unknown item" }}</span>
         </template>
     </Header>
 

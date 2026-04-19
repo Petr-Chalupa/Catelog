@@ -1,13 +1,13 @@
 <template>
     <Header>
         <template #center>
-            <span>Settings - {{ list ? list.name : "Unknown list" }}</span>
+            <span>Settings - <ClientOnly fallback="Unknown list">{{ list?.name ?? "Unknown list" }}</ClientOnly></span>
         </template>
     </Header>
 
     <LoadingState v-if="isLoadingLists" />
 
-    <EmptyState v-else-if="!list" />
+    <EmptyState v-else-if="!list">This seems like an error</EmptyState>
 
     <main v-else>
         <section class="list-name">

@@ -1,7 +1,9 @@
 <template>
     <Header>
         <template #center>
-            <span>{{ list ? list.name : "Unknown list" }}</span>
+            <span>
+                <ClientOnly fallback="Unknown list">{{ list?.name ?? "Unknown list" }}</ClientOnly>
+            </span>
         </template>
         <template #actions>
             <Icon name="lucide:filter" :size="25" @click="goToListFilter" />
@@ -10,7 +12,9 @@
     </Header>
 
     <main>
-        <LoadingState v-if="isLoadingLists && itemsQuery.isLoading.value" />
+        <LoadingState v-if="isLoadingLists || itemsQuery.isLoading.value" />
+
+        <EmptyState v-else-if="!list">This seems like an error</EmptyState>
 
         <EmptyState v-else-if="items.length === 0" />
 

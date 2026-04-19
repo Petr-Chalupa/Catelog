@@ -30,6 +30,7 @@ export default defineNuxtPlugin((nuxtApp) => {
                 retry: 1,
                 retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
                 throwOnError: false,
+                networkMode: "always",
             },
             mutations: {
                 retry: 0,

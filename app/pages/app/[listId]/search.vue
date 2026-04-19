@@ -1,7 +1,7 @@
 <template>
     <Header>
         <template #center>
-            <span>Search - {{ list ? list.name : "Unknown list" }}</span>
+            <span>Search - <ClientOnly fallback="Unknown list">{{ list?.name ?? "Unknown list" }}</ClientOnly></span>
         </template>
     </Header>
 
@@ -16,9 +16,7 @@
 
         <LoadingState v-if="searchPending" />
 
-        <EmptyState v-else-if="searchResults.length === 0">
-            Try searching something
-        </EmptyState>
+        <EmptyState v-else-if="searchResults.length === 0">Try searching something</EmptyState>
 
         <section class="results" v-else>
             <List :items="searchResults" keyPath="poster">
@@ -36,7 +34,7 @@
                 </template>
                 <template #actions="{ item }: { item: TitleCreate }">
                     <Icon name="lucide:check" v-if="isAlreadyInList(item)" class="check" :size="30" />
-                    <Icon name="lucide:plus" v-else :size="30" @click="handleAddToList(item)" :disabled="isAdding === item" v-online-only />
+                    <Icon name="lucide:plus" v-else :size="30" @click="handleAddToList(item)" :disabled="isCreatingItem" v-online-only />
                 </template>
             </List>
         </section>
@@ -50,16 +48,20 @@ const { $api } = useNuxtApp();
 const route = useRoute();
 const router = useRouter();
 const { localeTitle, resolveGenres } = useTitle();
-const { lists, isLoadingLists, useItems, createItem } = useWatchlists();
+const { lists, isLoadingLists, useItems, createItem, isCreatingItem } = useWatchlists();
 
 const listId = computed(() => route.params.listId as string);
 const list = computed(() => lists.value?.find((l) => l._id === listId.value));
 const itemsQuery = useItems(listId);
 const currentItems = computed(() => itemsQuery.sorted.value);
 
-const inputModel = ref(route.query.q as string ?? "");
-const query = ref(route.query.q as string ?? "");
-const isAdding = ref<TitleCreate | null>(null);
+const query = computed(() => (route.query.q as string) ?? "");
+const inputModel = computed({
+    get: () => query.value,
+    set: (val: string) => {
+        debouncedUpdate(val);
+    }
+});
 
 const isAlreadyInList = (res: TitleCreate) => {
     return currentItems.value.some(item => {
@@ -70,13 +72,17 @@ const isAlreadyInList = (res: TitleCreate) => {
 };
 
 const debouncedUpdate = useDebounce((val: string) => {
-    query.value = val;
-    router.replace({ query: { ...route.query, q: val || undefined } });
+    router.replace({
+        query: {
+            ...route.query,
+            q: val.trim(),
+        },
+    });
 }, 400);
 
 watch(inputModel, (newVal) => debouncedUpdate(newVal));
 
-const { data: searchResults, pending: searchPending } = await useLazyAsyncData(
+const { data: searchResults, pending: searchPending } = useLazyAsyncData(
     `search-${query.value}`,
     () => {
         if (query.value.length < 3) return Promise.resolve([]);
@@ -91,13 +97,10 @@ const { data: searchResults, pending: searchPending } = await useLazyAsyncData(
 async function handleAddToList(title: TitleCreate) {
     if (isAlreadyInList(title)) return;
 
-    isAdding.value = title;
     const titleImport: TitleImport = {
         externalIds: title.externalIds,
         type: title.type
     };
-
     await createItem({ listId: listId.value, title: titleImport });
-    isAdding.value = null;
 }
 </script>
