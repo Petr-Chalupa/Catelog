@@ -42,22 +42,18 @@
         <section class="invites">
             <h3>Invites</h3>
             <div class="body">
-                <template v-if="!invites || invites.length === 0">
-                    <i>You have no incoming invites.</i>
-                </template>
-                <template v-else v-online-only>
-                    <div v-for="i in invites" :key="i._id" class="invite">
-                        <div class="info">
-                            <span>To: <span class="to">{{ i.list.name }}</span></span>
-                            <span>From: <span class="from">{{ i.inviter.name ?? "Someone" }}</span></span>
-                            <span class="expires">{{ expiresIn(i.expiresAt).msg }}</span>
-                        </div>
-                        <div class="actions">
-                            <button @click="acceptInvite(i._id)">ACCEPT</button>
-                            <button @click="declineInvite(i._id)" data-theme="danger">DECLINE</button>
-                        </div>
+                <i v-if="!invites || invites.length === 0" class="empty-hint">You have no incoming invites.</i>
+                <div v-for="i in invites" :key="i._id" class="invite" v-online-only>
+                    <div class="info">
+                        <span>To: <span class="to">{{ i.list.name }}</span></span>
+                        <span>From: <span class="from">{{ i.inviter.name ?? "Someone" }}</span></span>
+                        <span class="expires">{{ expiresIn(i.expiresAt).msg }}</span>
                     </div>
-                </template>
+                    <div class="actions">
+                        <button @click="acceptInvite(i._id)">ACCEPT</button>
+                        <button @click="declineInvite(i._id)" data-theme="danger">DECLINE</button>
+                    </div>
+                </div>
             </div>
         </section>
 

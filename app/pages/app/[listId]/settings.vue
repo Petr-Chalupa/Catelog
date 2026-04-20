@@ -27,7 +27,7 @@
         <section class="members">
             <h3>Members</h3>
             <div class="body">
-                <p v-if="members.length === 0" class="empty-hint">No other members yet.</p>
+                <i v-if="members.length === 0" class="empty-hint">No other members yet.</i>
                 <div v-for="member in members" :key="member._id" class="member-item">
                     <div class="info">
                         <span class="name">{{ member.name }}</span>

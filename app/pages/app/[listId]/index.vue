@@ -56,7 +56,7 @@ const { getFilteredItems } = useWatchlistFiltersStore();
 const listId = computed(() => route.params.listId as string);
 const list = computed(() => lists.value?.find((l) => l._id === listId.value));
 const itemsQuery = useItems(listId);
-const items = computed(() => getFilteredItems(itemsQuery.sorted.value));
+const items = computed(() => getFilteredItems(itemsQuery.data.value ?? []));
 const newItemTitle = ref("");
 
 function goToListFilter() {

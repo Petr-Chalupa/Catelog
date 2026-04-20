@@ -53,7 +53,7 @@ const { lists, isLoadingLists, useItems, createItem, isCreatingItem } = useWatch
 const listId = computed(() => route.params.listId as string);
 const list = computed(() => lists.value?.find((l) => l._id === listId.value));
 const itemsQuery = useItems(listId);
-const currentItems = computed(() => itemsQuery.sorted.value);
+const currentItems = computed(() => itemsQuery.data.value ?? []);
 
 const query = computed(() => (route.query.q as string) ?? "");
 const inputModel = computed({

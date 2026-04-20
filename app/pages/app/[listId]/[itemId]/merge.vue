@@ -38,7 +38,7 @@ const list = computed(() => lists.value?.find((l) => l._id === listId.value));
 
 const itemId = computed(() => route.params.itemId as string);
 const itemsQuery = useItems(listId);
-const item = computed(() => itemsQuery.sorted.value.find((i) => i._id === itemId.value));
+const item = computed(() => itemsQuery.data.value?.find((i) => i._id === itemId.value));
 
 async function handleMergeTitle(candidate: MergeCandidate) {
     const ok = await confirm("Merge Item", "This action is irreversible!");

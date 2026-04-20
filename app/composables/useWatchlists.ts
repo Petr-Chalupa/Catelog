@@ -16,21 +16,12 @@ export default function () {
 
     // --- QUERY ITEMS ---
     const useItems = (listId: MaybeRef<string>) => {
-        const query = useQuery({
+        return useQuery({
             queryKey: computed(() => watchlistsKeys.items(unref(listId))),
             queryFn: ({ signal }) => $api<WatchlistItemPublic[]>(`/api/watchlists/${unref(listId)}/items`, { signal }),
             enabled: computed(() => !!unref(listId)),
+            select: (data) => [...data].sort((a, b) => (a.sortKey < b.sortKey ? -1 : 1)),
         });
-
-        const sorted = computed(() => {
-            if (!query.data.value) return [];
-            return [...query.data.value].sort((a, b) => (a.sortKey < b.sortKey ? -1 : 1));
-        });
-
-        return {
-            ...query,
-            sorted,
-        };
     };
 
     // --- SORTED LISTS ---
@@ -132,8 +123,8 @@ export default function () {
     // --- CREATE ITEM ---
     const createItem = useMutation({
         mutationFn: async ({ listId, title }: { listId: string; title: TitleImport }) => {
-            const itemsQuery = useItems(listId);
-            const sorted = itemsQuery.sorted.value;
+            const items = queryClient.getQueryData<WatchlistItemPublic[]>(watchlistsKeys.items(listId)) ?? [];
+            const sorted = [...items].sort((a, b) => (a.sortKey < b.sortKey ? -1 : 1));
             const last = sorted.at(-1);
             const sortKey = generateKeyBetween(last?.sortKey, undefined);
 
@@ -169,8 +160,8 @@ export default function () {
     // --- CREATE ITEM PRIVATE ---
     const createItemPrivate = useMutation({
         mutationFn: async ({ listId, title }: { listId: string; title: string }) => {
-            const itemsQuery = useItems(listId);
-            const sorted = itemsQuery.sorted.value;
+            const items = queryClient.getQueryData<WatchlistItemPublic[]>(watchlistsKeys.items(listId)) ?? [];
+            const sorted = [...items].sort((a, b) => (a.sortKey < b.sortKey ? -1 : 1));
             const last = sorted.at(-1);
             const sortKey = generateKeyBetween(last?.sortKey, undefined);
             const locale = useState<string>("locale");
@@ -281,8 +272,8 @@ export default function () {
 
     // --- REORDER ITEMS ---
     const reorderItems = async (listId: string, moved: WatchlistItemPublic, newIndex: number) => {
-        const itemsQuery = useItems(listId);
-        const sorted = itemsQuery.sorted.value;
+        const items = queryClient.getQueryData<WatchlistItemPublic[]>(watchlistsKeys.items(listId)) ?? [];
+        const sorted = [...items].sort((a, b) => (a.sortKey < b.sortKey ? -1 : 1));
         const others = sorted.filter((i) => i._id !== moved._id);
         const prev = others[newIndex - 1];
         const next = others[newIndex];

@@ -33,9 +33,11 @@
     .body {
         display: block;
         font-weight: 400;
+        line-height: 1.25;
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
+        pointer-events: none;
     }
 
     &.positive {

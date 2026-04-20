@@ -1,6 +1,6 @@
 main {
     display: grid;
-    gap: 1rem;
+    gap: 1.5rem;
     padding: 1rem;
 }
 
@@ -45,6 +45,10 @@ section {
 
     &.invites .body {
         gap: 0;
+
+        .empty-hint {
+            color: var(--text-secondary);
+        }
 
         .invite {
             display: flex;
