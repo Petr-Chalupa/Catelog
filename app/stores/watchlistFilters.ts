@@ -23,7 +23,7 @@ export const useWatchlistFiltersStore = defineStore(
                     return false;
                 }
                 if (f.maxDuration && (item.title.durationMinutes ?? 0) > f.maxDuration) return false;
-                if (f.minRating && (item.personalRating ?? item.title.avgRating ?? 0) < f.minRating) return false;
+                if (f.minRating && (item.title.avgRating ?? 0) < f.minRating) return false;
                 if (f.minYear && (item.title.year ?? 0) < f.minYear) return false;
                 if (f.maxYear && (item.title.year ?? 9999) > f.maxYear) return false;
 

@@ -68,7 +68,7 @@ export const WatchlistItemDBSchema = z.object({
     state: WatchStateSchema,
     addedGenres: z.array(TitleGenreSchema),
     excludedGenres: z.array(TitleGenreSchema),
-    personalRating: z.number().optional(),
+    personalRating: z.number().default(0),
     addedById: z.uuid(),
     sortKey: z.string(),
     updatedAt: z.coerce.date(),

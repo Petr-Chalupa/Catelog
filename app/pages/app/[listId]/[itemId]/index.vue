@@ -33,7 +33,7 @@
         </section>
 
         <section class="rating">
-            <RangeInput v-model="item.personalRating" :min="0" :max="10" :step="0.1" label="Rating" v-online-only />
+            <RangeInput v-model="personalRating" :min="0" :max="10" :step="0.1" label="Rating" v-online-only />
         </section>
 
         <section class="genres">
@@ -75,7 +75,15 @@ const item = computed(() => itemsQuery.data.value?.find((i) => i._id === itemId.
 
 const debouncedUpdate = useDebounce((body: WatchlistItemUpdate) => {
     updateItem({ listId: listId.value, itemId: itemId.value, body });
-}, 500);
+}, 300);
+
+const personalRating = computed({
+    get: () => item.value?.personalRating ?? 0,
+    set: (val) => {
+        if (!item.value) return;
+        debouncedUpdate({ personalRating: val });
+    }
+});
 
 const ALL_GENRES = TitleGenreSchema.options;
 const genres = computed({
@@ -98,16 +106,9 @@ const genres = computed({
             if (state === "positive" && !isFromApi) added.push(genre as TitleGenre);
             if (state === "neutral") excluded.push(genre as TitleGenre);
         });
-        item.value.addedGenres = added;
-        item.value.excludedGenres = excluded;
 
         debouncedUpdate({ addedGenres: added, excludedGenres: excluded });
     }
-});
-
-
-watch(() => item.value?.personalRating, (newRating) => {
-    if (newRating !== undefined) debouncedUpdate({ personalRating: newRating });
 });
 
 function goToItemMerge() {

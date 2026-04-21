@@ -36,10 +36,14 @@
         </section>
 
         <section class="ranges">
-            <RangeInput v-model="filterBuffer.minRating" label="Min Rating" :min="RATING_BOUNDS.min" :max="RATING_BOUNDS.max" :step="0.1" />
-            <RangeInput v-model="filterBuffer.maxDuration" label="Max Duration" unit="min" :min="DURATION_BOUNDS.min" :max="DURATION_BOUNDS.max" :step="10" />
-            <RangeInput v-model="filterBuffer.minYear" label="From" unit="year" :min="YEAR_BOUNDS.min" :max="filterBuffer.maxYear ?? YEAR_BOUNDS.max" />
-            <RangeInput v-model="filterBuffer.maxYear" label="To" unit="year" :min="filterBuffer.minYear ?? YEAR_BOUNDS.min" :max="YEAR_BOUNDS.max" />
+            <RangeInput :model-value="filterBuffer.minRating ?? RATING_BOUNDS.min" @update:modelValue="(val) => filterBuffer.minRating = val" label="Min Rating" :min="RATING_BOUNDS.min"
+                :max="RATING_BOUNDS.max" :step="0.1" />
+            <RangeInput :model-value="filterBuffer.maxDuration ?? DURATION_BOUNDS.max" @update:modelValue="(val) => filterBuffer.maxDuration = val" label="Max Duration" unit="min"
+                :min="DURATION_BOUNDS.min" :max="DURATION_BOUNDS.max" :step="10" />
+            <RangeInput :model-value="filterBuffer.minYear ?? YEAR_BOUNDS.min" @update:modelValue="(val) => filterBuffer.minYear = val" label="From" unit="year" :min="YEAR_BOUNDS.min"
+                :max="filterBuffer.maxYear ?? YEAR_BOUNDS.max" />
+            <RangeInput :model-value="filterBuffer.maxYear ?? YEAR_BOUNDS.max" @update:modelValue="(val) => filterBuffer.maxYear = val" label="To" unit="year"
+                :min="filterBuffer.minYear ?? YEAR_BOUNDS.min" :max="YEAR_BOUNDS.max" />
         </section>
 
         <section class="genres">
@@ -78,7 +82,7 @@ const { filters } = storeToRefs(useWatchlistFiltersStore());
 const listId = computed(() => route.params.listId as string);
 const list = computed(() => lists.value?.find((l) => l._id === listId.value));
 const itemsQuery = useItems(listId);
-const items = computed(() => itemsQuery.sorted.value);
+const items = computed(() => itemsQuery.data.value ?? []);
 
 const filterBuffer = ref<WatchlistFilters>({ ...filters.value });
 const ALL_STATES = WatchStateSchema.options;
@@ -98,7 +102,6 @@ const DURATION_BOUNDS = computed(() => {
     return { min: Math.floor(min / 10) * 10, max: Math.ceil(max / 10) * 10 };
 });
 const RATING_BOUNDS = computed(() => getBounds(i => i.title.avgRating));
-
 
 const debouncedUpdate = useDebounce((newVal: WatchlistFilters) => {
     filters.value = { ...newVal };
