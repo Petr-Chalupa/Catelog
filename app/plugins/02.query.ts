@@ -25,8 +25,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     const queryClient = new QueryClient({
         defaultOptions: {
             queries: {
-                staleTime: 1000 * 60, // 1 minute
-                gcTime: 1000 * 60 * 60 * 24, // 24 hours
+                staleTime: 1000 * 60 * 5, // 5 minutes
+                gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
                 retry: 1,
                 retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
                 throwOnError: false,

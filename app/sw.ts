@@ -34,7 +34,7 @@ self.addEventListener("push", (event) => {
             body: payload.body || "Something happened!",
             icon: "/pwa-192x192.png",
             badge: "/favicon.svg",
-            data: payload.url || "/",
+            data: payload.url || "/app",
             vibrate: [100, 50, 100],
         };
 
