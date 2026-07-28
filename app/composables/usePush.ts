@@ -3,16 +3,11 @@ export default function () {
     const { user } = useUser();
     const toasts = useToasts();
 
-    const isSupported = () =>
-        import.meta.client
-            ? "serviceWorker" in navigator && "PushManager" in window && "Notification" in window
-            : false;
+    const isSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 
     const permission = ref(isSupported() ? Notification.permission : "default");
 
-    const needsPermission = computed(
-        () => user.value?.notificationsEnabled && isSupported() && permission.value !== "granted",
-    );
+    const needsPermission = computed(() => user.value?.notificationsEnabled && isSupported() && permission.value !== "granted");
 
     const requestPermission = async () => {
         if (!isSupported()) return false;

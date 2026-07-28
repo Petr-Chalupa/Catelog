@@ -1,6 +1,6 @@
 import { precacheAndRoute } from "workbox-precaching";
 import { registerRoute, setCatchHandler } from "workbox-routing";
-import { NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
+import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -9,9 +9,13 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 registerRoute(({ request }) => request.mode === "navigate", new NetworkFirst({ cacheName: "pages" }));
 
+registerRoute(({ request }) => request.destination === "style" || request.destination === "script", new StaleWhileRevalidate({ cacheName: "assets" }));
+
+registerRoute(({ request }) => request.destination === "image", new CacheFirst({ cacheName: "images" }));
+
 registerRoute(
-    ({ request }) => request.destination === "style" || request.destination === "script",
-    new StaleWhileRevalidate({ cacheName: "assets" }),
+    ({ request }) => request.method === "GET" && request.url.startsWith(self.location.origin + "/api/"),
+    new NetworkFirst({ cacheName: "api", networkTimeoutSeconds: 5 }),
 );
 
 setCatchHandler(async ({ event }) => {
@@ -28,17 +32,17 @@ self.addEventListener("push", (event) => {
     if (!event.data) return;
 
     const promise = async () => {
-        const payload = event.data!.json();
+        const payload = await event.data!.json();
 
         const options: NotificationOptions = {
-            body: payload.body || "Something happened!",
+            body: payload?.body || "Something happened!",
             icon: "/pwa-192x192.png",
             badge: "/favicon.svg",
-            data: payload.url || "/app",
+            data: payload?.url || "/app",
             vibrate: [100, 50, 100],
         };
 
-        return self.registration.showNotification(payload.title || "Catelog", options);
+        return self.registration.showNotification(payload?.title || "Catelog", options);
     };
 
     event.waitUntil(promise());
@@ -46,7 +50,8 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
     event.notification.close();
-    event.waitUntil(self.clients.openWindow(event.notification.data));
+    const url = typeof event.notification.data === "string" ? event.notification.data : "/app";
+    event.waitUntil(self.clients.openWindow(url));
 });
 
 // --- LIFECYCLE ---

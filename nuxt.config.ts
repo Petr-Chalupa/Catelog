@@ -5,14 +5,8 @@ export default defineNuxtConfig({
     experimental: { nitroAutoImports: true },
     compatibilityDate: "2025-07-15",
     devtools: false,
-    modules: [
-        "@pinia/nuxt",
-        "pinia-plugin-persistedstate/nuxt",
-        "@vite-pwa/nuxt",
-        "@nuxt/icon",
-        "@nuxtjs/color-mode",
-        "@onmax/nuxt-better-auth",
-    ],
+    ssr: false,
+    modules: ["@pinia/nuxt", "pinia-plugin-persistedstate/nuxt", "@vite-pwa/nuxt", "@nuxt/icon", "@nuxtjs/color-mode", "@onmax/nuxt-better-auth"],
     vite: {
         optimizeDeps: {
             include: ["fractional-indexing", "zod", "vuedraggable"],

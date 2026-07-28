@@ -36,14 +36,10 @@
         </section>
 
         <section class="ranges">
-            <RangeInput :model-value="filterBuffer.minRating ?? RATING_BOUNDS.min" @update:modelValue="(val) => filterBuffer.minRating = val" label="Min Rating" :min="RATING_BOUNDS.min"
-                :max="RATING_BOUNDS.max" :step="0.1" />
-            <RangeInput :model-value="filterBuffer.maxDuration ?? DURATION_BOUNDS.max" @update:modelValue="(val) => filterBuffer.maxDuration = val" label="Max Duration" unit="min"
-                :min="DURATION_BOUNDS.min" :max="DURATION_BOUNDS.max" :step="10" />
-            <RangeInput :model-value="filterBuffer.minYear ?? YEAR_BOUNDS.min" @update:modelValue="(val) => filterBuffer.minYear = val" label="From" unit="year" :min="YEAR_BOUNDS.min"
-                :max="filterBuffer.maxYear ?? YEAR_BOUNDS.max" />
-            <RangeInput :model-value="filterBuffer.maxYear ?? YEAR_BOUNDS.max" @update:modelValue="(val) => filterBuffer.maxYear = val" label="To" unit="year"
-                :min="filterBuffer.minYear ?? YEAR_BOUNDS.min" :max="YEAR_BOUNDS.max" />
+            <RangeInput :model-value="filterBuffer.minRating ?? RATING_BOUNDS.min" @update:modelValue="(val) => filterBuffer.minRating = val" label="Min Rating" :min="RATING_BOUNDS.min" :max="RATING_BOUNDS.max" :step="0.1" />
+            <RangeInput :model-value="filterBuffer.maxDuration ?? DURATION_BOUNDS.max" @update:modelValue="(val) => filterBuffer.maxDuration = val" label="Max Duration" unit="min" :min="DURATION_BOUNDS.min" :max="DURATION_BOUNDS.max" :step="10" />
+            <RangeInput :model-value="filterBuffer.minYear ?? YEAR_BOUNDS.min" @update:modelValue="(val) => filterBuffer.minYear = val" label="From" unit="year" :min="YEAR_BOUNDS.min" :max="filterBuffer.maxYear ?? YEAR_BOUNDS.max" />
+            <RangeInput :model-value="filterBuffer.maxYear ?? YEAR_BOUNDS.max" @update:modelValue="(val) => filterBuffer.maxYear = val" label="To" unit="year" :min="filterBuffer.minYear ?? YEAR_BOUNDS.min" :max="YEAR_BOUNDS.max" />
         </section>
 
         <section class="genres">

@@ -140,6 +140,15 @@ a {
     }
 }
 
+span.iconify::after {
+    content: "";
+    display: block;
+    min-width: 1rem;
+    min-height: 1rem;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
 .is-offline,
 :disabled {
     opacity: 0.5;

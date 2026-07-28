@@ -17,12 +17,22 @@ export const vOnlineOnly: Directive<HTMLElement> = {
 };
 
 export default defineNuxtPlugin((nuxtApp) => {
-    const isOnline = useState<boolean>("is-online", () => true);
+    const isOnline = useState<boolean>("is-online", () => (import.meta.client ? navigator.onLine : true));
 
     if (import.meta.client) {
-        const update = () => (isOnline.value = navigator.onLine);
+        const update = () => {
+            isOnline.value = navigator.onLine;
+        };
+
+        const syncOnVisibility = () => {
+            if (!document.hidden) update();
+        };
+
         window.addEventListener("online", update);
         window.addEventListener("offline", update);
+        window.addEventListener("load", update);
+        window.addEventListener("pageshow", update);
+        document.addEventListener("visibilitychange", syncOnVisibility);
         update();
     }
 

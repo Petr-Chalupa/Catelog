@@ -1,4 +1,4 @@
-import { VueQueryPlugin, QueryClient, hydrate, dehydrate } from "@tanstack/vue-query";
+import { VueQueryPlugin, QueryClient } from "@tanstack/vue-query";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 
@@ -20,8 +20,6 @@ const watchlistsKeys = {
 };
 
 export default defineNuxtPlugin((nuxtApp) => {
-    const vueQueryState = useState("vue-query");
-
     const queryClient = new QueryClient({
         defaultOptions: {
             queries: {
@@ -30,7 +28,7 @@ export default defineNuxtPlugin((nuxtApp) => {
                 retry: 1,
                 retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
                 throwOnError: false,
-                networkMode: "always",
+                networkMode: "online",
             },
             mutations: {
                 retry: 0,
@@ -40,17 +38,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     nuxtApp.vueApp.use(VueQueryPlugin, { queryClient });
 
-    if (import.meta.server) {
-        nuxtApp.hooks.hook("app:rendered", () => {
-            vueQueryState.value = dehydrate(queryClient);
-        });
-    }
-
     if (import.meta.client) {
-        nuxtApp.hooks.hook("app:created", () => {
-            hydrate(queryClient, vueQueryState.value);
-        });
-
         nuxtApp.hooks.hook("app:mounted", () => {
             persistQueryClient({
                 queryClient,
