@@ -1,7 +1,6 @@
 <template>
-    <draggable :model-value="items" :item-key="keyPath" tag="div" class="list-grid" :disabled="!isDraggable || !isOnline" :animation="200" :delay="300" :delay-on-touch-only="false"
-        :touch-start-threshold="5" ghost-class="ghost-item" drag-class="drag-item" @change="onDragChange">
-        <template #item="{ element, index }">
+    <Draggable :list="items" :item-key="keyPath" tag="div" class="list-grid" :disabled="!isDraggable || !isOnline" :animation="200" :delay="300" :delay-on-touch-only="false" :touch-start-threshold="5" ghost-class="ghost-item" drag-class="drag-item" @change="onDragChange">
+        <div v-for="(element, index) in items">
             <div class="list-row" :tabindex="0" @click="handleRowClick(element)" @keydown.enter="handleRowClick(element)" @keydown.space.prevent="handleRowClick(element)">
                 <div class="body">
                     <slot name="body" :item="element" :index="index"></slot>
@@ -11,8 +10,8 @@
                     <slot name="actions" :item="element" :index="index"></slot>
                 </div>
             </div>
-        </template>
-    </draggable>
+        </div>
+    </Draggable>
 </template>
 
 <style scoped>
@@ -64,7 +63,7 @@
 </style>
 
 <script setup lang="ts" generic="T">
-import draggable from "vuedraggable";
+import { VueDraggableNext as Draggable } from "vue-draggable-next";
 
 const isOnline = useState<boolean>("is-online");
 
